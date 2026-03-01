@@ -1,0 +1,1771 @@
+[
+  {
+    "bodyPart": "espalda",
+    "equipment": "Polea",
+    "id": "0007",
+    "name": "Jalón lateral alternado",
+    "target": "dorsales",
+    "secondaryMuscles": ["bíceps", "romboides"],
+    "instructions": [
+      "Siéntate en la máquina de polea con tu espalda recta y pies apoyados en el suelo.",
+      "Agarra las manijas con agarre prono, un poco más separadas que el ancho de hombros.",
+      "Inclínate ligeramente hacia atrás y tira de las manijas hacia tu pecho, apretando tus omóplatos juntos.",
+      "Haz una pausa por un momento en el punto máximo del movimiento, luego suelta lentamente las manijas de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El jalón lateral alternado es un ejercicio en máquina de polea que trabaja el dorsal ancho, con énfasis secundario en bíceps y romboides. implica tirar de las manijas hacia el pecho de forma alternada, enfocándose en fuerza de espalda y activación muscular.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "espalda",
+    "equipment": "Barra",
+    "id": "0022",
+    "name": "Pullover con barra a press",
+    "target": "dorsales",
+    "secondaryMuscles": ["tríceps", "pecho", "hombros"],
+    "instructions": [
+      "Acuéstate completamente sobre un banco con tu cabeza en un extremo y tus pies en el suelo.",
+      "Sostén la barra con agarre prono (palmas mirando hacia afuera) y extiende tus brazos completamente sobre tu pecho.",
+      "Manteniendo tus brazos rectos, baja la barra detrás de tu cabeza en un movimiento de arco hasta que sientas un estiramiento en tus dorsales.",
+      "Haz una pausa por un momento, luego invierte el movimiento y presiona la barra de vuelta a la posición inicial sobre tu pecho.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El pullover con barra a press es un ejercicio compuesto que trabaja los dorsales y también trabaja tríceps, pecho y hombros. implica bajar una barra detrás de tu cabeza mientras estás acostado en un banco, luego presionándola de vuelta hacia arriba sobre tu pecho.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0023",
+    "name": "Curl de bíceps alternado con barra",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Ponte de pie con la espalda recta con tus pies separados al ancho de hombros y sostén una barra en cada mano, palmas mirando hacia adelante.",
+      "Mantén tus brazos superiores estáticos y exhala mientras haces el curl con los pesos mientras contraes tus bíceps.",
+      "Continúa elevando las barras hasta que tus bíceps estén completamente contraídos y las barras estén a la altura de los hombros.",
+      "Mantén la posición contraída con una pausa breve mientras aprietas tus bíceps.",
+      "Inhala mientras comienzas a bajar lentamente las barras de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, alternating arms."
+    ],
+    "description": "El curl de bíceps alternado con barra es un ejercicio de fuerza que trabaja los bíceps, realizado haciendo curl alternadamente con una barra con cada brazo mientras estás de pie. también activa los antebrazos como músculos secundarios.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0024",
+    "name": "Sentadilla frontal con banca",
+    "target": "cuádriceps",
+    "secondaryMuscles": ["isquiotibiales", "glúteos", "gemelos"],
+    "instructions": [
+      "Comienza poniéndote de pie con tus pies separados al ancho de hombros y la barra descansando en tu pecho superior, justo debajo de tu clavícula.",
+      "Sostén la barra con agarre prono, manteniendo tus codos arriba y tus brazos superiores paralelos al suelo.",
+      "Baja tu cuerpo a una posición de sentadilla doblando las rodillas y caderas, manteniendo tu espalda recta y tu pecho arriba.",
+      "Haz una pausa por un momento en la parte inferior de la sentadilla, luego empuja a través de tus talones para volver a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La sentadilla frontal con banca con barra es un ejercicio compuesto para la parte inferior del cuerpo que se dirige a los cuádriceps, con énfasis secundario en los isquiotibiales, glúteos y gemelos. Requiere sostener una barra en la posición de rack frontal y realizar una sentadilla, demandando buena estabilidad del core, equilibrio y movilidad.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "pecho",
+    "equipment": "Barra",
+    "id": "0025",
+    "name": "Press de banca con barra",
+    "target": "pectorales",
+    "secondaryMuscles": ["tríceps", "hombros"],
+    "instructions": [
+      "Acuéstate plano en un banco con tus pies planos en el suelo y tu espalda presionada contra el banco.",
+      "Agarra la barra con un agarre supino ligeramente más ancho que el ancho de hombros.",
+      "Levanta la barra del rack y sostenla directamente sobre tu pecho con tus brazos completamente extendidos.",
+      "Baja la barra lentamente hacia tu pecho, manteniendo tus codos metidos.",
+      "Haz una pausa por un momento cuando la barra toque tu pecho.",
+      "Empuja la barra de vuelta a la posición inicial extendiendo tus brazos.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press de banca con barra es un ejercicio compuesto clásico que se dirige principalmente a los músculos pectorales, mientras también involucra a los tríceps y hombros. Se realiza acostado en un banco y presionando una barra hacia arriba y abajo de manera controlada.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0026",
+    "name": "Sentadilla con banca",
+    "target": "cuádriceps",
+    "secondaryMuscles": ["glúteos", "isquiotibiales", "gemelos"],
+    "instructions": [
+      "Coloca una barra en un rack de sentadillas a la altura del pecho.",
+      "Párate mirando hacia afuera del rack, con tus pies al ancho de hombros.",
+      "Dobla tus rodillas y baja tu cuerpo a una posición de sentadilla, manteniendo tu espalda recta y pecho arriba.",
+      "Agarra la barra con un agarre supino, ligeramente más ancho que el ancho de hombros.",
+      "Levanta la barra del rack y da un paso atrás, asegurándote de que tus pies estén al ancho de hombros.",
+      "Baja tu cuerpo a una sentadilla, manteniendo tus rodillas alineadas con tus dedos de los pies.",
+      "Haz una pausa por un momento en la parte inferior, luego empuja a través de tus talones para volver a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La sentadilla con banca con barra es un ejercicio compuesto para la parte inferior del cuerpo que se dirige principalmente a los cuádriceps, mientras también involucra a los glúteos, isquiotibiales y gemelos. Implica sentadillas con una barra, requiriendo buena técnica y fuerza.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "espalda",
+    "equipment": "Barra",
+    "id": "0027",
+    "name": "Remo inclinado con barra",
+    "target": "parte superior de la espalda",
+    "secondaryMuscles": ["bíceps", "antebrazos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y rodillas ligeramente dobladas.",
+      "Inclínate hacia adelante en las caderas manteniendo tu espalda recta y pecho arriba.",
+      "Agarra la barra con un agarre supino, manos ligeramente más anchas que el ancho de hombros.",
+      "Tira la barra hacia tu pecho inferior retrayendo tus omóplatos y apretando los músculos de la espalda.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El remo inclinado con barra es un ejercicio compuesto que se dirige a la parte superior de la espalda, requiriendo que el levantador se incline en las caderas y tire de una barra hacia el torso. Desarrolla fuerza y masa muscular en la parte superior de la espalda, bíceps y antebrazos, y demanda buena postura y estabilidad del core.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0028",
+    "name": "Cargada y press con barra",
+    "target": "cuádriceps",
+    "secondaryMuscles": ["isquiotibiales", "glúteos", "hombros", "tríceps"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y la barra en el suelo frente a ti.",
+      "Dobla tus rodillas y gira en las caderas para bajar y agarrar la barra con un agarre supino, manos ligeramente más anchas que el ancho de hombros.",
+      "Impulsa a través de tus talones y extiende tus caderas y rodillas para levantar la barra del suelo, manteniéndola cerca de tu cuerpo.",
+      "Cuando la barra alcance tus muslos, extiende explosivamente tus caderas, encoge tus hombros y tira la barra hacia arriba hacia tu pecho.",
+      "Cuando la barra alcance la altura del pecho, rápidamente cae debajo de ella y atrápala al nivel de los hombros, con tus codos apuntando hacia adelante y palmas hacia arriba.",
+      "Desde la posición de atrapada, presiona la barra sobre tu cabeza extendiendo tus brazos y empujando la barra recta hacia arriba.",
+      "Baja la barra de vuelta a la posición inicial y repite durante el número deseado de repeticiones."
+    ],
+    "description": "La cargada y press con barra es un ejercicio compuesto que se dirige a los cuádriceps e implica levantar una barra del suelo a los hombros (cargada) y luego presionarla sobre la cabeza (press). Requiere fuerza, coordinación y potencia explosiva.",
+    "difficulty": "Avanzado",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0029",
+    "name": "Sentadilla frontal con barra agarre clean",
+    "target": "glúteos",
+    "secondaryMuscles": ["cuádriceps", "isquiotibiales", "gemelos", "core"],
+    "instructions": [
+      "Comienza poniéndote de pie con tus pies al ancho de hombros, la barra descansando en tu pecho superior con tus codos apuntando hacia adelante.",
+      "Baja tu cuerpo doblando tus rodillas e impulsando tus caderas hacia atrás, como si te sentaras en una silla.",
+      "Mantén tu pecho arriba y tu espalda recta mientras bajas, asegurándote de que tus rodillas no pasen tus dedos de los pies.",
+      "Continúa bajando hasta que tus muslos estén paralelos al suelo, o tan bajo como puedas ir cómodamente.",
+      "Haz una pausa por un momento en la parte inferior, luego empuja a través de tus talones para levantarte, extendiendo tus caderas y rodillas.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La sentadilla frontal con barra agarre clean es un ejercicio compuesto para la parte inferior del cuerpo que se dirige a los glúteos, cuádriceps e isquiotibiales, mientras también involucra al core para la estabilidad. Requiere sostener una barra en la posición de agarre clean en la parte delantera de los hombros, demandando buena movilidad y fuerza.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0030",
+    "name": "Press de banca con barra agarre cerrado",
+    "target": "tríceps",
+    "secondaryMuscles": ["pecho", "hombros"],
+    "instructions": [
+      "Acuéstate plano en un banco con tus pies planos en el suelo y tu espalda presionada contra el banco.",
+      "Agarra la barra con un agarre cerrado, ligeramente más estrecho que el ancho de hombros.",
+      "Desengancha la barra y bájala lentamente hacia tu pecho, manteniendo tus codos cerca de tu cuerpo.",
+      "Haz una pausa por un momento cuando la barra toque tu pecho.",
+      "Empuja la barra de vuelta a la posición inicial, extendiendo completamente tus brazos.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press de banca con barra agarre cerrado es un ejercicio compuesto que se dirige principalmente a los tríceps, con énfasis secundario en el pecho y hombros. Se realiza acostado en un banco, agarrando la barra con un agarre cerrado y presionando el peso hacia arriba y abajo mientras mantiene los codos cerca del cuerpo.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0031",
+    "name": "Curl con barra",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Párate recto con tus pies al ancho de hombros y sostén una barra con un agarre subpronado, palmas hacia adelante.",
+      "Mantén tus codos cerca de tu torso y exhala mientras haces curl con los pesos contrayendo tus bíceps.",
+      "Continúa elevando la barra hasta que tus bíceps estén completamente contraídos y la barra esté al nivel de los hombros.",
+      "Mantén la posición contraída con una pausa breve mientras aprietas tus bíceps.",
+      "Inhala mientras comienzas a bajar lentamente la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El curl con barra es un ejercicio de fuerza clásico que se dirige a los bíceps, realizado curvando una barra desde los muslos hasta los hombros mientras mantiene los codos cerca del torso.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0032",
+    "name": "Peso muerto con barra",
+    "target": "glúteos",
+    "secondaryMuscles": ["isquiotibiales", "parte inferior de la espalda"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y la barra en el suelo frente a ti.",
+      "Dobla tus rodillas y gira en las caderas para bajar tu torso y agarrar la barra con un agarre supino, manos ligeramente más anchas que el ancho de hombros.",
+      "Mantén tu espalda recta y pecho levantado mientras impulsas a través de tus talones para levantar la barra del suelo, extendiendo tus caderas y rodillas.",
+      "Mientras te pones de pie recto, aprieta tus glúteos y mantén tu core comprometido.",
+      "Baja la barra de vuelta al suelo doblando en las caderas y rodillas, manteniendo tu espalda recta.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El peso muerto con barra es un ejercicio de fuerza compuesto que se dirige a los glúteos, isquiotibiales y parte inferior de la espalda. Implica levantar una barra cargada del suelo a una posición de pie, enfatizando la forma adecuada y el compromiso del core.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "pecho",
+    "equipment": "Barra",
+    "id": "0033",
+    "name": "Press de banca declinado con barra",
+    "target": "pectorales",
+    "secondaryMuscles": ["tríceps", "hombros"],
+    "instructions": [
+      "Acuéstate en un banco declinado con tus pies asegurados y tu cabeza más baja que tus caderas.",
+      "Agarra la barra con un agarre supino ligeramente más ancho que el ancho de hombros.",
+      "Desengancha la barra y bájala lentamente hacia tu pecho, manteniendo tus codos metidos.",
+      "Haz una pausa por un momento en la parte inferior, luego empuja la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press de banca declinado con barra es un ejercicio compuesto que se dirige a la porción inferior de los músculos pectorales. Se realiza en un banco declinado, requiriendo que el levantador presione una barra hacia arriba desde una posición declinada, involucrando el pecho, tríceps y hombros.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "espalda",
+    "equipment": "Barra",
+    "id": "0034",
+    "name": "Pullover declinado con barra brazos flexionados",
+    "target": "dorsales",
+    "secondaryMuscles": ["tríceps", "pecho"],
+    "instructions": [
+      "Acuéstate en un banco declinado con tu cabeza más baja que tus caderas y tus pies asegurados.",
+      "Sostén una barra con agarre prono (palmas alejadas de ti) y extiende tus brazos rectos sobre tu pecho.",
+      "Baja la barra detrás de tu cabeza de manera controlada, manteniendo tus brazos ligeramente doblados.",
+      "Haz una pausa por un momento, luego levanta la barra de vuelta a la posición inicial contrayendo tus dorsales.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El pullover declinado con barra brazos flexionados es un ejercicio compuesto que se dirige principalmente a los dorsales, realizado en un banco declinado con una barra. También involucra a los tríceps y pecho como músculos secundarios. El movimiento requiere buen control y fuerza para bajar y levantar la barra sobre la cabeza de manera segura mientras mantiene la forma adecuada.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0035",
+    "name": "Press declinado con barra agarre cerrado a rompecráneos",
+    "target": "tríceps",
+    "secondaryMuscles": ["pecho", "hombros"],
+    "instructions": [
+      "Acuéstate en un banco declinado con tu cabeza más baja que tus pies y sostén una barra con un agarre cerrado.",
+      "Baja la barra hacia tu frente doblando tus codos, manteniendo tus brazos superiores estacionarios.",
+      "Haz una pausa por un momento, luego extiende tus brazos para presionar la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press declinado con barra agarre cerrado a rompecráneos es un ejercicio compuesto que se dirige a los tríceps, realizado en un banco declinado con un agarre cerrado en la barra. Combina elementos de un press agarre cerrado y un rompecráneos, desafiando tanto la fuerza como la estabilidad de los tríceps.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "pecho",
+    "equipment": "Barra",
+    "id": "0036",
+    "name": "Press declinado con barra agarre amplio",
+    "target": "pectorales",
+    "secondaryMuscles": ["tríceps", "hombros"],
+    "instructions": [
+      "Acuéstate en un banco declinado con tus pies asegurados y tu cabeza más baja que tus caderas.",
+      "Agarra la barra con un agarre amplio, ligeramente más ancho que el ancho de hombros.",
+      "Baja la barra a tu pecho, manteniendo tus codos hacia los lados.",
+      "Empuja la barra de vuelta a la posición inicial, extendiendo completamente tus brazos.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press declinado con barra agarre amplio es un ejercicio compuesto para el pecho realizado en un banco declinado usando una barra con agarre amplio. Se dirige a la porción inferior de los músculos pectorales y también involucra a los tríceps y hombros.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "espalda",
+    "equipment": "Barra",
+    "id": "0037",
+    "name": "Pullover declinado con barra agarre amplio",
+    "target": "dorsales",
+    "secondaryMuscles": ["tríceps", "pecho"],
+    "instructions": [
+      "Acuéstate en un banco declinado con tu cabeza más baja que tus caderas y tus pies asegurados.",
+      "Sostén una barra con un agarre amplio y extiende tus brazos rectos sobre tu pecho.",
+      "Baja la barra detrás de tu cabeza de manera controlada, manteniendo tus brazos rectos.",
+      "Haz una pausa por un momento, luego levanta la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El pullover declinado con barra agarre amplio es un ejercicio compuesto realizado en un banco declinado, dirigido a los dorsales mientras también involucra a los tríceps y pecho. Requiere una barra e implica bajar el peso detrás de la cabeza con brazos rectos, luego volver a la posición inicial.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0038",
+    "name": "Curl de arrastre con barra",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y sostén una barra con un agarre subpronado, palmas hacia arriba.",
+      "Deja que la barra cuelgue a la longitud de los brazos frente a tus muslos.",
+      "Manteniendo tus brazos superiores estacionarios, haz curl con la barra hacia tu pecho contrayendo tus bíceps.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El curl de arrastre con barra es un ejercicio enfocado en los bíceps que implica curvear una barra mientras mantiene los codos hacia atrás, enfatizando la contracción de los bíceps y minimizando la involucración de los hombros. También involucra a los antebrazos como músculos secundarios.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0039",
+    "name": "Sentadilla frontal al pecho con barra",
+    "target": "glúteos",
+    "secondaryMuscles": ["cuádriceps", "isquiotibiales", "gemelos", "core"],
+    "instructions": [
+      "Comienza poniéndote de pie con tus pies al ancho de hombros, dedos ligeramente hacia afuera.",
+      "Sostén la barra frente a tu pecho con tus manos al ancho de hombros, codos apuntando hacia adelante.",
+      "Compromete tu core y mantén tu pecho arriba mientras bajas tu cuerpo a una posición de sentadilla, impulsando tus caderas hacia atrás y doblando tus rodillas.",
+      "Baja hasta que tus muslos estén paralelos al suelo, o tan bajo como puedas ir cómodamente.",
+      "Haz una pausa por un momento en la parte inferior, luego empuja a través de tus talones para volver a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La sentadilla frontal al pecho con barra es un ejercicio compuesto para la parte inferior del cuerpo que se dirige a los glúteos y también trabaja los cuádriceps, isquiotibiales, gemelos y core. Implica sostener una barra en la parte delantera del pecho y realizar una sentadilla, lo que requiere fuerza, equilibrio y técnica adecuada.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "pecho",
+    "equipment": "Barra",
+    "id": "0040",
+    "name": "Elevación frontal con barra y pullover",
+    "target": "pectorales",
+    "secondaryMuscles": ["deltoides", "tríceps"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y sostén una barra con un agarre supino, palmas hacia abajo.",
+      "Mantén tus brazos rectos y levanta la barra frente a ti hasta que alcance la altura de los hombros.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente la barra de vuelta a la posición inicial.",
+      "Luego, baja la barra detrás de tu cabeza, manteniendo tus brazos rectos.",
+      "Haz una pausa por un momento en la parte inferior, luego levanta la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La elevación frontal con barra y pullover es un ejercicio compuesto que se dirige a los pectorales, con énfasis secundario en los deltoides y tríceps. Implica elevar una barra frente al cuerpo y luego realizar un movimiento de pullover detrás de la cabeza, requiriendo fuerza, coordinación y movilidad de hombros.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Barra",
+    "id": "0041",
+    "name": "Elevación frontal con barra",
+    "target": "deltoides",
+    "secondaryMuscles": ["bíceps", "tríceps"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y sostén una barra frente a tus muslos con un agarre supino.",
+      "Mantén tus brazos rectos y levanta la barra hacia adelante y arriba hasta que alcance el nivel de los hombros.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La elevación frontal con barra es un ejercicio para hombros que se dirige a los deltoides levantando una barra desde los muslos hasta la altura de los hombros con brazos rectos.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0042",
+    "name": "Sentadilla frontal con barra",
+    "target": "glúteos",
+    "secondaryMuscles": ["cuádriceps", "isquiotibiales", "gemelos", "core"],
+    "instructions": [
+      "Comienza poniéndote de pie con tus pies al ancho de hombros, dedos ligeramente hacia afuera.",
+      "Sostén la barra frente a tus hombros, descansándola en tu clavícula y hombros.",
+      "Compromete tu core y mantén tu pecho arriba mientras bajas tu cuerpo a una posición de sentadilla, impulsando tus caderas hacia atrás y doblando tus rodillas.",
+      "Baja hasta que tus muslos estén paralelos al suelo, o tan bajo como puedas ir cómodamente.",
+      "Haz una pausa por un momento en la parte inferior, luego empuja a través de tus talones para volver a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La sentadilla frontal con barra es un ejercicio compuesto para la parte inferior del cuerpo que se dirige a los glúteos, cuádriceps e isquiotibiales, mientras también involucra al core para la estabilidad. La barra se sostiene frente a los hombros, requiriendo buena movilidad y fuerza del core para mantener la postura adecuada durante el movimiento.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0043",
+    "name": "Sentadilla completa con barra",
+    "target": "glúteos",
+    "secondaryMuscles": ["cuádriceps", "isquiotibiales", "gemelos", "core"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, dedos ligeramente hacia afuera.",
+      "Sostén la barra a través de tu espalda superior, descansándola en tus trapecios o deltoides posteriores.",
+      "Compromete tu core y mantén tu pecho arriba mientras comienzas a bajar tu cuerpo.",
+      "Dobla en las rodillas y caderas, impulsando tus caderas hacia atrás y abajo como si te sentaras en una silla.",
+      "Baja hasta que tus muslos estén paralelos al suelo o ligeramente por debajo.",
+      "Mantén tus rodillas alineadas con tus dedos de los pies y tu peso en tus talones.",
+      "Impulsa a través de tus talones para ponerte de pie, extendiendo tus caderas y rodillas.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La sentadilla completa con barra es un ejercicio compuesto para la parte inferior del cuerpo que se dirige a los glúteos y también trabaja los cuádriceps, isquiotibiales, gemelos y core. Implica bajar en sentadilla con una barra colocada a través de la espalda superior, requiriendo fuerza, equilibrio y técnica adecuada.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0044",
+    "name": "Buenos días con barra",
+    "target": "isquiotibiales",
+    "secondaryMuscles": ["parte inferior de la espalda"],
+    "instructions": [
+      "Comienza poniéndote de pie con tus pies al ancho de hombros y la barra descansando en tu espalda superior.",
+      "Manteniendo tu espalda recta y tu core comprometido, gira hacia adelante en las caderas, impulsando tus glúteos hacia atrás como si intentaras tocar la pared detrás de ti con tus glúteos.",
+      "Baja tu torso hasta que esté paralelo al suelo, sintiendo un estiramiento en tus isquiotibiales.",
+      "Haz una pausa por un momento, luego regresa a la posición inicial apretando tus glúteos e impulsando tus caderas hacia adelante.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "Los buenos días con barra es un ejercicio compuesto que se dirige a los isquiotibiales y la parte inferior de la espalda. Implica girar en las caderas con una barra en tu espalda superior, requiriendo buena forma y estabilidad del core para realizarlo de manera segura.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "pecho",
+    "equipment": "Barra",
+    "id": "0045",
+    "name": "Press de banca guillotina con barra",
+    "target": "pectorales",
+    "secondaryMuscles": ["hombros", "tríceps"],
+    "instructions": [
+      "Acuéstate plano en un banco con tus pies planos en el suelo y tu espalda presionada contra el banco.",
+      "Agarra la barra con un agarre supino, ligeramente más ancho que el ancho de hombros.",
+      "Baja la barra lentamente hacia tu cuello, manteniendo tus codos apuntando hacia afuera.",
+      "Haz una pausa por un momento cuando la barra esté justo sobre tu cuello.",
+      "Empuja la barra de vuelta a la posición inicial, extendiendo completamente tus brazos.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press de banca guillotina con barra es una variación del press de banca donde la barra se baja al cuello en lugar del pecho, colocando mayor énfasis en los pectorales superiores. Este ejercicio requiere control cuidadoso y técnica adecuada para evitar lesiones.",
+    "difficulty": "Avanzado",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0046",
+    "name": "Hack squat con barra",
+    "target": "glúteos",
+    "secondaryMuscles": ["cuádriceps", "isquiotibiales", "gemelos"],
+    "instructions": [
+      "Comienza poniéndote de pie con tus pies al ancho de hombros y dedos ligeramente hacia afuera.",
+      "Sostén la barra detrás de tus piernas, descansándola en tus muslos superiores.",
+      "Baja tu cuerpo doblando en las rodillas y caderas, manteniendo tu espalda recta y pecho arriba.",
+      "Continúa bajando hasta que tus muslos estén paralelos al suelo, o tan bajo como puedas ir cómodamente.",
+      "Haz una pausa por un momento, luego empuja a través de tus talones para volver a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El hack squat con barra es un ejercicio de fuerza para la parte inferior del cuerpo que se dirige a los glúteos, cuádriceps, isquiotibiales y gemelos. Implica sostener una barra detrás de las piernas y realizar un movimiento de sentadilla, enfatizando la cadena posterior y cuádriceps.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "pecho",
+    "equipment": "Barra",
+    "id": "0047",
+    "name": "Press de banca inclinado con barra",
+    "target": "pectorales",
+    "secondaryMuscles": ["hombros", "tríceps"],
+    "instructions": [
+      "Configura un banco inclinado a un ángulo de 45 grados.",
+      "Acuéstate en el banco con tus pies planos en el suelo.",
+      "Agarra la barra con un agarre supino, ligeramente más ancho que el ancho de hombros.",
+      "Desengancha la barra y bájala lentamente hacia tu pecho, manteniendo tus codos en un ángulo de 45 grados.",
+      "Haz una pausa por un momento en la parte inferior, luego empuja la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press de banca inclinado con barra es un ejercicio compuesto para la parte superior del cuerpo que se dirige a la porción superior de los músculos pectorales, con énfasis secundario en los hombros y tríceps. Se realiza en un banco inclinado usando una barra, siendo un básico en rutinas de entrenamiento de fuerza para desarrollar tamaño y fuerza en el pecho.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0048",
+    "name": "Press inclinado con barra agarre inverso",
+    "target": "tríceps",
+    "secondaryMuscles": ["pecho", "hombros"],
+    "instructions": [
+      "Configura un banco inclinado a un ángulo de 45 grados.",
+      "Acuéstate de espaldas en el banco y agarra la barra con un agarre inverso, manos ligeramente más anchas que el ancho de hombros.",
+      "Desengancha la barra y bájala hacia tu pecho superior, manteniendo tus codos metidos.",
+      "Haz una pausa por un momento en la parte inferior, luego empuja la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press inclinado con barra agarre inverso es un ejercicio compuesto para la parte superior del cuerpo que se dirige a los tríceps mientras también involucra al pecho y hombros. Se realiza en un banco inclinado usando un agarre inverso (subpronado) en la barra.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "espalda",
+    "equipment": "Barra",
+    "id": "0049",
+    "name": "Remo inclinado con barra",
+    "target": "parte superior de la espalda",
+    "secondaryMuscles": ["bíceps", "antebrazos"],
+    "instructions": [
+      "Configura un banco inclinado a un ángulo de 45 grados.",
+      "Acuéstate boca abajo en el banco con tu pecho contra el pad y tus pies planos en el suelo.",
+      "Agarra la barra con un agarre supino, ligeramente más ancho que el ancho de hombros.",
+      "Mantén tu espalda recta y tu core comprometido.",
+      "Tira la barra hacia tu pecho, apretando tus omóplatos juntos.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El remo inclinado con barra es un ejercicio compuesto que se dirige a la parte superior de la espalda, realizado mientras se está acostado boca abajo en un banco inclinado y tirando de una barra hacia el pecho.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "pecho",
+    "equipment": "Barra",
+    "id": "0050",
+    "name": "Elevación de hombros inclinado con barra",
+    "target": "serrato anterior",
+    "secondaryMuscles": ["deltoides", "trapecios"],
+    "instructions": [
+      "Configura un banco inclinado a un ángulo de 45 grados.",
+      "Siéntate en el banco con tu espalda contra el pad y pies planos en el suelo.",
+      "Sostén una barra con un agarre supino, ligeramente más ancho que el ancho de hombros.",
+      "Levanta la barra hasta la altura de los hombros, manteniendo tus codos ligeramente doblados.",
+      "Levanta lentamente la barra sobre tu cabeza, extendiendo completamente tus brazos.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente la barra de vuelta a la altura de los hombros.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La elevación de hombros inclinado con barra se realiza en un banco inclinado y se dirige al serrato anterior, con énfasis secundario en los deltoides y trapecios. El movimiento implica elevar una barra sobre la cabeza desde la altura de los hombros mientras se está sentado en un banco inclinado.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0051",
+    "name": "Sentadilla jefferson con barra",
+    "target": "glúteos",
+    "secondaryMuscles": ["cuádriceps", "isquiotibiales", "gemelos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y dedos ligeramente hacia afuera.",
+      "Sostén la barra con un agarre supino, descansándola en la parte delantera de tu cuerpo, justo debajo de tu cintura.",
+      "Da un paso adelante con tu pie izquierdo y tu pie derecho atrás, manteniendo tus pies al ancho de hombros.",
+      "Dobla tus rodillas y baja tu cuerpo a una posición de sentadilla, manteniendo tu espalda recta y pecho arriba.",
+      "Empuja a través de tu talón para ponerte de pie de vuelta a la posición inicial.",
+      "Repite el movimiento, alternando tu pie adelante y atrás con cada repetición."
+    ],
+    "description": "La sentadilla jefferson con barra es un ejercicio compuesto para la parte inferior del cuerpo que se dirige a los glúteos, cuádriceps, isquiotibiales y gemelos. Implica sostener una barra entre las piernas y realizar una sentadilla con una postura escalonada, alternando posiciones de pies con cada repetición.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0052",
+    "name": "Press de banca jm con barra",
+    "target": "tríceps",
+    "secondaryMuscles": ["pecho", "hombros"],
+    "instructions": [
+      "Acuéstate plano en un banco con tus pies planos en el suelo y tu espalda presionada contra el banco.",
+      "Agarra la barra con un agarre supino, ligeramente más ancho que el ancho de hombros.",
+      "Baja la barra a tu pecho, manteniendo tus codos metidos cerca de tu cuerpo.",
+      "Empuja la barra de vuelta a la posición inicial, extendiendo completamente tus brazos.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press de banca jm con barra es un movimiento de presión enfocado en los tríceps que combina elementos de un press agarre cerrado y una extensión de tríceps. Se realiza acostado en un banco, bajando la barra al pecho con codos metidos y presionando de vuelta hacia arriba.",
+    "difficulty": "Avanzado",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0053",
+    "name": "Sentadilla con salto con barra",
+    "target": "glúteos",
+    "secondaryMuscles": ["cuádriceps", "isquiotibiales", "gemelos"],
+    "instructions": [
+      "Comienza poniéndote de pie con tus pies al ancho de hombros, sosteniendo una barra a través de tu espalda superior.",
+      "Baja tu cuerpo a una posición de sentadilla doblando tus rodillas e impulsando tus caderas hacia atrás.",
+      "Una vez que alcances la parte inferior de la sentadilla, explota hacia arriba saltando del suelo.",
+      "Mientras saltas, extiende tus caderas, rodillas y tobillos, impulsando a través de tus dedos de los pies.",
+      "Aterriza suavemente de vuelta a la posición de sentadilla e inmediatamente repite el movimiento durante el número deseado de repeticiones."
+    ],
+    "description": "La sentadilla con salto con barra es un ejercicio dinámico para la parte inferior del cuerpo que combina la sentadilla tradicional con un salto explosivo, realizado mientras se sostiene una barra a través de la espalda superior. Este ejercicio se dirige a los glúteos y también trabaja los cuádriceps, isquiotibiales y gemelos. Es un movimiento pliométrico que desarrolla potencia, fuerza y explosividad en las piernas.",
+    "difficulty": "Avanzado",
+    "category": "Pliometría"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0054",
+    "name": "Zancada con barra",
+    "target": "glúteos",
+    "secondaryMuscles": ["cuádriceps", "isquiotibiales", "gemelos"],
+    "instructions": [
+      "Comienza poniéndote de pie con tus pies al ancho de hombros y una barra descansando en tu espalda superior.",
+      "Da un paso adelante con tu pie derecho y posiciona tu torso erguido.",
+      "Baja tu cuerpo doblando tu rodilla derecha hasta que tu muslo esté paralelo al suelo.",
+      "Empuja a través de tu talón derecho para volver a la posición inicial.",
+      "Repite con tu pierna izquierda, alternando piernas durante el número deseado de repeticiones."
+    ],
+    "description": "La zancada con barra es un ejercicio compuesto para la parte inferior del cuerpo que se dirige a los glúteos, cuádriceps, isquiotibiales y gemelos. Implica dar un paso adelante con una barra en tu espalda superior y bajar tu cuerpo a una posición de zancada antes de volver a ponerte de pie.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0055",
+    "name": "Press tumbado con barra agarre cerrado",
+    "target": "tríceps",
+    "secondaryMuscles": ["pecho", "hombros"],
+    "instructions": [
+      "Acuéstate plano en un banco con tus pies planos en el suelo y tu espalda presionada contra el banco.",
+      "Agarra la barra con un agarre cerrado, manos al ancho de hombros, palmas hacia tus pies.",
+      "Levanta la barra del rack y sostenla directamente sobre tu pecho con tus brazos completamente extendidos.",
+      "Baja lentamente la barra hacia tu pecho, manteniendo tus codos cerca de tu cuerpo.",
+      "Haz una pausa por un momento cuando la barra toque tu pecho, luego empújala de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press tumbado con barra agarre cerrado es un ejercicio compuesto para la parte superior del cuerpo que se dirige principalmente a los tríceps, con énfasis secundario en el pecho y hombros. Se realiza usando un agarre cerrado en la barra para aumentar la activación de los tríceps.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0056",
+    "name": "Extensión de tríceps tumbado con barra agarre cerrado",
+    "target": "tríceps",
+    "secondaryMuscles": ["hombros"],
+    "instructions": [
+      "Acuéstate plano en un banco con tus pies planos en el suelo y tu cabeza al final del banco.",
+      "Agarra la barra con un agarre cerrado, manos al ancho de hombros, palmas hacia arriba.",
+      "Extiende tus brazos completamente, levantando la barra sobre tu pecho.",
+      "Manteniendo tus brazos superiores estacionarios, baja lentamente la barra hacia tu frente doblando tus codos.",
+      "Haz una pausa por un momento en la parte inferior, luego extiende tus brazos de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La extensión de tríceps tumbado con barra agarre cerrado es un ejercicio de fuerza que se dirige a los tríceps, realizado acostado en un banco con una barra usando un agarre cerrado. Enfatiza el desarrollo de los tríceps y también involucra a los hombros como músculos secundarios.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0057",
+    "name": "Extensión tumbado con barra",
+    "target": "tríceps",
+    "secondaryMuscles": ["hombros"],
+    "instructions": [
+      "Acuéstate plano en un banco con tus pies planos en el suelo y tu cabeza al final del banco.",
+      "Sostén la barra con un agarre supino, manos al ancho de hombros, y extiende tus brazos rectos sobre tu pecho.",
+      "Manteniendo tus brazos superiores estacionarios, baja lentamente la barra hacia tu frente doblando tus codos.",
+      "Haz una pausa por un momento, luego extiende tus brazos de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La extensión tumbado con barra, también conocida como rompecráneos, es un ejercicio de fuerza que se dirige a los tríceps. Implica acostarse en un banco y bajar una barra hacia la frente doblando los codos, luego extendiendo los brazos de vuelta hacia arriba.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0058",
+    "name": "Elevación tumbado con barra (en cadera)",
+    "target": "glúteos",
+    "secondaryMuscles": ["isquiotibiales", "cuádriceps"],
+    "instructions": [
+      "Acuéstate plano de espaldas en un banco con tus pies planos en el suelo y tus rodillas dobladas.",
+      "Sostén la barra con un agarre supino y posiciónala en tus caderas.",
+      "Comprometiendo tus glúteos, levanta tus caderas del banco hasta que tu cuerpo forme una línea recta desde tus rodillas hasta tus hombros.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente tus caderas de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La elevación tumbado con barra (en cadera) se dirige principalmente a los glúteos y también trabaja los isquiotibiales y cuádriceps. Implica acostarse de espaldas en un banco, colocando una barra a través de las caderas y levantando las caderas hacia arriba comprometiéndolos glúteos.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0059",
+    "name": "Curl predicador tumbado con barra",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Siéntate en un banco predicador con tu pecho contra el pad y tus brazos extendidos sobre el borde, sosteniendo una barra con un agarre subpronado.",
+      "Manteniendo tus brazos superiores estacionarios, exhala y haz curl con los pesos contrayendo tus bíceps.",
+      "Continúa elevando la barra hasta que tus bíceps estén completamente contraídos y la barra esté al nivel de los hombros.",
+      "Mantén la posición contraída con una pausa breve mientras aprietas tus bíceps.",
+      "Inhala y baja lentamente la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El curl predicador tumbado con barra es un ejercicio de aislamiento que se dirige a los bíceps, realizado en un banco predicador para minimizar la involucración de los hombros y maximizar el compromiso de los bíceps.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0060",
+    "name": "Rompecráneos con barra tumbado",
+    "target": "tríceps",
+    "secondaryMuscles": ["hombros"],
+    "instructions": [
+      "Acuéstate plano en un banco con tus pies planos en el suelo y tu cabeza al final del banco.",
+      "Sostén la barra con un agarre supino, manos al ancho de hombros, y extiende tus brazos rectos sobre tu pecho.",
+      "Manteniendo tus brazos superiores estacionarios, baja lentamente la barra hacia tu frente doblando tus codos.",
+      "Haz una pausa por un momento cuando la barra esté justo sobre tu frente, luego extiende tus brazos de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El rompecráneos con barra tumbado, también conocido como skull crusher, es un ejercicio de fuerza que se dirige a los tríceps. Realizado acostado en un banco, implica bajar una barra a la frente y extender los brazos de vuelta hacia arriba, requiriendo control y forma adecuada para evitar lesiones.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0061",
+    "name": "Extensión de tríceps tumbado con barra",
+    "target": "tríceps",
+    "secondaryMuscles": ["hombros"],
+    "instructions": [
+      "Acuéstate plano en un banco con tus pies planos en el suelo y tu cabeza al final del banco.",
+      "Sostén la barra con un agarre supino, manos al ancho de hombros, y extiende tus brazos rectos sobre tu pecho.",
+      "Manteniendo tus brazos superiores estacionarios, baja lentamente la barra hacia tu frente doblando tus codos.",
+      "Haz una pausa por un momento en la parte inferior, luego extiende tus brazos de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La extensión de tríceps tumbado con barra es un ejercicio de fuerza que se dirige a los tríceps, realizado acostado en un banco y bajando una barra hacia la frente antes de extender los brazos de vuelta hacia arriba.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0063",
+    "name": "Sentadilla con barra postura estrecha",
+    "target": "glúteos",
+    "secondaryMuscles": ["cuádriceps", "isquiotibiales", "gemelos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y dedos apuntando ligeramente hacia afuera.",
+      "Sostén la barra a través de tu espalda superior, descansándola en tus trapecios o deltoides posteriores.",
+      "Compromete tu core y mantén tu pecho arriba mientras bajas lentamente tu cuerpo doblando tus rodillas e impulsando tus caderas hacia atrás.",
+      "Continúa bajando hasta que tus muslos estén paralelos al suelo o ligeramente por debajo.",
+      "Haz una pausa por un momento, luego empuja a través de tus talones para volver a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La sentadilla con barra postura estrecha es un ejercicio de fuerza para la parte inferior del cuerpo que se dirige a los glúteos, con involucración significativa de los cuádriceps, isquiotibiales y gemelos. Se realiza sosteniendo una barra a través de la espalda superior y haciendo sentadillas con una postura estrecha, enfatizando los muslos internos y glúteos.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "espalda",
+    "equipment": "Barra",
+    "id": "0064",
+    "name": "Remo inclinado con barra a un brazo",
+    "target": "parte superior de la espalda",
+    "secondaryMuscles": ["bíceps", "antebrazos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, rodillas ligeramente dobladas, y sostén una barra con una mano usando un agarre supino.",
+      "Inclínate hacia adelante en las caderas, manteniendo tu espalda recta y tu cabeza en una posición neutral.",
+      "Tira la barra hacia tu pecho, manteniendo tu codo cerca de tu cuerpo y apretando tus omóplatos juntos.",
+      "Baja la barra de vuelta a la posición inicial de manera controlada.",
+      "Repite durante el número deseado de repeticiones, luego cambia al otro brazo."
+    ],
+    "description": "El remo inclinado con barra a un brazo es un ejercicio de fuerza unilateral que se dirige a la parte superior de la espalda, requiriendo equilibrio, coordinación y estabilidad del core. Se realiza inclinándose en las caderas, manteniendo la espalda recta y remando una barra con un brazo mientras se mantiene una posición estable.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Barra",
+    "id": "0065",
+    "name": "Press de suelo con barra a un brazo",
+    "target": "tríceps",
+    "secondaryMuscles": ["pecho", "hombros"],
+    "instructions": [
+      "Acuéstate plano de espaldas en el suelo con tus rodillas dobladas y pies planos en el suelo.",
+      "Sostén la barra con una mano, palma hacia arriba, y extiende tu brazo recto sobre tu pecho.",
+      "Baja lentamente la barra hacia tu pecho, manteniendo tu codo cerca de tu cuerpo.",
+      "Haz una pausa por un momento en la parte inferior, luego empuja la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia de brazos."
+    ],
+    "description": "El press de suelo con barra a un brazo es un ejercicio de presión unilateral que se dirige a los tríceps mientras también involucra al pecho y hombros. Requiere que el levantador estabilice la barra con un brazo mientras está acostado en el suelo, lo que aumenta la demanda en la estabilidad del core y coordinación.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0066",
+    "name": "Peso muerto lateral con barra a un brazo",
+    "target": "glúteos",
+    "secondaryMuscles": [
+      "isquiotibiales",
+      "cuádriceps",
+      "parte inferior de la espalda"
+    ],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una barra en una mano con un agarre supino.",
+      "Mantén tu espalda recta y tu core comprometido.",
+      "Dobla en las caderas y baja la barra hacia el exterior de tu pierna, manteniendo tu brazo recto y pecho arriba.",
+      "Baja la barra tan lejos como puedas manteniendo buena forma.",
+      "Haz una pausa por un momento, luego regresa lentamente a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia de lados."
+    ],
+    "description": "El peso muerto lateral con barra a un brazo es una variación unilateral del peso muerto que se dirige a los glúteos, isquiotibiales, cuádriceps y parte inferior de la espalda. Requiere sostener una barra en una mano y realizar un movimiento de peso muerto al lado del cuerpo, desafiando el equilibrio, fuerza de agarre y estabilidad del core.",
+    "difficulty": "Avanzado",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Barra",
+    "id": "0067",
+    "name": "Arrancada con barra a un brazo",
+    "target": "deltoides",
+    "secondaryMuscles": ["trapecios", "antebrazos", "core"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, dedos apuntando ligeramente hacia afuera.",
+      "Sostén la barra con un agarre supino, manos ligeramente más anchas que el ancho de hombros."
+    ],
+    "description": "La arrancada con barra a un brazo es un ejercicio que se dirige a los deltoides y también involucra a los trapecios, antebrazos y core. Implica levantar una barra con un brazo de manera explosiva, enfatizando la potencia y coordinación.",
+    "difficulty": "Avanzado",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0293",
+    "name": "Curl de bíceps con mancuerna",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Párate recto con una mancuerna en cada mano, brazos completamente extendidos y palmas hacia adelante.",
+      "Manteniendo tus brazos superiores estacionarios, exhala y haz curl con las mancuernas contrayendo tus bíceps.",
+      "Continúa elevando las mancuernas hasta que tus bíceps estén completamente contraídos y las mancuernas estén al nivel de los hombros.",
+      "Mantén la posición contraída con una pausa breve mientras aprietas tus bíceps.",
+      "Inhala y baja lentamente las mancuernas de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El curl de bíceps con mancuerna es un ejercicio de fuerza que se dirige a los bíceps y también involucra a los antebrazos. Se realiza curvando mancuernas desde una posición de pie, enfocándose en el movimiento controlado y la contracción muscular.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Mancuerna",
+    "id": "0405",
+    "name": "Press de hombros sentado con mancuerna",
+    "target": "deltoides",
+    "secondaryMuscles": ["tríceps", "parte superior de la espalda"],
+    "instructions": [
+      "Siéntate en un banco con respaldo, sosteniendo una mancuerna en cada mano al nivel de los hombros, palmas hacia adelante.",
+      "Presiona las mancuernas hacia arriba hasta que tus brazos estén completamente extendidos.",
+      "Baja lentamente las mancuernas de vuelta a la altura de los hombros.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press de hombros sentado con mancuerna es un ejercicio de fuerza que se dirige a los músculos deltoides de los hombros. Se realiza sentado, presionando mancuernas sobre la cabeza para construir fuerza en los hombros y brazos superiores.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "espalda",
+    "equipment": "Mancuerna",
+    "id": "0406",
+    "name": "Encogimiento con mancuerna",
+    "target": "trapecios",
+    "secondaryMuscles": ["hombros"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y sostén una mancuerna en cada mano con tus palmas hacia tu cuerpo.",
+      "Mantén tus brazos rectos y deja que las mancuernas cuelguen a tus lados.",
+      "Levanta tus hombros lo más alto posible, como si intentaras tocar tus orejas con tus hombros.",
+      "Mantén la contracción por un segundo, luego baja lentamente tus hombros de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El encogimiento con mancuerna es un ejercicio de aislamiento que se dirige a los músculos trapecios. Implica levantar los hombros hacia las orejas mientras se sostienen mancuernas, enfocándose en construir fuerza y tamaño en la parte superior de la espalda.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Mancuerna",
+    "id": "0408",
+    "name": "Elevación lateral tumbado con mancuerna a una mano",
+    "target": "deltoides",
+    "secondaryMuscles": ["trapecios", "romboides"],
+    "instructions": [
+      "Acuéstate de lado en un banco plano con tus piernas extendidas y tu cabeza apoyada por tu brazo.",
+      "Sostén una mancuerna en tu mano superior con tu palma hacia abajo.",
+      "Manteniendo tu brazo recto, levanta la mancuerna hasta la altura de los hombros.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente la mancuerna de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia de lados."
+    ],
+    "description": "La elevación lateral tumbado con mancuerna a una mano se dirige a los músculos deltoides y se realiza acostado de lado, levantando una mancuerna con un brazo hasta la altura de los hombros. Este ejercicio aísla los músculos de los hombros y ayuda a mejorar la fuerza y estabilidad.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas inferiores",
+    "equipment": "Mancuerna",
+    "id": "0409",
+    "name": "Elevación de gemelo a una pierna con mancuerna",
+    "target": "gemelos",
+    "secondaryMuscles": ["tobillos"],
+    "instructions": [
+      "Párate en el borde de un escalón o plataforma con tus talones colgando y tus dedos en el escalón.",
+      "Sostén una mancuerna en una mano y coloca tu otra mano en una pared o barandilla para apoyo.",
+      "Levanta tu talón lo más alto posible, levantando tu cuerpo sobre tus dedos.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente tu talón por debajo del escalón.",
+      "Repite durante el número deseado de repeticiones, luego cambia a la otra pierna."
+    ],
+    "description": "La elevación de gemelo a una pierna con mancuerna es un ejercicio unilateral para la parte inferior de la pierna que se dirige a los gemelos, realizado mientras se sostiene una mancuerna para resistencia adicional. Desafía el equilibrio y la fuerza al aislar una pierna a la vez.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Mancuerna",
+    "id": "0410",
+    "name": "Sentadilla split a una pierna con mancuerna",
+    "target": "cuádriceps",
+    "secondaryMuscles": ["glúteos", "isquiotibiales", "gemelos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en cada mano.",
+      "Da un paso adelante con un pie y posiciona tus pies de modo que tu pie delantero esté plano en el suelo y tu pie trasero esté elevado en un banco o escalón.",
+      "Baja tu cuerpo doblando tu rodilla delantera y cadera, manteniendo tu rodilla trasera ligeramente doblada y tu talón trasero fuera del suelo.",
+      "Continúa bajando hasta que tu muslo delantero esté paralelo al suelo, luego empuja a través de tu talón delantero para volver a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia de piernas y repite."
+    ],
+    "description": "La sentadilla split a una pierna con mancuerna es un ejercicio unilateral para la parte inferior del cuerpo que se dirige a los cuádriceps, con énfasis secundario en los glúteos, isquiotibiales y gemelos. Requiere equilibrio, coordinación y fuerza, ya que una pierna está elevada y el movimiento se realiza con resistencia adicional de mancuernas.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Mancuerna",
+    "id": "0411",
+    "name": "Sentadilla a una pierna con mancuerna",
+    "target": "glúteos",
+    "secondaryMuscles": ["cuádriceps", "isquiotibiales", "gemelos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en cada mano.",
+      "Extiende una pierna hacia adelante y mantenla fuera del suelo durante el ejercicio.",
+      "Dobla tu pierna de apoyo y baja tu cuerpo como si te sentaras en una silla.",
+      "Mantén tu pecho arriba y tu espalda recta.",
+      "Haz una pausa por un momento en la parte inferior, luego empuja a través de tu talón para volver a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia de piernas."
+    ],
+    "description": "La sentadilla a una pierna con mancuerna es un ejercicio desafiante para la parte inferior del cuerpo que se dirige a los glúteos mientras también involucra a los cuádriceps, isquiotibiales y gemelos. Requiere equilibrio, coordinación y fuerza, ya que realizas una sentadilla en una pierna mientras sostienes mancuernas para resistencia adicional.",
+    "difficulty": "Avanzado",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Mancuerna",
+    "id": "0413",
+    "name": "Sentadilla con mancuerna",
+    "target": "glúteos",
+    "secondaryMuscles": ["cuádriceps", "isquiotibiales", "gemelos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en cada mano a tus lados.",
+      "Manteniendo tu pecho arriba y core comprometido, baja tu cuerpo doblando en las rodillas y caderas, como si te sentaras en una silla.",
+      "Continúa bajando hasta que tus muslos estén paralelos al suelo, o tan bajo como puedas ir cómodamente.",
+      "Haz una pausa por un momento en la parte inferior, luego empuja a través de tus talones para volver a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La sentadilla con mancuerna es un ejercicio de fuerza para la parte inferior del cuerpo que se dirige a los glúteos, cuádriceps e isquiotibiales, mientras también involucra a los gemelos. Se realiza sosteniendo una mancuerna en cada mano y bajando y subiendo en sentadilla con forma adecuada.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Mancuerna",
+    "id": "0414",
+    "name": "Press overhead alternado de pie con mancuerna",
+    "target": "deltoides",
+    "secondaryMuscles": ["tríceps", "core"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en cada mano al nivel de los hombros con palmas hacia adelante.",
+      "Presiona una mancuerna sobre tu cabeza, extendiendo completamente tu brazo.",
+      "Baja la mancuerna de vuelta al nivel de los hombros.",
+      "Repite con el otro brazo.",
+      "Continúa alternando brazos durante el número deseado de repeticiones."
+    ],
+    "description": "El press overhead alternado de pie con mancuerna es un ejercicio para hombros que implica presionar mancuernas sobre la cabeza un brazo a la vez mientras se está de pie. Este movimiento se dirige a los músculos deltoides y también involucra a los tríceps y core para estabilidad.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Mancuerna",
+    "id": "0415",
+    "name": "Elevación alternada de pie con mancuerna",
+    "target": "deltoides",
+    "secondaryMuscles": ["trapecios", "antebrazos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en cada mano con tus palmas hacia tu cuerpo.",
+      "Mantén tu espalda recta y tu core comprometido.",
+      "Levanta una mancuerna al lado, manteniendo tu brazo recto y palma hacia abajo.",
+      "Continúa levantando hasta que tu brazo esté paralelo al suelo.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente la mancuerna de vuelta a la posición inicial.",
+      "Repite con el otro brazo.",
+      "Alterna entre brazos durante el número deseado de repeticiones."
+    ],
+    "description": "La elevación alternada de pie con mancuerna es un ejercicio para hombros que se dirige a los músculos deltoides levantando mancuernas alternadamente al lado, mejorando la fuerza y estabilidad de los hombros.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0416",
+    "name": "Curl de bíceps de pie con mancuerna",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Párate recto con una mancuerna en cada mano, palmas hacia adelante y brazos completamente extendidos.",
+      "Manteniendo tus brazos superiores estacionarios, exhala y haz curl con las mancuernas contrayendo tus bíceps.",
+      "Continúa elevando las mancuernas hasta que tus bíceps estén completamente contraídos y las mancuernas estén al nivel de los hombros.",
+      "Mantén la posición contraída con una pausa breve mientras aprietas tus bíceps.",
+      "Inhala y baja lentamente las mancuernas de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El curl de bíceps de pie con mancuerna es un ejercicio de fuerza clásico que se dirige a los bíceps y también involucra a los antebrazos. Implica curvando mancuernas desde una posición de pie, enfocándose en el movimiento controlado y la contracción muscular.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas inferiores",
+    "equipment": "Mancuerna",
+    "id": "0417",
+    "name": "Elevación de gemelo de pie con mancuerna",
+    "target": "gemelos",
+    "secondaryMuscles": ["tobillos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en cada mano.",
+      "Levanta tus talones del suelo lo más alto posible, usando tus gemelos.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente tus talones de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La elevación de gemelo de pie con mancuerna es un ejercicio que se dirige a los músculos gemelos levantando los talones del suelo mientras se sostienen mancuernas para resistencia adicional.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0418",
+    "name": "Curl de concentración de pie con mancuerna",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y sostén una mancuerna en una mano, con tu brazo completamente extendido y palma hacia adentro.",
+      "Coloca tu mano opuesta en tu muslo para apoyo.",
+      "Manteniendo tu brazo superior estacionario, exhala y haz curl con la mancuerna hacia tu hombro contrayendo tus bíceps.",
+      "Continúa elevando la mancuerna hasta que tus bíceps estén completamente contraídos y la mancuerna esté al nivel de los hombros.",
+      "Mantén la posición contraída con una pausa breve mientras aprietas tus bíceps.",
+      "Inhala y baja lentamente la mancuerna de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia de brazos."
+    ],
+    "description": "El curl de concentración de pie con mancuerna es un ejercicio de aislamiento que se dirige a los bíceps, realizado mientras se está de pie y usando un brazo a la vez para una contracción enfocada.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Mancuerna",
+    "id": "0419",
+    "name": "Elevación frontal de pie con mancuerna sobre la cabeza",
+    "target": "deltoides",
+    "secondaryMuscles": ["trapecios", "bíceps"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en cada mano con un agarre supino.",
+      "Mantén tus brazos rectos y levanta las mancuernas frente a ti, elevándolas sobre tu cabeza.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente las mancuernas de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La elevación frontal de pie con mancuerna sobre la cabeza es un ejercicio para hombros que se dirige a los deltoides levantando mancuernas desde el nivel de los muslos hasta sobre la cabeza en un movimiento controlado.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0420",
+    "name": "Kickback de pie con mancuerna",
+    "target": "tríceps",
+    "secondaryMuscles": ["hombros"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y sostén una mancuerna en cada mano.",
+      "Dobla tus rodillas ligeramente y gira hacia adelante en las caderas, manteniendo tu espalda recta.",
+      "Extiende tus brazos rectos hacia atrás, apretando tus tríceps en la parte superior del movimiento.",
+      "Haz una pausa por un momento, luego baja lentamente las mancuernas de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El kickback de pie con mancuerna es un ejercicio de aislamiento que se dirige a los tríceps, realizado girando en las caderas y extendiendo los brazos hacia atrás con mancuernas.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0421",
+    "name": "Curl de concentración de pie con mancuerna a un brazo",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Párate recto con tus pies al ancho de hombros y sostén una mancuerna en una mano, palma hacia arriba.",
+      "Coloca tu mano libre en tu muslo para apoyo.",
+      "Manteniendo tu brazo superior estacionario, exhala y haz curl con la mancuerna hacia tu hombro contrayendo tus bíceps.",
+      "Continúa elevando la mancuerna hasta que tus bíceps estén completamente contraídos y la mancuerna esté al nivel de los hombros.",
+      "Mantén la posición contraída con una pausa breve mientras aprietas tus bíceps.",
+      "Inhala y baja lentamente la mancuerna de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia de brazos."
+    ],
+    "description": "El curl de concentración de pie con mancuerna a un brazo es un ejercicio de aislamiento que se dirige a los bíceps, realizado mientras se está de pie y enfocándose en un brazo a la vez para un mayor compromiso muscular.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0422",
+    "name": "Curl de pie con mancuerna a un brazo (sobre banco inclinado)",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en una mano con palma hacia adelante.",
+      "Coloca tu otra mano en un banco inclinado para apoyo.",
+      "Manteniendo tu brazo superior estacionario, exhala y haz curl con la mancuerna hacia tu hombro contrayendo tus bíceps.",
+      "Haz una pausa por un momento en la parte superior, luego inhala y baja lentamente la mancuerna de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia de brazos."
+    ],
+    "description": "El curl de pie con mancuerna a un brazo (sobre banco inclinado) es un ejercicio de aislamiento que se dirige a los bíceps, realizado de pie y curvando una mancuerna con un brazo mientras se usa un banco inclinado para apoyo.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0423",
+    "name": "Extensión de pie con mancuerna a un brazo",
+    "target": "tríceps",
+    "secondaryMuscles": ["hombros"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en una mano.",
+      "Levanta la mancuerna sobre tu cabeza, extendiendo completamente tu brazo.",
+      "Mantén tu brazo superior cerca de tu cabeza y perpendicular al suelo.",
+      "Baja lentamente la mancuerna detrás de tu cabeza, doblando tu codo.",
+      "Haz una pausa por un momento, luego levanta la mancuerna de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La extensión de pie con mancuerna a un brazo es un ejercicio de aislamiento que se dirige a los tríceps. Implica sostener una mancuerna sobre la cabeza con un brazo y extender el codo para levantar el peso, enfocándose en el compromiso de los tríceps.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Mancuerna",
+    "id": "0424",
+    "name": "Press de pie con mancuerna a un brazo palma adentro",
+    "target": "deltoides",
+    "secondaryMuscles": ["tríceps", "core"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en una mano al nivel de los hombros con tu palma hacia adentro.",
+      "Compromete tu core y mantén tu espalda recta.",
+      "Presiona la mancuerna hacia arriba hasta que tu brazo esté completamente extendido.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente la mancuerna de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia al otro brazo."
+    ],
+    "description": "El press de pie con mancuerna a un brazo palma adentro es un ejercicio unilateral para hombros que se dirige a los deltoides mientras también involucra a los tríceps y core para estabilización. Se realiza de pie, presionando una mancuerna sobre la cabeza con un brazo a la vez, palma hacia adentro.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0425",
+    "name": "Curl inverso de pie con mancuerna a un brazo",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Párate recto con tus pies al ancho de hombros y sostén una mancuerna en una mano con un agarre supino.",
+      "Mantén tu brazo completamente extendido y cerca de tu cuerpo, con tu palma hacia abajo.",
+      "Haz curl lentamente con la mancuerna hacia tu hombro, manteniendo tu brazo superior estacionario.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente la mancuerna de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia al otro brazo."
+    ],
+    "description": "El curl inverso de pie con mancuerna a un brazo se dirige a los bíceps y antebrazos usando una mancuerna con un agarre supino, enfatizando el braquial y extensores del antebrazo.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Mancuerna",
+    "id": "0426",
+    "name": "Press overhead de pie con mancuerna",
+    "target": "deltoides",
+    "secondaryMuscles": ["tríceps", "parte superior de la espalda"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en cada mano al nivel de los hombros con palmas hacia adelante.",
+      "Presiona las mancuernas hacia arriba hasta que tus brazos estén completamente extendidos sobre tu cabeza.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente las mancuernas de vuelta al nivel de los hombros.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press overhead de pie con mancuerna es un ejercicio compuesto que se dirige a los deltoides, realizado presionando mancuernas sobre la cabeza desde la altura de los hombros mientras se está de pie.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Mancuerna",
+    "id": "0427",
+    "name": "Press de pie con mancuerna palmas adentro",
+    "target": "deltoides",
+    "secondaryMuscles": ["tríceps", "pecho"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en cada mano al nivel de los hombros con palmas hacia adentro.",
+      "Manteniendo tu core comprometido y tu espalda recta, presiona las mancuernas hacia arriba hasta que tus brazos estén completamente extendidos sobre tu cabeza.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente las mancuernas de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press de pie con mancuerna palmas adentro es un ejercicio para hombros que se dirige a los deltoides, con énfasis secundario en los tríceps y pecho. Implica presionar mancuernas sobre la cabeza mientras se mantienen las palmas hacia adentro, lo que puede ser más fácil en las articulaciones de los hombros comparado con un press overhead tradicional.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0428",
+    "name": "Curl predicador de pie con mancuerna",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Párate erguido con tus pies al ancho de hombros y sostén una mancuerna en cada mano, palmas hacia adelante.",
+      "Apoya la parte posterior de tus brazos superiores contra el banco predicador o un banco inclinado, con tus codos ligeramente doblados.",
+      "Manteniendo tus brazos superiores estacionarios, exhala y haz curl con las mancuernas contrayendo tus bíceps.",
+      "Continúa elevando las mancuernas hasta que tus bíceps estén completamente contraídos y las mancuernas estén al nivel de los hombros.",
+      "Mantén la posición contraída con una pausa breve mientras aprietas tus bíceps.",
+      "Inhala y baja lentamente las mancuernas de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El curl predicador de pie con mancuerna es un ejercicio de aislamiento que se dirige a los bíceps, realizado mientras se está de pie y apoyando los brazos superiores contra un banco predicador o inclinado para forma estricta.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0429",
+    "name": "Curl inverso de pie con mancuerna",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Párate recto con tus pies al ancho de hombros y sostén una mancuerna en cada mano, palmas hacia tu cuerpo.",
+      "Manteniendo tus brazos superiores estacionarios, exhala y haz curl con las mancuernas contrayendo tus bíceps. Continúa elevando los pesos hasta que tus bíceps estén completamente contraídos y las mancuernas estén al nivel de los hombros.",
+      "Mantén la posición contraída con una pausa breve mientras aprietas tus bíceps.",
+      "Inhala y baja lentamente las mancuernas de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El curl inverso de pie con mancuerna es un ejercicio que se dirige a los bíceps y antebrazos, realizado curvando mancuernas con un agarre supino mientras se está de pie.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0430",
+    "name": "Extensión de tríceps de pie con mancuerna",
+    "target": "tríceps",
+    "secondaryMuscles": ["hombros"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y sostén una mancuerna en una mano.",
+      "Levanta la mancuerna sobre tu cabeza, manteniendo tu brazo recto.",
+      "Dobla tu codo y baja la mancuerna detrás de tu cabeza, manteniendo tu brazo superior estacionario.",
+      "Extiende tu brazo de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La extensión de tríceps de pie con mancuerna es un ejercicio de aislamiento que se dirige a los tríceps, realizado levantando una mancuerna sobre la cabeza y extendiendo el brazo. También involucra a los hombros como músculos secundarios.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Mancuerna",
+    "id": "0431",
+    "name": "Step-up con mancuerna",
+    "target": "glúteos",
+    "secondaryMuscles": ["cuádriceps", "isquiotibiales", "gemelos"],
+    "instructions": [
+      "Párate frente a un banco o escalón con una mancuerna en cada mano, palmas hacia tu cuerpo.",
+      "Coloca tu pie derecho en el banco o escalón, asegurándote de que todo tu pie esté en contacto con la superficie.",
+      "Empuja a través de tu talón derecho y levanta tu cuerpo sobre el banco o escalón, enderezando tu pierna derecha.",
+      "Lleva tu pie izquierdo sobre el banco o escalón, poniéndote completamente erguido.",
+      "Baja con tu pie izquierdo, seguido de tu pie derecho, volviendo a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia de piernas."
+    ],
+    "description": "El step-up con mancuerna es un ejercicio para la parte inferior del cuerpo que se dirige a los glúteos, cuádriceps e isquiotibiales, mientras también involucra a los gemelos. Implica subir a una plataforma elevada mientras se sostienen mancuernas, lo que aumenta la resistencia y desafía el equilibrio y coordinación.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Mancuerna",
+    "id": "0432",
+    "name": "Peso muerto pierna rígida con mancuerna",
+    "target": "glúteos",
+    "secondaryMuscles": ["isquiotibiales", "parte inferior de la espalda"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en cada mano con un agarre supino.",
+      "Manteniendo tu espalda recta y tu core comprometido, gira en las caderas y baja las mancuernas hacia el suelo, permitiendo un ligero doblado en tus rodillas.",
+      "Baja las mancuernas hasta que sientas un estiramiento en tus isquiotibiales, luego aprieta tus glúteos y empuja a través de tus talones para volver a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El peso muerto pierna rígida con mancuerna es un ejercicio para la parte inferior del cuerpo que se dirige a los glúteos e isquiotibiales, con activación adicional de la parte inferior de la espalda. Implica girar en las caderas mientras se mantienen las piernas mayormente rectas, enfatizando un estiramiento y contracción en la cadena posterior.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "pecho",
+    "equipment": "Mancuerna",
+    "id": "0433",
+    "name": "Pullover brazos rectos con mancuerna",
+    "target": "pectorales",
+    "secondaryMuscles": ["dorsal ancho", "tríceps"],
+    "instructions": [
+      "Acuéstate plano en un banco con tu cabeza en un extremo y tus pies plantados firmemente en el suelo.",
+      "Sostén una mancuerna con ambas manos y extiende tus brazos rectos sobre tu pecho.",
+      "Manteniendo tus brazos rectos, baja lentamente la mancuerna detrás de tu cabeza en un movimiento de arco.",
+      "Haz una pausa por un momento, luego levanta la mancuerna de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El pullover brazos rectos con mancuerna es un ejercicio para el pecho que también se dirige a los dorsales y tríceps. Implica acostarse en un banco y mover una mancuerna en un arco sobre y detrás de tu cabeza mientras se mantienen los brazos rectos.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Mancuerna",
+    "id": "0434",
+    "name": "Peso muerto pierna recta con mancuerna",
+    "target": "glúteos",
+    "secondaryMuscles": ["isquiotibiales", "parte inferior de la espalda"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en cada mano con un agarre supino.",
+      "Manteniendo tu espalda recta y tu core comprometido, gira en las caderas y baja las mancuernas hacia el suelo, permitiendo que tu torso se incline hacia adelante.",
+      "Continúa bajando las mancuernas hasta que sientas un estiramiento en tus isquiotibiales, manteniendo tus rodillas ligeramente dobladas.",
+      "Haz una pausa por un momento en la parte inferior, luego compromete tus glúteos e isquiotibiales para levantar tu torso de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El peso muerto pierna recta con mancuerna es un ejercicio de fuerza que se dirige a los glúteos, isquiotibiales y parte inferior de la espalda. Implica girar en las caderas mientras se mantienen las piernas rectas y bajar mancuernas hacia el suelo, luego volviendo a la posición inicial.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0436",
+    "name": "Press tate con mancuerna",
+    "target": "tríceps",
+    "secondaryMuscles": ["hombros"],
+    "instructions": [
+      "Siéntate en un banco plano con una mancuerna en cada mano, palmas enfrentadas.",
+      "Levanta las mancuernas a la altura de los hombros, luego rota tus muñecas para que tus palmas estén alejadas de ti.",
+      "Presiona las mancuernas hacia arriba hasta que tus brazos estén completamente extendidos, luego bájalas de vuelta a la altura de los hombros.",
+      "Rota tus muñecas de vuelta a la posición inicial y repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press tate con mancuerna es un ejercicio para los brazos superiores que se dirige principalmente a los tríceps, con involucración secundaria de los hombros. Se realiza con mancuernas mientras se está sentado en un banco plano, involucrando un movimiento de presión único que enfatiza la activación de los tríceps.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Mancuerna",
+    "id": "0437",
+    "name": "Remo upright con mancuerna",
+    "target": "deltoides",
+    "secondaryMuscles": ["trapecios", "bíceps"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, sosteniendo una mancuerna en cada mano con un agarre supino.",
+      "Deja que las mancuernas cuelguen frente a tus muslos, con tus brazos completamente extendidos.",
+      "Manteniendo tu espalda recta y tu core comprometido, exhala y levanta las mancuernas rectas hacia arriba hacia tu mentón, liderando con tus codos.",
+      "Haz una pausa por un momento en la parte superior, luego inhala y baja lentamente las mancuernas de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El remo upright con mancuerna es un ejercicio de fuerza que se dirige a los deltoides, con énfasis secundario en los trapecios y bíceps. Implica levantar mancuernas desde el nivel de los muslos hasta la altura del mentón, liderando con los codos.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Mancuerna",
+    "id": "0438",
+    "name": "W-press con mancuerna",
+    "target": "deltoides",
+    "secondaryMuscles": ["tríceps", "pecho"],
+    "instructions": [
+      "Siéntate en un banco con una mancuerna en cada mano, palmas hacia adelante.",
+      "Levanta las mancuernas a la altura de los hombros, codos doblados y palmas hacia adelante.",
+      "Presiona las mancuernas hacia arriba hasta que tus brazos estén completamente extendidos sobre tu cabeza.",
+      "Baja las mancuernas de vuelta a la altura de los hombros.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El w-press con mancuerna es un ejercicio para hombros realizado con mancuernas, enfocándose en los músculos deltoides. Implica presionar los pesos sobre la cabeza desde una posición 'w', involucrando los hombros, tríceps y pecho.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0439",
+    "name": "Curl zottman con mancuerna",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Párate recto con una mancuerna en cada mano, palmas hacia tu cuerpo.",
+      "Mantén tus codos cerca de tu torso y rota tus palmas para que miren hacia adelante.",
+      "Haz curl con las mancuernas hasta tus hombros manteniendo tus brazos superiores estacionarios.",
+      "En la parte superior del movimiento, rota tus muñecas para que tus palmas miren alejadas de tu cuerpo.",
+      "Baja lentamente las mancuernas de vuelta a la posición inicial, rotando tus palmas de vuelta a mirar hacia tu cuerpo.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El curl zottman con mancuerna es un ejercicio para bíceps que incorpora tanto un curl estándar como un curl inverso, dirigido a los bíceps y antebrazos. Implica rotar las muñecas en la parte superior del movimiento para trabajar ambos grupos musculares efectivamente.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "pecho",
+    "equipment": "Barra",
+    "id": "0458",
+    "name": "Fly en suelo (con barra)",
+    "target": "pectorales",
+    "secondaryMuscles": ["deltoides", "tríceps"],
+    "instructions": [
+      "Acuéstate plano de espaldas en el suelo con tus rodillas dobladas y pies planos en el suelo.",
+      "Sostén una barra con agarre supino, brazos extendidos rectos sobre tu pecho.",
+      "Baja lentamente la barra hacia los lados, manteniendo un ligero doblado en tus codos.",
+      "Baja la barra hasta que tus brazos estén paralelos al suelo, sintiendo un estiramiento en tu pecho.",
+      "Haz una pausa por un momento, luego aprieta tus músculos del pecho para traer la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El fly en suelo con barra es un ejercicio para el pecho realizado acostado en el suelo, enfocándose en estirar y contraer los músculos pectorales mientras se usa una barra para resistencia.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "espalda",
+    "equipment": "Barra",
+    "id": "0574",
+    "name": "Remo inclinado con palanca",
+    "target": "parte superior de la espalda",
+    "secondaryMuscles": ["bíceps", "antebrazos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y rodillas ligeramente dobladas.",
+      "Sostén la barra con agarre supino, manos ligeramente más anchas que el ancho de hombros.",
+      "Inclínate hacia adelante en las caderas, manteniendo tu espalda recta y pecho arriba.",
+      "Tira la barra hacia tu pecho inferior, apretando tus omóplatos juntos.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El remo inclinado con palanca es un ejercicio de fuerza compuesto que se dirige a la parte superior de la espalda, realizado con una barra. Requiere buena postura, estabilidad del core y técnica adecuada para evitar lesiones.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "espalda",
+    "equipment": "Barra",
+    "id": "0589",
+    "name": "Remo inclinado con palanca a un brazo",
+    "target": "parte superior de la espalda",
+    "secondaryMuscles": ["bíceps", "antebrazos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros, rodillas ligeramente dobladas, y sostén una barra con agarre supino.",
+      "Inclínate hacia adelante en las caderas, manteniendo tu espalda recta y cabeza arriba.",
+      "Deja que la barra cuelgue frente a ti con tus brazos completamente extendidos.",
+      "Tira la barra hacia tu pecho, manteniendo tus codos cerca de tu cuerpo.",
+      "Aprieta tus omóplatos juntos en la parte superior del movimiento.",
+      "Baja la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El remo inclinado con palanca a un brazo es un ejercicio unilateral para la espalda realizado con una barra. Se dirige a la parte superior de la espalda y también trabaja los bíceps y antebrazos. El movimiento requiere mantener una posición estable inclinada mientras se rema el peso con un brazo, demandando estabilidad del core y coordinación.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0648",
+    "name": "Power clean",
+    "target": "isquiotibiales",
+    "secondaryMuscles": ["glúteos", "cuádriceps", "gemelos"],
+    "instructions": [
+      "Comienza con la barra en el suelo frente a ti, con tus pies al ancho de hombros.",
+      "Agáchate y agarra la barra con agarre supino, ligeramente más ancho que el ancho de hombros.",
+      "Mantén tu espalda recta y pecho arriba mientras levantas la barra del suelo, extendiendo tus caderas y rodillas.",
+      "Cuando la barra alcance la mitad de tu muslo, tira explosivamente hacia arriba, encogiéndote de hombros y tirando tus codos altos y a los lados.",
+      "Cuando la barra alcance su punto más alto, rápidamente cae debajo de ella, rotando tus codos alrededor y atrapando la barra en tus hombros en una posición de sentadilla frontal.",
+      "Ponte de pie con la barra, extendiendo completamente tus caderas y rodillas.",
+      "Baja la barra de vuelta a la posición inicial, manteniendo control del peso durante todo el movimiento.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El power clean es un movimiento compuesto de levantamiento de pesas olímpico que implica levantar una barra del suelo a los hombros en un movimiento explosivo. Se dirige a los isquiotibiales, glúteos, cuádriceps y gemelos, y requiere fuerza significativa, coordinación y técnica.",
+    "difficulty": "Avanzado",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Mancuerna",
+    "id": "0660",
+    "name": "Flexión agarre cerrado sobre mancuerna",
+    "target": "tríceps",
+    "secondaryMuscles": ["pecho", "hombros"],
+    "instructions": [
+      "Comienza en posición de flexión con tus manos colocadas cerca una de la otra, directamente bajo tus hombros.",
+      "Sostén una mancuerna en cada mano, descansándolas en el suelo.",
+      "Baja tu cuerpo hacia el suelo doblando tus codos, manteniéndolos cerca de tus lados.",
+      "Empuja a través de tus palmas para extender tus brazos y volver a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La flexión agarre cerrado sobre mancuerna es una variación de la flexión que se dirige a los tríceps, con énfasis adicional en el pecho y hombros. Se realiza agarrando mancuernas colocadas en el suelo, lo que aumenta el rango de movimiento y desafía la estabilidad.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas inferiores",
+    "equipment": "Mancuerna",
+    "id": "0727",
+    "name": "Elevación de gemelo a una pierna (sobre una mancuerna)",
+    "target": "gemelos",
+    "secondaryMuscles": ["tobillos", "pies"],
+    "instructions": [
+      "Párate con tus pies al ancho de caderas y sostén una mancuerna en una mano.",
+      "Levanta un pie del suelo y equilibra en el otro pie.",
+      "Levanta lentamente tu talón lo más alto posible, usando tus músculos gemelos.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente tu talón de vuelta.",
+      "Repite durante el número deseado de repeticiones, luego cambia a la otra pierna."
+    ],
+    "description": "La elevación de gemelo a una pierna (sobre una mancuerna) es un ejercicio para la parte inferior de la pierna que se dirige a los gemelos, con énfasis secundario en los tobillos y pies. Implica equilibrarse en una pierna mientras se sostiene una mancuerna y realizar una elevación de gemelo, lo que aumenta el desafío al equilibrio y fuerza.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0776",
+    "name": "Snatch pull",
+    "target": "cuádriceps",
+    "secondaryMuscles": ["isquiotibiales", "glúteos", "gemelos"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y la barra en el suelo frente a ti.",
+      "Dobla tus rodillas y gira en las caderas para bajar a una posición de sentadilla, agarrando la barra con agarre supino.",
+      "Mantén tu espalda recta y pecho arriba mientras impulsas a través de tus talones para levantar la barra del suelo, extendiendo tus caderas y rodillas.",
+      "Cuando la barra alcance el nivel de la cadera, tira explosivamente hacia arriba, encogiéndote de hombros y tirando tus codos altos y a los lados.",
+      "Cuando la barra alcance su punto más alto, rápidamente cae debajo de ella, tirándote a una posición de sentadilla profunda.",
+      "Atrapa la barra sobre tu cabeza con tus brazos completamente extendidos y tus rodillas dobladas.",
+      "Ponte de pie extendiendo tus caderas y rodillas, manteniendo la barra sobre tu cabeza.",
+      "Baja la barra de vuelta a la posición inicial invirtiendo el movimiento.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El snatch pull es un movimiento compuesto de levantamiento de pesas olímpico que desarrolla potencia explosiva y fuerza en la parte inferior del cuerpo, particularmente dirigido a los cuádriceps, isquiotibiales y glúteos. Requiere coordinación, equilibrio y técnica adecuada para realizarlo de manera segura y efectiva.",
+    "difficulty": "Avanzado",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "piernas superiores",
+    "equipment": "Barra",
+    "id": "0786",
+    "name": "Sentadilla jerk",
+    "target": "cuádriceps",
+    "secondaryMuscles": ["glúteos", "isquiotibiales", "gemelos", "core"],
+    "instructions": [
+      "Comienza con la barra descansando en tus hombros, con tus pies al ancho de hombros.",
+      "Baja tu cuerpo a una posición de sentadilla, manteniendo tu pecho arriba y tus rodillas rastreando sobre tus dedos de los pies.",
+      "Cuando alcances la parte inferior de la sentadilla, impulsa explosivamente a través de tus piernas y empuja la barra sobre tu cabeza.",
+      "Cuando la barra alcance su pico, rápidamente cae a una posición split, con un pie adelante y un pie atrás.",
+      "Atrapa la barra sobre tu cabeza con tus brazos completamente extendidos y tu rodilla trasera ligeramente tocando el suelo.",
+      "Ponte de pie desde la posición split, trayendo tus pies de vuelta juntos.",
+      "Baja la barra de vuelta a tus hombros y repite durante el número deseado de repeticiones."
+    ],
+    "description": "La sentadilla jerk es un movimiento avanzado de levantamiento de pesas olímpico que combina una sentadilla y un jerk, requiriendo potencia explosiva, coordinación y equilibrio. Se dirige principalmente a los cuádriceps, con involucración significativa de los glúteos, isquiotibiales, gemelos y core.",
+    "difficulty": "Avanzado",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Barra",
+    "id": "0788",
+    "name": "Press detrás del cuello de pie",
+    "target": "deltoides",
+    "secondaryMuscles": ["tríceps", "parte superior de la espalda"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y sostén la barra detrás de tu cuello con agarre supino.",
+      "Mantén tu espalda recta y core comprometido.",
+      "Presiona la barra sobre tu cabeza extendiendo tus brazos, extendiendo completamente tus codos.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente la barra de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El press detrás del cuello de pie es un ejercicio con barra que se dirige a los deltoides, realizado presionando una barra desde detrás del cuello hasta sobre la cabeza mientras se está de pie. También involucra a los tríceps y parte superior de la espalda.",
+    "difficulty": "Avanzado",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "espalda",
+    "equipment": "Polea",
+    "id": "0818",
+    "name": "Jalón lat agarre paralelo con manijas gemelas",
+    "target": "dorsales",
+    "secondaryMuscles": ["bíceps", "romboides", "deltoides posteriores"],
+    "instructions": [
+      "Ajusta la altura del asiento y posiciónate mirando a la máquina de cable.",
+      "Agarra las manijas con agarre supino, manos al ancho de hombros.",
+      "Siéntate y posiciona tus muslos bajo los pads de muslos, manteniendo tus pies planos en el suelo.",
+      "Inclínate ligeramente hacia atrás y mantén tu pecho arriba, manteniendo una espina neutral.",
+      "Tira las manijas hacia abajo hacia tu pecho superior, apretando tus omóplatos juntos.",
+      "Haz una pausa por un momento en la parte inferior del movimiento, sintiendo la contracción en tus dorsales.",
+      "Suelta lentamente las manijas y regresa a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El jalón lat agarre paralelo con manijas gemelas es un ejercicio en máquina de cable que se dirige al dorsal ancho, con énfasis secundario en los bíceps, romboides y deltoides posteriores. Implica tirar manijas paralelas hacia el pecho mientras se está sentado, enfocándose en apretar los omóplatos juntos.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Polea",
+    "id": "0860",
+    "name": "Kickback con polea",
+    "target": "tríceps",
+    "secondaryMuscles": ["hombros"],
+    "instructions": [
+      "Párate mirando a una máquina de cable con tus pies al ancho de hombros.",
+      "Sostén la manija del cable con tu mano derecha y da un paso atrás para crear tensión en el cable.",
+      "Dobla tus rodillas ligeramente y gira hacia adelante en las caderas, manteniendo tu espalda recta.",
+      "Mantén tu brazo superior cerca de tu cuerpo y tu codo doblado en un ángulo de 90 grados.",
+      "Extiende tu antebrazo hacia atrás, enderezando completamente tu brazo.",
+      "Haz una pausa por un momento, luego regresa lentamente a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia de lados."
+    ],
+    "description": "El kickback con polea es un ejercicio de aislamiento que se dirige a los tríceps, realizado usando una máquina de cable. Implica extender el brazo hacia atrás contra resistencia para trabajar los tríceps, con algo de compromiso secundario de los hombros.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "espalda",
+    "equipment": "Polea",
+    "id": "0861",
+    "name": "Remo sentado con polea",
+    "target": "parte superior de la espalda",
+    "secondaryMuscles": ["bíceps", "antebrazos"],
+    "instructions": [
+      "Siéntate en la máquina de remo con cable con tus pies planos en los reposapiés y tus rodillas ligeramente dobladas.",
+      "Agarra las manijas con agarre supino, manteniendo tu espalda recta y tus hombros relajados.",
+      "Tira las manijas hacia tu cuerpo, apretando tus omóplatos juntos.",
+      "Haz una pausa por un momento en el punto máximo del movimiento, luego suelta lentamente las manijas de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El remo sentado con polea es un ejercicio de fuerza que se dirige a la parte superior de la espalda, con énfasis secundario en los bíceps y antebrazos. Se realiza usando una máquina de remo con cable e implica tirar manijas hacia el torso mientras se mantiene una espalda recta y apretando los omóplatos juntos.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Mancuerna",
+    "id": "0863",
+    "name": "Rotación externa de hombro tumbado con mancuerna",
+    "target": "deltoides",
+    "secondaryMuscles": ["manguito rotador", "tríceps"],
+    "instructions": [
+      "Acuéstate de lado en un banco plano con tu brazo superior contra tu lado y tu codo doblado 90 grados.",
+      "Sostén una mancuerna en tu mano con tu palma hacia abajo.",
+      "Manteniendo tu brazo superior contra tu lado, rota lentamente tu antebrazo hacia arriba lo más posible.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente tu antebrazo de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones, luego cambia de lados."
+    ],
+    "description": "La rotación externa de hombro tumbado con mancuerna es un ejercicio que se dirige a los músculos deltoides y al manguito rotador, ayudando a mejorar la estabilidad y fuerza de los hombros. Se realiza acostado de lado, rotando el antebrazo hacia arriba mientras se mantiene el brazo superior contra el lado.",
+    "difficulty": "Principiante",
+    "category": "rehabilitación"
+  },
+  {
+    "bodyPart": "hombros",
+    "equipment": "Mancuerna",
+    "id": "0864",
+    "name": "Rotación externa de hombro upright con mancuerna",
+    "target": "deltoides",
+    "secondaryMuscles": ["manguito rotador", "trapecios"],
+    "instructions": [
+      "Párate con tus pies al ancho de hombros y sostén una mancuerna en cada mano con tus palmas hacia tu cuerpo.",
+      "Levanta tus brazos hacia los lados hasta que estén paralelos al suelo, manteniendo tus codos ligeramente doblados.",
+      "Rota tus brazos externamente, trayendo las mancuernas hacia tu cabeza mientras mantienes tus codos en la misma posición.",
+      "Haz una pausa por un momento en la parte superior, luego baja lentamente las mancuernas de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "La rotación externa de hombro upright con mancuerna es un ejercicio que se dirige a los deltoides y también involucra al manguito rotador y trapecios. Implica elevar los brazos a la altura de los hombros y rotar externamente los hombros mientras se sostienen mancuernas.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "brazos superiores",
+    "equipment": "Polea",
+    "id": "0868",
+    "name": "Curl con polea",
+    "target": "bíceps",
+    "secondaryMuscles": ["antebrazos"],
+    "instructions": [
+      "Párate mirando a la máquina de cable con tus pies al ancho de hombros.",
+      "Agarra el accesorio del cable con agarre subpronado, palmas hacia arriba.",
+      "Mantén tus codos cerca de tus lados y tus brazos superiores estacionarios.",
+      "Exhala y haz curl con el accesorio del cable hacia tus hombros, contrayendo tus bíceps.",
+      "Haz una pausa por un momento en la parte superior del movimiento, apretando tus bíceps.",
+      "Inhala y baja lentamente el accesorio del cable de vuelta a la posición inicial.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El curl con polea es un ejercicio de fuerza que se dirige a los bíceps, realizado usando una máquina de cable. Implica curvear un accesorio del cable hacia los hombros mientras se mantienen los codos cerca del cuerpo, proporcionando tensión constante en los bíceps durante todo el movimiento.",
+    "difficulty": "Principiante",
+    "category": "Fuerza"
+  },
+  {
+    "bodyPart": "pecho",
+    "equipment": "Barra",
+    "id": "1255",
+    "name": "Pullover declinado con barra",
+    "target": "pectorales",
+    "secondaryMuscles": ["tríceps", "hombros"],
+    "instructions": [
+      "Acuéstate en un banco declinado con tu cabeza más baja que tus caderas y tus pies asegurados.",
+      "Sostén la barra con agarre prono (palmas alejadas de ti) y tus manos ligeramente más anchas que el ancho de hombros.",
+      "Extiende tus brazos sobre tu pecho, manteniendo un ligero doblado en tus codos.",
+      "Baja la barra en un movimiento de arco detrás de tu cabeza, sintiendo un estiramiento en tu pecho y hombros.",
+      "Haz una pausa por un momento, luego regresa la barra a la posición inicial invirtiendo el movimiento.",
+      "Repite durante el número deseado de repeticiones."
+    ],
+    "description": "El pullover declinado con barra es un ejercicio para el pecho realizado en un banco declinado, dirigido a los pectorales con énfasis secundario en los tríceps y hombros. Implica bajar una barra en un arco detrás de la cabeza y volver a la posición inicial, requiriendo control y estabilidad.",
+    "difficulty": "Intermedio",
+    "category": "Fuerza"
+  }
+]
