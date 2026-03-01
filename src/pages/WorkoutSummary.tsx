@@ -1,0 +1,117 @@
+import { useLocation, useNavigate } from "react-router-dom";
+import { defaultExercises } from "@/utils/exerciseData";
+import { CompletedWorkout } from "@/utils/types";
+import { useSettings } from "@/hooks/useSettings";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, CheckCircle, Clock, Layers } from "lucide-react";
+
+const exerciseMap = Object.fromEntries(defaultExercises.map((e) => [e.id, e]));
+
+export default function WorkoutSummaryPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { settings } = useSettings();
+  const workout = location.state as CompletedWorkout | undefined;
+
+  if (!workout) {
+    return (
+      <div className="px-4 pt-6 max-w-lg mx-auto text-center">
+        <p>No se encontró el resumen.</p>
+        <Button className="mt-4" onClick={() => navigate("/")}>
+          Volver
+        </Button>
+      </div>
+    );
+  }
+
+  const formatDuration = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}m ${sec}s`;
+  };
+
+  const totalSets = workout.exercises.reduce(
+    (s, e) => s + e.sets.filter((s) => s.completed).length,
+    0,
+  );
+
+  return (
+    <div className="px-4 pt-6 pb-8 max-w-lg mx-auto">
+      <div className="flex items-center gap-3 mb-6">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+        <h1 className="text-2xl font-bold">Resumen</h1>
+      </div>
+
+      {/* Success banner */}
+      <div className="flex flex-col items-center py-8">
+        <CheckCircle className="w-16 h-16 text-accent mb-3" />
+        <h2 className="text-xl font-bold">¡Excelente trabajo!</h2>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <Card className="p-4 flex items-center gap-3">
+          <Clock className="w-8 h-8 text-primary" />
+          <div>
+            <p className="text-xs text-muted-foreground">Duración</p>
+            <p className="text-lg font-bold">
+              {formatDuration(workout.durationSeconds)}
+            </p>
+          </div>
+        </Card>
+        <Card className="p-4 flex items-center gap-3">
+          <Layers className="w-8 h-8 text-primary" />
+          <div>
+            <p className="text-xs text-muted-foreground">Series</p>
+            <p className="text-lg font-bold">{totalSets}</p>
+          </div>
+        </Card>
+      </div>
+
+      {/* Completed exercises */}
+      <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+        Ejercicios completados
+      </h3>
+      <div className="space-y-2">
+        {workout.exercises.map((ex, i) => {
+          const data = exerciseMap[ex.exerciseId];
+          if (!data) return null;
+          const completedSets = ex.sets.filter((s) => s.completed);
+          const volume = completedSets.reduce(
+            (v, s) => v + s.weight * s.reps,
+            0,
+          );
+          return (
+            <Card key={i} className="flex items-center gap-3 p-3">
+              <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
+                <span className="text-xs text-muted-foreground">IMG</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate">{data.name}</p>
+                <Badge variant="secondary" className="text-[10px]">
+                  {data.muscleGroup}
+                </Badge>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">
+                  {completedSets.length} series
+                </p>
+                <p className="text-xs font-semibold">
+                  {volume} {settings.defaultUnit}
+                </p>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      <Button className="w-full mt-6" onClick={() => navigate("/")}>
+        Volver al planificador
+      </Button>
+    </div>
+  );
+}
