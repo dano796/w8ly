@@ -312,7 +312,7 @@ export default function ExerciseLibraryPage() {
             key={f}
             onClick={() => setActiveFilter(f)}
             className={cn(
-              "px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border",
+              "px-3 py-1.5 rounded-2xl text-sm font-medium whitespace-nowrap transition-colors border",
               activeFilter === f
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-card text-foreground border-border",
@@ -515,18 +515,21 @@ export default function ExerciseLibraryPage() {
               </Select>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-col gap-2">
+            <Button onClick={handleCreateExercise} className="w-full m-0">
+              Crear ejercicio
+            </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => {
                 setCreateDialogOpen(false);
                 setNewExerciseName("");
                 setNewExerciseMuscleGroup("Pecho");
               }}
+              className="w-full m-0"
             >
               Cancelar
             </Button>
-            <Button onClick={handleCreateExercise}>Crear ejercicio</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

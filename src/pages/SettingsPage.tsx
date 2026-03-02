@@ -45,7 +45,7 @@ function ChipSelector<T extends string | number>({
           key={String(o)}
           onClick={() => onChange(o)}
           className={cn(
-            "px-3 py-1.5 rounded-full text-sm font-medium border transition-colors",
+            "px-3 py-1.5 rounded-2xl text-sm font-medium border transition-colors",
             value === o
               ? "bg-primary text-primary-foreground border-primary"
               : "bg-card text-foreground border-border",

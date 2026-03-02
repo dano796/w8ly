@@ -26,15 +26,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -711,7 +709,7 @@ export default function WeeklyPlannerPage() {
       </div>
 
       {/* Edit Label Dialog */}
-      <AlertDialog
+      <Dialog
         open={editLabelDialog.isOpen}
         onOpenChange={(open) => {
           if (!open) {
@@ -719,14 +717,14 @@ export default function WeeklyPlannerPage() {
           }
         }}
       >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Editar título de la rutina</AlertDialogTitle>
-            <AlertDialogDescription>
+        <DialogContent className="max-w-[425px] w-[calc(100%-2rem)]">
+          <DialogHeader>
+            <DialogTitle>Editar título de la rutina</DialogTitle>
+            <DialogDescription>
               Dale un nombre personalizado a tu rutina del {editLabelDialog.day}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="grid gap-2">
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-2 py-4">
             <Label htmlFor="label">Título (opcional)</Label>
             <Input
               id="label"
@@ -746,24 +744,35 @@ export default function WeeklyPlannerPage() {
               }}
             />
           </div>
-          <AlertDialogFooter className="flex-col sm:flex-col gap-2">
-            <AlertDialogAction onClick={handleSaveLabel} className="w-full m-0">
+          <DialogFooter className="flex-col sm:flex-col gap-2">
+            <Button onClick={handleSaveLabel} className="w-full m-0">
               Guardar
-            </AlertDialogAction>
+            </Button>
             {editLabelDialog.currentLabel && (
-              <AlertDialogAction
+              <Button
+                variant="destructive"
                 onClick={handleClearLabel}
-                className="w-full m-0 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="w-full m-0"
               >
                 Eliminar título
-              </AlertDialogAction>
+              </Button>
             )}
-            <AlertDialogCancel className="w-full m-0">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setEditLabelDialog({
+                  isOpen: false,
+                  day: null,
+                  currentLabel: "",
+                })
+              }
+              className="w-full m-0"
+            >
               Cancelar
-            </AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Drag ghost element that follows finger */}
       <AnimatePresence>
