@@ -1,0 +1,42 @@
+{
+  "name": "W8ly - Workout Planner",
+  "short_name": "W8ly",
+  "description": "Planifica y registra tus entrenamientos semanales offline",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness", "lifestyle"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Ver mi rutina",
+      "short_name": "Rutina",
+      "description": "Abre la vista de planificación semanal",
+      "url": "/",
+      "icons": []
+    },
+    {
+      "name": "Ejercicios",
+      "short_name": "Ejercicios",
+      "description": "Explora la biblioteca de ejercicios",
+      "url": "/exercises",
+      "icons": []
+    }
+  ]
+}
