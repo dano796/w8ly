@@ -5,6 +5,7 @@ import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { defaultExercises } from "@/utils/exerciseData";
+import { convertWeight } from "@/utils/unitConversion";
 import {
   DayName,
   WorkoutExercise,
@@ -89,17 +90,24 @@ export default function ActiveWorkoutPage() {
     setOriginalPlan(JSON.parse(JSON.stringify(dayPlan.exercises)));
 
     const init: WorkoutExercise[] = dayPlan.exercises.map((pe) => {
-      const prev = getLastPerformance(pe.exerciseId);
+      const prevExercise = getLastPerformance(pe.exerciseId);
+      const prevSets = prevExercise?.sets;
+      const prevUnit = prevExercise?.unit || settings.defaultUnit;
+
       const sets: WorkoutSet[] = Array.from({ length: pe.sets }, (_, i) => ({
         setNumber: i + 1,
-        previous: prev?.[i]
-          ? { weight: prev[i].weight, reps: prev[i].reps }
+        previous: prevSets?.[i]
+          ? { weight: prevSets[i].weight, reps: prevSets[i].reps }
           : undefined,
-        weight: prev?.[i]?.weight ?? 0,
-        reps: prev?.[i]?.reps ?? pe.reps,
+        weight: prevSets?.[i]?.weight ?? 0,
+        reps: prevSets?.[i]?.reps ?? pe.reps,
         completed: false,
       }));
-      return { exerciseId: pe.exerciseId, sets };
+      return {
+        exerciseId: pe.exerciseId,
+        sets,
+        unit: prevUnit, // Use unit from last performance, or default if new
+      };
     });
     setExercises(init);
 
@@ -117,20 +125,27 @@ export default function ActiveWorkoutPage() {
     if (state?.addExercises && state.addExercises.length > 0) {
       const newExercises: WorkoutExercise[] = state.addExercises.map(
         (exerciseId) => {
-          const prev = getLastPerformance(exerciseId);
+          const prevExercise = getLastPerformance(exerciseId);
+          const prevSets = prevExercise?.sets;
+          const prevUnit = prevExercise?.unit || settings.defaultUnit;
+
           const sets: WorkoutSet[] = Array.from(
             { length: settings.defaultSets },
             (_, i) => ({
               setNumber: i + 1,
-              previous: prev?.[i]
-                ? { weight: prev[i].weight, reps: prev[i].reps }
+              previous: prevSets?.[i]
+                ? { weight: prevSets[i].weight, reps: prevSets[i].reps }
                 : undefined,
-              weight: prev?.[i]?.weight ?? 0,
-              reps: prev?.[i]?.reps ?? 10,
+              weight: prevSets?.[i]?.weight ?? 0,
+              reps: prevSets?.[i]?.reps ?? 10,
               completed: false,
             }),
           );
-          return { exerciseId, sets };
+          return {
+            exerciseId,
+            sets,
+            unit: prevUnit, // Use unit from last performance, or default if new
+          };
         },
       );
 
@@ -152,6 +167,7 @@ export default function ActiveWorkoutPage() {
     getLastPerformance,
     settings.defaultSets,
     settings.defaultRestTime,
+    settings.defaultUnit,
   ]);
 
   // Timer
@@ -240,6 +256,39 @@ export default function ActiveWorkoutPage() {
       newTimes[exIdx] = seconds;
       return newTimes;
     });
+  };
+
+  const toggleExerciseUnit = (exIdx: number) => {
+    setExercises((prev) =>
+      prev.map((ex, ei) => {
+        if (ei !== exIdx) return ex;
+
+        const currentUnit = ex.unit || settings.defaultUnit;
+        const newUnit: "kg" | "lbs" = currentUnit === "kg" ? "lbs" : "kg";
+
+        // Convert all weights in this exercise
+        const convertedSets = ex.sets.map((set) => ({
+          ...set,
+          weight: convertWeight(set.weight, currentUnit, newUnit),
+          previous: set.previous
+            ? {
+              ...set.previous,
+              weight: convertWeight(
+                set.previous.weight,
+                currentUnit,
+                newUnit,
+              ),
+            }
+            : undefined,
+        }));
+
+        return {
+          ...ex,
+          sets: convertedSets,
+          unit: newUnit,
+        };
+      }),
+    );
   };
 
   const toggleRestTimer = () => {
@@ -544,12 +593,25 @@ export default function ActiveWorkoutPage() {
                         <p className="text-base sm:text-sm font-semibold">
                           {data.name}
                         </p>
-                        <Badge
-                          variant="secondary"
-                          className="text-xs sm:text-[10px]"
-                        >
-                          {data.muscleGroup}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="secondary"
+                            className="text-xs sm:text-[10px]"
+                          >
+                            {data.muscleGroup}
+                          </Badge>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-5 px-2 text-xs font-medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleExerciseUnit(exIdx);
+                            }}
+                          >
+                            {ex.unit || settings.defaultUnit}
+                          </Button>
+                        </div>
                       </div>
                       <Button
                         variant="ghost"
@@ -613,7 +675,7 @@ export default function ActiveWorkoutPage() {
                         <span className="text-center">Serie</span>
                         <span className="text-center">Previo</span>
                         <span className="text-center">
-                          Peso ({settings.defaultUnit})
+                          Peso ({ex.unit || settings.defaultUnit})
                         </span>
                         <span className="text-center">Reps</span>
                         <span className="text-center">✓</span>

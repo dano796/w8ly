@@ -49,6 +49,7 @@ export interface WorkoutSet {
 export interface WorkoutExercise {
   exerciseId: string;
   sets: WorkoutSet[];
+  unit?: "lbs" | "kg";
 }
 
 export interface ActiveWorkout {

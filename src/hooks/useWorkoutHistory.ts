@@ -29,7 +29,7 @@ export function useWorkoutHistory() {
   const getLastPerformance = (exerciseId: string) => {
     for (const w of history) {
       const ex = w.exercises.find((e) => e.exerciseId === exerciseId);
-      if (ex) return ex.sets;
+      if (ex) return ex;
     }
     return undefined;
   };

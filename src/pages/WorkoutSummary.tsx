@@ -3,6 +3,7 @@ import { defaultExercises } from "@/utils/exerciseData";
 import { CompletedWorkout } from "@/utils/types";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
+import { convertWeight } from "@/utils/unitConversion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +58,18 @@ export default function WorkoutSummaryPage() {
 
   const totalVolume = workout.exercises.reduce((vol, ex) => {
     const completedSets = ex.sets.filter((s) => s.completed);
-    return vol + completedSets.reduce((v, s) => v + s.weight * s.reps, 0);
+    const exerciseUnit = ex.unit || settings.defaultUnit;
+    return (
+      vol +
+      completedSets.reduce((v, s) => {
+        const weightInDefaultUnit = convertWeight(
+          s.weight,
+          exerciseUnit,
+          settings.defaultUnit,
+        );
+        return v + weightInDefaultUnit * s.reps;
+      }, 0)
+    );
   }, 0);
 
   const totalExercises = workout.exercises.length;
@@ -151,10 +163,15 @@ export default function WorkoutSummaryPage() {
           const completedSets = ex.sets.filter((s) => s.completed);
           const totalSetsForExercise = ex.sets.length;
           const allCompleted = completedSets.length === totalSetsForExercise;
-          const volume = completedSets.reduce(
-            (v, s) => v + s.weight * s.reps,
-            0,
-          );
+          const exerciseUnit = ex.unit || settings.defaultUnit;
+          const volume = completedSets.reduce((v, s) => {
+            const weightInDefaultUnit = convertWeight(
+              s.weight,
+              exerciseUnit,
+              settings.defaultUnit,
+            );
+            return v + weightInDefaultUnit * s.reps;
+          }, 0);
           return (
             <motion.div key={i} variants={listItemVariants}>
               <Card className="p-3">
@@ -206,7 +223,7 @@ export default function WorkoutSummaryPage() {
                       {completedSets.map((set, idx) => (
                         <Badge key={idx} variant="outline" className="text-xs">
                           {set.weight}
-                          {settings.defaultUnit} × {set.reps}
+                          {exerciseUnit} × {set.reps}
                         </Badge>
                       ))}
                     </div>
