@@ -38,6 +38,9 @@ export default function WorkoutSummaryPage() {
   const [detailExercise, setDetailExercise] = useState<Exercise | null>(null);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
 
+  // Detectar si se accedió desde el perfil
+  const fromProfile = location.state && location.state.fromProfile;
+
   // Combine default and custom exercises
   const allExercises = [...defaultExercises, ...customExercises];
   const exerciseMap = Object.fromEntries(allExercises.map((e) => [e.id, e]));
@@ -60,7 +63,10 @@ export default function WorkoutSummaryPage() {
     return (
       <div className="px-4 pt-6 max-w-lg mx-auto text-center">
         <p>No se encontró el resumen.</p>
-        <Button className="mt-4" onClick={() => navigate("/")}>
+        <Button
+          className="mt-4"
+          onClick={() => navigate(fromProfile ? "/profile" : "/")}
+        >
           Volver
         </Button>
       </div>
@@ -108,7 +114,11 @@ export default function WorkoutSummaryPage() {
       exit="exit"
     >
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate(fromProfile ? "/profile" : "/")}
+        >
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h1 className="text-2xl font-bold">Resumen</h1>
@@ -302,8 +312,11 @@ export default function WorkoutSummaryPage() {
           })}
       </motion.div>
 
-      <Button className="w-full mt-6" onClick={() => navigate("/")}>
-        Volver al planificador
+      <Button
+        className="w-full mt-6"
+        onClick={() => navigate(fromProfile ? "/profile" : "/")}
+      >
+        {fromProfile ? "Volver al perfil" : "Volver al planificador"}
       </Button>
 
       {/* Exercise Detail Sheet */}

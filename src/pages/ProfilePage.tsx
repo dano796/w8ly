@@ -413,7 +413,9 @@ export default function ProfilePage() {
                 key={workout.id}
                 variants={listItemVariants}
                 onClick={() =>
-                  navigate(`/summary/${workout.id}`, { state: workout })
+                  navigate(`/summary/${workout.id}`, {
+                    state: { ...workout, fromProfile: true },
+                  })
                 }
               >
                 <Card className="p-4 cursor-pointer hover:bg-accent/50 transition-colors">
