@@ -102,11 +102,18 @@ export default function ActiveWorkoutPage() {
     null,
   );
   const [revealedSet, setRevealedSet] = useState<string | null>(null);
+
   const [unitChangeDialogExIdx, setUnitChangeDialogExIdx] = useState<
     number | null
   >(null);
   const [detailExercise, setDetailExercise] = useState<Exercise | null>(null);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
+
+  // Tracks the highest weight completed per exercise THIS session.
+  // Key: exerciseId, Value: max weight completed so far this workout.
+  const [sessionMaxWeight, setSessionMaxWeight] = useState<
+    Record<string, number>
+  >({});
 
   // Rest timer state
   const [restTimer, setRestTimer] = useState<{
@@ -319,19 +326,30 @@ export default function ActiveWorkoutPage() {
         const exerciseName =
           exerciseMap[exercise.exerciseId]?.name || "Ejercicio";
 
-        // Get personal record for this exercise
-        const currentRecord = getPersonalRecord(
+        const historicRecord = getPersonalRecord(
           exercise.exerciseId,
           exerciseUnit,
         );
+        const sessionMax = sessionMaxWeight[exercise.exerciseId] ?? 0;
 
-        // Check if this set is a new record
-        if (set.weight > currentRecord) {
+        const isNewHistoricRecord = set.weight > historicRecord;
+        const isNewSessionMax = set.weight > sessionMax;
+
+        if (isNewHistoricRecord && isNewSessionMax) {
+          // Beat all-time record AND session max — show PR toast
           toast.success("¡Nuevo récord personal!", {
             description: `${exerciseName}: ${set.weight} ${exerciseUnit} × ${set.reps} reps`,
             duration: 5000,
             icon: <Trophy className="w-5 h-5" />,
           });
+        }
+
+        // Always update session max if this is the heaviest set so far this session
+        if (isNewSessionMax) {
+          setSessionMaxWeight((prev) => ({
+            ...prev,
+            [exercise.exerciseId]: set.weight,
+          }));
         }
       }
 

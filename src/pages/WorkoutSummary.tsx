@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { defaultExercises } from "@/utils/exerciseData";
 import { CompletedWorkout, Exercise } from "@/utils/types";
 import { useSettings } from "@/hooks/useSettings";
@@ -42,6 +42,20 @@ export default function WorkoutSummaryPage() {
   const allExercises = [...defaultExercises, ...customExercises];
   const exerciseMap = Object.fromEntries(allExercises.map((e) => [e.id, e]));
 
+  // Precompute the max completed set weight per exercise for this session
+  const sessionMaxByExercise = useMemo(() => {
+    if (!workout) return {};
+    const map: Record<string, number> = {};
+    workout.exercises.forEach((ex) => {
+      const maxWeight = Math.max(
+        0,
+        ...ex.sets.filter((s) => s.completed).map((s) => s.weight),
+      );
+      map[ex.exerciseId] = maxWeight;
+    });
+    return map;
+  }, [workout]);
+
   if (!workout) {
     return (
       <div className="px-4 pt-6 max-w-lg mx-auto text-center">
@@ -52,17 +66,6 @@ export default function WorkoutSummaryPage() {
       </div>
     );
   }
-
-  // Helper function to check if a set's weight is a new personal record
-  const isPersonalRecord = (
-    exerciseId: string,
-    weight: number,
-    unit: "kg" | "lbs",
-  ) => {
-    // Exclude current workout from record calculation
-    const previousRecord = getPersonalRecord(exerciseId, unit, workout?.id);
-    return weight > previousRecord;
-  };
 
   const formatDuration = (s: number) => {
     const m = Math.floor(s / 60);
@@ -167,7 +170,7 @@ export default function WorkoutSummaryPage() {
       </div>
 
       {/* Completed exercises */}
-      <h3 className="text-lg font-bold text-primary mb-3">
+      <h3 className="text-lg font-semibold text-primary mb-3">
         Ejercicios completados
       </h3>
       <motion.div
@@ -266,11 +269,16 @@ export default function WorkoutSummaryPage() {
                       </p>
                       <div className="flex flex-wrap gap-1">
                         {completedSets.map((set, idx) => {
-                          const isRecord = isPersonalRecord(
+                          const sessionMax =
+                            sessionMaxByExercise[ex.exerciseId] ?? 0;
+                          const historicRecord = getPersonalRecord(
                             ex.exerciseId,
-                            set.weight,
                             exerciseUnit,
+                            workout?.id,
                           );
+                          const isRecord =
+                            set.weight === sessionMax &&
+                            set.weight > historicRecord;
                           return (
                             <Badge
                               key={idx}
