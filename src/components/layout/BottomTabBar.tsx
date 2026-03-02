@@ -41,12 +41,16 @@ export default function BottomTabBar() {
               <motion.button
                 key="logo"
                 onClick={() => navigate("/")}
-                className="w-14 h-14 bg-primary text-primary-foreground font-bold -mt-4 shadow-lg text-sm text-center flex items-center justify-center rounded-full"
+                className="w-14 h-14 flex items-center justify-center"
                 variants={logoVariants}
                 whileTap="tap"
                 whileHover="hover"
               >
-                w8ly
+                <img
+                  src="/w8ly_logo.png"
+                  alt="W8ly Logo"
+                  className="w-full h-full object-contain"
+                />
               </motion.button>
             );
           }
