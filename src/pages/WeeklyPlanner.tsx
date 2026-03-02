@@ -140,12 +140,17 @@ export default function WeeklyPlannerPage() {
       const deltaX = Math.abs(touch.clientX - touchStartPos.x);
       const deltaY = Math.abs(touch.clientY - touchStartPos.y);
 
-      // If moved more than 10px, cancel long press
+      // If moved more than 10px, cancel long press (but allow horizontal scroll)
       if (deltaX > 10 || deltaY > 10) {
         if (longPressTimer) {
           clearTimeout(longPressTimer);
           setLongPressTimer(null);
         }
+      }
+
+      // If drag is active, prevent default to enable drag & drop
+      if (draggedExercise?.isFromCarousel) {
+        e.preventDefault();
       }
     }
   };
@@ -383,7 +388,7 @@ export default function WeeklyPlannerPage() {
                         onTouchStart={(e) => handleTouchStart(e, ex.exerciseId)}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
-                        className={`p-3 w-36 hover:bg-accent transition-all touch-none select-none ${draggedExercise?.exerciseId === ex.exerciseId
+                        className={`p-3 w-36 hover:bg-accent transition-all select-none ${draggedExercise?.exerciseId === ex.exerciseId
                             ? "opacity-50 scale-95"
                             : "cursor-grab active:cursor-grabbing"
                           }`}

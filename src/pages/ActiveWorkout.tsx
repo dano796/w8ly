@@ -48,7 +48,10 @@ export default function ActiveWorkoutPage() {
 
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
   const [originalPlan, setOriginalPlan] = useState<PlannedExercise[]>([]);
-  const [startTime] = useState(Date.now());
+  const [startTime] = useState(() => {
+    const state = location.state as { startTime?: number } | null;
+    return state?.startTime ?? Date.now();
+  });
   const [elapsed, setElapsed] = useState(0);
   const [showChangesDialog, setShowChangesDialog] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
@@ -535,7 +538,9 @@ export default function ActiveWorkoutPage() {
         className="w-full mt-4"
         onClick={() => {
           setRevealedSet(null);
-          navigate(`/exercises?fromWorkout=${day}`);
+          navigate(`/exercises?fromWorkout=${day}`, {
+            state: { startTime },
+          });
         }}
       >
         <Plus className="w-4 h-4 mr-1" /> Agregar ejercicio
