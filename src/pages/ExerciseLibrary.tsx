@@ -82,6 +82,11 @@ export default function ExerciseLibraryPage() {
   } | null;
   const currentExercises = new Set(state?.currentExercises || []);
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
+
   // Combine default and custom exercises
   const allExercises = [...defaultExercises, ...customExercises];
 
@@ -92,8 +97,8 @@ export default function ExerciseLibraryPage() {
 
   const searchFiltered = searchTerm.trim()
     ? filtered.filter((e) =>
-      e.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
+        e.name.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
     : filtered;
 
   const toggleSelection = (exerciseId: string) => {
@@ -339,8 +344,8 @@ export default function ExerciseLibraryPage() {
                 className={cn(
                   "flex items-center gap-3 p-4 transition-colors",
                   (fromWorkout || preselectedDay) &&
-                  !isAlreadyAdded &&
-                  "cursor-pointer hover:bg-accent/50",
+                    !isAlreadyAdded &&
+                    "cursor-pointer hover:bg-accent/50",
                   isSelected && "bg-primary/10 border-primary",
                   isAlreadyAdded && "opacity-60 cursor-not-allowed",
                 )}
@@ -424,7 +429,15 @@ export default function ExerciseLibraryPage() {
       )}
 
       {/* Day selection sheet */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+      <Sheet
+        open={sheetOpen}
+        onOpenChange={(open) => {
+          setSheetOpen(open);
+          if (!open) {
+            setSelectedExerciseId(null);
+          }
+        }}
+      >
         <SheetContent side="bottom" className="rounded-t-2xl">
           <SheetHeader>
             <SheetTitle>Agregar a un día</SheetTitle>
@@ -446,9 +459,12 @@ export default function ExerciseLibraryPage() {
               </Button>
             ))}
             <Button
-              variant="ghost"
-              className="col-span-2"
-              onClick={() => setSheetOpen(false)}
+              variant="outline"
+              className="col-span-2 mt-2"
+              onClick={() => {
+                setSheetOpen(false);
+                setSelectedExerciseId(null);
+              }}
             >
               Cancelar
             </Button>

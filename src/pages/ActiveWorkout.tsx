@@ -11,6 +11,7 @@ import {
   WorkoutExercise,
   WorkoutSet,
   PlannedExercise,
+  CompletedWorkout,
 } from "@/utils/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -35,6 +36,7 @@ import {
   Play,
   Minus,
   X,
+  Trophy,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -67,7 +69,8 @@ export default function ActiveWorkoutPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { plan, updateDayExercises } = useWeeklyPlan();
-  const { addWorkout, getLastPerformance } = useWorkoutHistory();
+  const { addWorkout, getLastPerformance, getPersonalRecord } =
+    useWorkoutHistory();
   const { settings } = useSettings();
   const { customExercises } = useCustomExercises();
 
@@ -87,7 +90,9 @@ export default function ActiveWorkoutPage() {
   const [showChangesDialog, setShowChangesDialog] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [showFinishDialog, setShowFinishDialog] = useState(false);
-  const [pendingWorkout, setPendingWorkout] = useState<any>(null);
+  const [pendingWorkout, setPendingWorkout] = useState<CompletedWorkout | null>(
+    null,
+  );
   const [revealedSet, setRevealedSet] = useState<string | null>(null);
   const [unitChangeDialogExIdx, setUnitChangeDialogExIdx] = useState<
     number | null
@@ -106,6 +111,23 @@ export default function ActiveWorkoutPage() {
     if (!dayPlan) return;
     // Store original plan for comparison
     setOriginalPlan(JSON.parse(JSON.stringify(dayPlan.exercises)));
+
+    // Check if we have saved state in sessionStorage
+    const savedStateKey = `activeWorkout_${day}`;
+    const savedState = sessionStorage.getItem(savedStateKey);
+
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        setExercises(parsed.exercises);
+        setExerciseRestTimes(parsed.restTimes);
+        // Clear the saved state after restoring
+        sessionStorage.removeItem(savedStateKey);
+        return;
+      } catch (e) {
+        console.error("Error restoring workout state:", e);
+      }
+    }
 
     const init: WorkoutExercise[] = dayPlan.exercises.map((pe) => {
       const prevExercise = getLastPerformance(pe.exerciseId);
@@ -257,20 +279,46 @@ export default function ActiveWorkoutPage() {
     exIdx: number,
     setIdx: number,
     field: keyof WorkoutSet,
-    value: any,
+    value: string | number | boolean,
   ) => {
-    setExercises((prev) =>
-      prev.map((ex, ei) =>
+    setExercises((prev) => {
+      const newExercises = prev.map((ex, ei) =>
         ei === exIdx
           ? {
-            ...ex,
-            sets: ex.sets.map((s, si) =>
-              si === setIdx ? { ...s, [field]: value } : s,
-            ),
-          }
+              ...ex,
+              sets: ex.sets.map((s, si) =>
+                si === setIdx ? { ...s, [field]: value } : s,
+              ),
+            }
           : ex,
-      ),
-    );
+      );
+
+      // Check for personal record when completing a set
+      if (field === "completed" && value === true) {
+        const exercise = newExercises[exIdx];
+        const set = exercise.sets[setIdx];
+        const exerciseUnit = exercise.unit || settings.defaultUnit;
+        const exerciseName =
+          exerciseMap[exercise.exerciseId]?.name || "Ejercicio";
+
+        // Get personal record for this exercise
+        const currentRecord = getPersonalRecord(
+          exercise.exerciseId,
+          exerciseUnit,
+        );
+
+        // Check if this set is a new record
+        if (set.weight > currentRecord) {
+          toast.success("¡Nuevo récord personal!", {
+            description: `${exerciseName}: ${set.weight} ${exerciseUnit} × ${set.reps} reps`,
+            duration: 5000,
+            icon: <Trophy className="w-5 h-5" />,
+          });
+        }
+      }
+
+      return newExercises;
+    });
 
     // If completing a set, start rest timer
     if (field === "completed" && value === true) {
@@ -322,13 +370,13 @@ export default function ActiveWorkoutPage() {
           weight: convertWeight(set.weight, currentUnit, newUnit),
           previous: set.previous
             ? {
-              ...set.previous,
-              weight: convertWeight(
-                set.previous.weight,
-                currentUnit,
-                newUnit,
-              ),
-            }
+                ...set.previous,
+                weight: convertWeight(
+                  set.previous.weight,
+                  currentUnit,
+                  newUnit,
+                ),
+              }
             : undefined,
         }));
 
@@ -365,17 +413,17 @@ export default function ActiveWorkoutPage() {
       prev.map((ex, ei) =>
         ei === exIdx
           ? {
-            ...ex,
-            sets: [
-              ...ex.sets,
-              {
-                setNumber: ex.sets.length + 1,
-                weight: 0,
-                reps: 10,
-                completed: false,
-              },
-            ],
-          }
+              ...ex,
+              sets: [
+                ...ex.sets,
+                {
+                  setNumber: ex.sets.length + 1,
+                  weight: 0,
+                  reps: 10,
+                  completed: false,
+                },
+              ],
+            }
           : ex,
       ),
     );
@@ -386,11 +434,11 @@ export default function ActiveWorkoutPage() {
       prev.map((ex, ei) =>
         ei === exIdx
           ? {
-            ...ex,
-            sets: ex.sets
-              .filter((_, si) => si !== setIdx)
-              .map((s, i) => ({ ...s, setNumber: i + 1 })),
-          }
+              ...ex,
+              sets: ex.sets
+                .filter((_, si) => si !== setIdx)
+                .map((s, i) => ({ ...s, setNumber: i + 1 })),
+            }
           : ex,
       ),
     );
@@ -864,6 +912,15 @@ export default function ActiveWorkoutPage() {
           className="w-full mt-4 text-sm"
           onClick={() => {
             setRevealedSet(null);
+            // Save current state to sessionStorage before navigating
+            const savedStateKey = `activeWorkout_${day}`;
+            sessionStorage.setItem(
+              savedStateKey,
+              JSON.stringify({
+                exercises,
+                restTimes: exerciseRestTimes,
+              }),
+            );
             navigate(`/exercises?fromWorkout=${day}`, {
               state: {
                 startTime,
@@ -993,7 +1050,7 @@ export default function ActiveWorkoutPage() {
               <Button
                 variant={
                   exercises[unitChangeDialogExIdx]?.unit === "lbs" ||
-                    !exercises[unitChangeDialogExIdx]?.unit
+                  !exercises[unitChangeDialogExIdx]?.unit
                     ? "default"
                     : "outline"
                 }

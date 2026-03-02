@@ -29,10 +29,49 @@ export function useWorkoutHistory() {
   const getLastPerformance = (exerciseId: string) => {
     for (const w of history) {
       const ex = w.exercises.find((e) => e.exerciseId === exerciseId);
-      if (ex) return ex;
+      if (ex) return ex; // Return full exercise including unit
     }
     return undefined;
   };
 
-  return { history, addWorkout, getLastPerformance };
+  const getPersonalRecord = (
+    exerciseId: string,
+    unit: "kg" | "lbs" = "kg",
+    excludeWorkoutId?: string,
+  ) => {
+    let maxWeight = 0;
+
+    for (const w of history) {
+      // Skip the workout if it should be excluded
+      if (excludeWorkoutId && w.id === excludeWorkoutId) {
+        continue;
+      }
+
+      const ex = w.exercises.find((e) => e.exerciseId === exerciseId);
+      if (ex) {
+        const completedSets = ex.sets.filter((s) => s.completed);
+        const exerciseUnit = ex.unit || unit;
+
+        for (const set of completedSets) {
+          // Convert to the target unit for comparison
+          let weight = set.weight;
+          if (exerciseUnit !== unit) {
+            // Simple conversion: 1 kg = 2.20462 lbs
+            weight =
+              exerciseUnit === "kg"
+                ? weight * 2.20462 // kg to lbs
+                : weight / 2.20462; // lbs to kg
+          }
+
+          if (weight > maxWeight) {
+            maxWeight = weight;
+          }
+        }
+      }
+    }
+
+    return maxWeight;
+  };
+
+  return { history, addWorkout, getLastPerformance, getPersonalRecord };
 }

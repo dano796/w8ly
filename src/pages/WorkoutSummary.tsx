@@ -3,6 +3,7 @@ import { defaultExercises } from "@/utils/exerciseData";
 import { CompletedWorkout } from "@/utils/types";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
+import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { convertWeight } from "@/utils/unitConversion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import {
   Layers,
   Dumbbell,
   TrendingUp,
+  Trophy,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import {
@@ -28,6 +30,7 @@ export default function WorkoutSummaryPage() {
   const location = useLocation();
   const { settings } = useSettings();
   const { customExercises } = useCustomExercises();
+  const { getPersonalRecord } = useWorkoutHistory();
   const workout = location.state as CompletedWorkout | undefined;
 
   // Combine default and custom exercises
@@ -44,6 +47,17 @@ export default function WorkoutSummaryPage() {
       </div>
     );
   }
+
+  // Helper function to check if a set's weight is a new personal record
+  const isPersonalRecord = (
+    exerciseId: string,
+    weight: number,
+    unit: "kg" | "lbs",
+  ) => {
+    // Exclude current workout from record calculation
+    const previousRecord = getPersonalRecord(exerciseId, unit, workout?.id);
+    return weight > previousRecord;
+  };
 
   const formatDuration = (s: number) => {
     const m = Math.floor(s / 60);
@@ -220,12 +234,26 @@ export default function WorkoutSummaryPage() {
                       Detalle
                     </p>
                     <div className="flex flex-wrap gap-1">
-                      {completedSets.map((set, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
-                          {set.weight}
-                          {exerciseUnit} × {set.reps}
-                        </Badge>
-                      ))}
+                      {completedSets.map((set, idx) => {
+                        const isRecord = isPersonalRecord(
+                          ex.exerciseId,
+                          set.weight,
+                          exerciseUnit,
+                        );
+                        return (
+                          <Badge
+                            key={idx}
+                            variant="outline"
+                            className={`text-xs ${isRecord ? "text-primary border-primary font-semibold" : ""}`}
+                          >
+                            {isRecord && (
+                              <Trophy className="w-3 h-3 mr-1 inline" />
+                            )}
+                            {set.weight}
+                            {exerciseUnit} × {set.reps} reps
+                          </Badge>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
