@@ -38,6 +38,7 @@ import {
   TrendingUp,
   Target,
 } from "lucide-react";
+import { convertWeight } from "@/utils/unitConversion";
 import { defaultExercises } from "@/utils/exerciseData";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
 
@@ -440,7 +441,6 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-1">
                       <TrendingUp className="w-3 h-3" />
                       {(() => {
-                        // Reuse volume calculation from WorkoutSummary
                         const settingsUnit = settings?.defaultUnit || "kg";
                         const volume = workout.exercises.reduce((vol, ex) => {
                           const completedSets = ex.sets.filter(
@@ -450,14 +450,13 @@ export default function ProfilePage() {
                           return (
                             vol +
                             completedSets.reduce((v, s) => {
-                              // If convertWeight is available, use it, else assume same unit
                               if (typeof s.weight === "number") {
-                                if (exerciseUnit === settingsUnit) {
-                                  return v + s.weight * s.reps;
-                                } else {
-                                  // fallback: no conversion
-                                  return v + s.weight * s.reps;
-                                }
+                                const weightInDefaultUnit = convertWeight(
+                                  s.weight,
+                                  exerciseUnit,
+                                  settingsUnit,
+                                );
+                                return v + weightInDefaultUnit * s.reps;
                               }
                               return v;
                             }, 0)
