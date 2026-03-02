@@ -85,7 +85,7 @@ export default function WorkoutSummaryPage() {
       >
         <CheckCircle className="w-16 h-16 text-accent mb-3" />
         <h2 className="text-xl font-bold">¡Excelente trabajo!</h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-base text-muted-foreground mt-1">
           {workout.day}
           {workout.label && (
             <span className="text-primary"> - {workout.label}</span>
@@ -98,7 +98,7 @@ export default function WorkoutSummaryPage() {
         <Card className="p-4 flex items-center gap-3">
           <Clock className="w-8 h-8 text-primary" />
           <div>
-            <p className="text-xs text-muted-foreground">Duración</p>
+            <p className="text-sm text-muted-foreground">Duración</p>
             <p className="text-base font-semibold">
               {formatDuration(workout.durationSeconds)}
             </p>
@@ -107,14 +107,14 @@ export default function WorkoutSummaryPage() {
         <Card className="p-4 flex items-center gap-3">
           <Layers className="w-8 h-8 text-primary" />
           <div>
-            <p className="text-xs text-muted-foreground">Series</p>
+            <p className="text-sm text-muted-foreground">Series</p>
             <p className="text-base font-semibold">{totalSets}</p>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
           <Dumbbell className="w-8 h-8 text-primary" />
           <div>
-            <p className="text-xs text-muted-foreground">Ejercicios</p>
+            <p className="text-sm text-muted-foreground">Ejercicios</p>
             <p className="text-base font-semibold">
               {exercisesWithCompletedSets}/{totalExercises}
             </p>
@@ -123,7 +123,7 @@ export default function WorkoutSummaryPage() {
         <Card className="p-4 flex items-center gap-3">
           <TrendingUp className="w-8 h-8 text-primary" />
           <div>
-            <p className="text-xs text-muted-foreground">Volumen total</p>
+            <p className="text-sm text-muted-foreground">Volumen total</p>
             <p className="text-base font-semibold">
               {totalVolume.toLocaleString()} {settings.defaultUnit}
             </p>
@@ -132,11 +132,11 @@ export default function WorkoutSummaryPage() {
       </div>
 
       {/* Completed exercises */}
-      <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+      <h3 className="text-xl font-bold text-primary mb-3">
         Ejercicios completados
       </h3>
       <motion.div
-        className="space-y-2"
+        className="space-y-3"
         variants={listContainerVariants}
         initial="hidden"
         animate="visible"
@@ -154,37 +154,39 @@ export default function WorkoutSummaryPage() {
           return (
             <motion.div key={i} variants={listItemVariants}>
               <Card className="p-3">
-                <div className="flex items-start gap-3 mb-2">
-                  <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs text-muted-foreground">IMG</span>
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
+                    <span className="text-sm text-muted-foreground">IMG</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{data.name}</p>
-                    <Badge variant="secondary" className="text-[10px] mt-1">
+                    <p className="text-base font-semibold truncate">
+                      {data.name}
+                    </p>
+                    <Badge variant="secondary" className="text-xs mt-1">
                       {data.muscleGroup}
                     </Badge>
                   </div>
                   {!allCompleted && (
                     <Badge
                       variant="outline"
-                      className="text-[10px] text-amber-600 border-amber-600"
+                      className="text-xs text-amber-600 border-amber-600"
                     >
                       Incompleto
                     </Badge>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t">
+                <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t">
                   <div>
-                    <p className="text-xs text-muted-foreground">Series</p>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm text-muted-foreground">Series</p>
+                    <p className="text-sm font-medium mt-1">
                       {completedSets.length} de {totalSetsForExercise}{" "}
                       completadas
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-muted-foreground">Volumen</p>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm text-muted-foreground">Volumen</p>
+                    <p className="text-sm font-medium mt-1">
                       {volume.toLocaleString()} {settings.defaultUnit}
                     </p>
                   </div>
@@ -192,17 +194,13 @@ export default function WorkoutSummaryPage() {
 
                 {/* Detalles de cada serie */}
                 {completedSets.length > 0 && (
-                  <div className="mt-2 pt-2 border-t">
-                    <p className="text-xs text-muted-foreground mb-1">
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-sm text-muted-foreground mb-1">
                       Detalle
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {completedSets.map((set, idx) => (
-                        <Badge
-                          key={idx}
-                          variant="outline"
-                          className="text-[10px]"
-                        >
+                        <Badge key={idx} variant="outline" className="text-xs">
                           {set.weight}
                           {settings.defaultUnit} × {set.reps}
                         </Badge>

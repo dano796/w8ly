@@ -531,8 +531,8 @@ export default function ActiveWorkoutPage() {
                 >
                   <Card className="p-4" onClick={() => setRevealedSet(null)}>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs text-muted-foreground">
+                      <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm text-muted-foreground">
                           IMG
                         </span>
                       </div>
@@ -605,7 +605,7 @@ export default function ActiveWorkoutPage() {
 
                     {/* Sets table */}
                     <div className="space-y-2">
-                      <div className="grid grid-cols-[2rem_3rem_1fr_1fr_2rem] gap-1 text-xs sm:text-[10px] font-semibold text-muted-foreground px-1">
+                      <div className="grid grid-cols-[2rem_3rem_1fr_1fr_2rem] gap-1 text-sm sm:text-xs font-semibold text-muted-foreground px-1">
                         <span className="text-center">Serie</span>
                         <span className="text-center">Previo</span>
                         <span className="text-center">
@@ -743,7 +743,7 @@ export default function ActiveWorkoutPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="mt-2 text-sm sm:text-xs w-full"
+                      className="mt-2 text-sm sm:text-xs w-full border border-border"
                       onClick={(e) => {
                         e.stopPropagation();
                         setRevealedSet(null);

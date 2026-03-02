@@ -454,7 +454,7 @@ export default function WeeklyPlannerPage() {
                       <Edit2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-base text-muted-foreground">
                     {dayPlan.exercises.length} ejercicio
                     {dayPlan.exercises.length !== 1 ? "s" : ""}
                   </p>
@@ -477,7 +477,7 @@ export default function WeeklyPlannerPage() {
                 style={{ WebkitOverflowScrolling: "touch" }}
               >
                 {dayPlan.exercises.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
+                  <p className="text-base text-muted-foreground text-center py-8">
                     Agrega ejercicios con el botón +
                   </p>
                 ) : (
@@ -499,11 +499,12 @@ export default function WeeklyPlannerPage() {
                         }
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
-                        className={`flex items-start gap-3 p-3 bg-card rounded-lg border hover:bg-accent/50 transition-colors touch-draggable ${
+                        className={`flex items-start gap-3 p-2.5 bg-card rounded-lg border hover:bg-accent/50 transition-colors touch-draggable ${
                           draggedExercise?.sourceExId === ex.id
                             ? "opacity-50"
                             : ""
                         }`}
+                        style={{ touchAction: "none" }}
                       >
                         <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
                           <span className="text-xs text-muted-foreground">
@@ -511,13 +512,13 @@ export default function WeeklyPlannerPage() {
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold mb-1">
+                          <p className="text-base font-semibold mb-1">
                             {data.name}
                           </p>
-                          <p className="text-xs text-muted-foreground mb-1.5">
+                          <p className="text-sm text-muted-foreground mb-1.5">
                             {ex.sets} series x {ex.reps} reps
                           </p>
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-sm">
                             {data.muscleGroup}
                           </Badge>
                         </div>
@@ -569,7 +570,7 @@ export default function WeeklyPlannerPage() {
         <div className="px-4 pt-4 pb-2">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-semibold">Ejercicios recientes</h2>
+              <h2 className="text-lg font-semibold">Ejercicios recientes</h2>
               <Button
                 variant="ghost"
                 size="icon"
@@ -622,16 +623,22 @@ export default function WeeklyPlannerPage() {
                             ? "opacity-50 scale-95 shadow-lg"
                             : "cursor-grab active:cursor-grabbing"
                         }`}
+                        style={{
+                          touchAction:
+                            draggedExercise?.exerciseId === ex.exerciseId
+                              ? "none"
+                              : "pan-x",
+                        }}
                       >
                         <div className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2">
                           <span className="text-xs text-muted-foreground">
                             IMG
                           </span>
                         </div>
-                        <p className="text-sm font-semibold truncate mb-1">
+                        <p className="text-base font-semibold truncate mb-1">
                           {ex.name}
                         </p>
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-sm">
                           {ex.muscleGroup}
                         </Badge>
                       </Card>
@@ -640,7 +647,7 @@ export default function WeeklyPlannerPage() {
                 </div>
               ) : (
                 <div className="text-center py-6 px-4">
-                  <p className="text-sm text-muted-foreground mb-3">
+                  <p className="text-base text-muted-foreground mb-3">
                     Aún no tienes ejercicios en tu rutina
                   </p>
                   <Button

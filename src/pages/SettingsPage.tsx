@@ -40,7 +40,7 @@ function ChipSelector<T extends string | number>({
           key={String(o)}
           onClick={() => onChange(o)}
           className={cn(
-            "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
+            "px-3 py-1.5 rounded-full text-sm font-medium border transition-colors",
             value === o
               ? "bg-primary text-primary-foreground border-primary"
               : "bg-card text-foreground border-border",
@@ -75,7 +75,7 @@ export default function SettingsPage() {
         {/* Dark mode */}
         <Card>
           <CardContent className="flex items-center justify-between p-4">
-            <span className="text-sm font-medium">Modo oscuro</span>
+            <span className="text-base font-medium">Modo oscuro</span>
             <Switch
               checked={settings.darkMode}
               onCheckedChange={(v) => updateSetting("darkMode", v)}
@@ -86,7 +86,7 @@ export default function SettingsPage() {
         {/* Default sets */}
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm font-medium mb-3">Series por defecto</p>
+            <p className="text-base font-medium mb-3">Series por defecto</p>
             <ChipSelector
               options={[2, 3, 4, 5]}
               value={settings.defaultSets}
@@ -98,7 +98,7 @@ export default function SettingsPage() {
         {/* Default unit */}
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm font-medium mb-3">Unidades por defecto</p>
+            <p className="text-base font-medium mb-3">Unidades por defecto</p>
             <ChipSelector
               options={["lbs" as const, "kg" as const]}
               value={settings.defaultUnit}
@@ -110,7 +110,7 @@ export default function SettingsPage() {
         {/* Default rest time */}
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm font-medium mb-3">
+            <p className="text-base font-medium mb-3">
               Tiempo de descanso por defecto
             </p>
             <ChipSelector
@@ -125,7 +125,9 @@ export default function SettingsPage() {
         {/* Confirm on finish */}
         <Card>
           <CardContent className="flex items-center justify-between p-4">
-            <span className="text-sm font-medium">Confirmar al finalizar</span>
+            <span className="text-base font-medium">
+              Confirmar al finalizar
+            </span>
             <Switch
               checked={settings.confirmOnFinish}
               onCheckedChange={(v) => updateSetting("confirmOnFinish", v)}

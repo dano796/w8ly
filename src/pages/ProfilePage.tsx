@@ -314,7 +314,7 @@ export default function ProfilePage() {
         <Card className="p-4 flex items-center gap-3">
           <Dumbbell className="w-8 h-8 text-primary" />
           <div>
-            <p className="text-xs text-muted-foreground">Entrenamientos</p>
+            <p className="text-sm text-muted-foreground">Entrenamientos</p>
             <p className="text-base font-semibold">{totalWorkouts}</p>
           </div>
         </Card>
@@ -322,7 +322,7 @@ export default function ProfilePage() {
         <Card className="p-4 flex items-center gap-3">
           <Target className="w-8 h-8 text-primary" />
           <div>
-            <p className="text-xs text-muted-foreground">Series totales</p>
+            <p className="text-sm text-muted-foreground">Series totales</p>
             <p className="text-base font-semibold">{totalSets}</p>
           </div>
         </Card>
@@ -330,7 +330,7 @@ export default function ProfilePage() {
         <Card className="p-4 flex items-center gap-3">
           <Clock className="w-8 h-8 text-primary" />
           <div>
-            <p className="text-xs text-muted-foreground">Tiempo total</p>
+            <p className="text-sm text-muted-foreground">Tiempo total</p>
             <p className="text-base font-semibold">{totalTimeFormatted()}</p>
           </div>
         </Card>
@@ -338,7 +338,7 @@ export default function ProfilePage() {
         <Card className="p-4 flex items-center gap-3">
           <TrendingUp className="w-8 h-8 text-primary" />
           <div>
-            <p className="text-xs text-muted-foreground">Promedio</p>
+            <p className="text-sm text-muted-foreground">Promedio</p>
             <p className="text-base font-semibold">{avgDuration} min</p>
           </div>
         </Card>
@@ -352,7 +352,7 @@ export default function ProfilePage() {
               className={`w-8 h-8 ${weeklyStreak > 0 ? "text-orange-500" : "text-muted-foreground"}`}
             />
             <div className="flex-1">
-              <p className="text-xs text-muted-foreground">Racha semanal</p>
+              <p className="text-sm text-muted-foreground">Racha semanal</p>
               <p className="text-base font-semibold">
                 {weeklyStreak > 0
                   ? `${weeklyStreak} ${weeklyStreak === 1 ? "semana" : "semanas"}`
@@ -361,7 +361,7 @@ export default function ProfilePage() {
             </div>
             {bestStreak > 0 && bestStreak > weeklyStreak && (
               <div className="text-right">
-                <p className="text-xs text-muted-foreground">Mejor</p>
+                <p className="text-sm text-muted-foreground">Mejor</p>
                 <p className="text-sm font-semibold">{bestStreak}</p>
               </div>
             )}
@@ -400,24 +400,24 @@ export default function ProfilePage() {
               >
                 <Card className="p-4 cursor-pointer hover:bg-accent/50 transition-colors">
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <h3 className="text-sm font-medium truncate max-w-[60%]">
+                    <h3 className="text-base font-medium truncate max-w-[60%]">
                       {workout.day}
                       {workout.label && (
                         <span className="text-primary"> - {workout.label}</span>
                       )}
                     </h3>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <Badge variant="secondary" className="text-[10px]">
+                      <Badge variant="secondary" className="text-xs">
                         {completedExercises}{" "}
                         {completedExercises === 1 ? "ejercicio" : "ejercicios"}
                       </Badge>
-                      <Badge variant="outline" className="text-[10px]">
+                      <Badge variant="outline" className="text-xs">
                         {totalSets} {totalSets === 1 ? "serie" : "series"}
                       </Badge>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       {formatDate(workout.date)}
@@ -436,17 +436,13 @@ export default function ProfilePage() {
                       .map((ex, i) => {
                         const exerciseData = exerciseMap[ex.exerciseId];
                         return exerciseData ? (
-                          <Badge
-                            key={i}
-                            variant="outline"
-                            className="text-[10px]"
-                          >
+                          <Badge key={i} variant="outline" className="text-xs">
                             {exerciseData.name}
                           </Badge>
                         ) : null;
                       })}
                     {completedExercises > 3 && (
-                      <Badge variant="outline" className="text-[10px]">
+                      <Badge variant="outline" className="text-xs">
                         +{completedExercises - 3}
                       </Badge>
                     )}

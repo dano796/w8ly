@@ -76,7 +76,10 @@ export default function ExerciseLibraryPage() {
     e.stopPropagation();
     if (preselectedDay) {
       doAdd(exerciseId, preselectedDay);
-      navigate("/");
+      // Small delay to ensure state is saved to localStorage before navigation
+      setTimeout(() => {
+        navigate("/");
+      }, 50);
     } else {
       setSelectedExerciseId(exerciseId);
       setSheetOpen(true);
@@ -120,7 +123,7 @@ export default function ExerciseLibraryPage() {
 
   const doAdd = (exerciseId: string, day: DayName) => {
     addExerciseToDay(day, {
-      id: `${exerciseId}-${Date.now()}`,
+      id: `${day}-${exerciseId}-${Date.now()}`,
       exerciseId,
       sets: settings.defaultSets,
       reps: 10,
@@ -163,7 +166,7 @@ export default function ExerciseLibraryPage() {
             key={f}
             onClick={() => setActiveFilter(f)}
             className={cn(
-              "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
+              "px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border",
               activeFilter === f
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-card text-foreground border-border",
@@ -180,7 +183,7 @@ export default function ExerciseLibraryPage() {
 
       {/* Exercise list */}
       <motion.div
-        className="space-y-2 pb-24"
+        className="space-y-3 pb-24"
         variants={listContainerVariants}
         initial="hidden"
         animate="visible"
@@ -191,7 +194,7 @@ export default function ExerciseLibraryPage() {
             <motion.div key={ex.id} variants={listItemVariants}>
               <Card
                 className={cn(
-                  "flex items-center gap-3 p-3 cursor-pointer transition-colors",
+                  "flex items-center gap-3 p-4 cursor-pointer transition-colors",
                   (fromWorkout || preselectedDay) && "hover:bg-accent/50",
                   isSelected && "bg-primary/10 border-primary",
                 )}
@@ -199,12 +202,12 @@ export default function ExerciseLibraryPage() {
                   fromWorkout || preselectedDay ? toggleSelection(ex.id) : null
                 }
               >
-                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs text-muted-foreground">IMG</span>
+                <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm text-muted-foreground">IMG</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate">{ex.name}</p>
-                  <Badge variant="secondary" className="text-[10px] mt-0.5">
+                  <p className="text-base font-semibold truncate">{ex.name}</p>
+                  <Badge variant="secondary" className="text-xs mt-0.5">
                     {ex.muscleGroup}
                   </Badge>
                 </div>
