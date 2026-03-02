@@ -38,6 +38,8 @@ export default function WeeklyPlannerPage() {
     isFromCarousel: boolean;
   } | null>(null);
   const [isCarouselCollapsed, setIsCarouselCollapsed] = useState(false);
+  const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
 
   // Recent exercises from plan
   const recentExercises = useMemo(() => {
@@ -104,6 +106,63 @@ export default function WeeklyPlannerPage() {
     setDragItem(null);
   };
 
+  // Touch event handlers for mobile drag and drop
+  const handleTouchStart = (e: React.TouchEvent, exerciseId: string) => {
+    const touch = e.touches[0];
+    setTouchStartPos({ x: touch.clientX, y: touch.clientY });
+
+    // Long press to initiate drag
+    const timer = setTimeout(() => {
+      setDraggedExercise({ exerciseId, isFromCarousel: true });
+      // Haptic feedback if available
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+    }, 500); // 500ms long press
+
+    setLongPressTimer(timer);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartPos) {
+      const touch = e.touches[0];
+      const deltaX = Math.abs(touch.clientX - touchStartPos.x);
+      const deltaY = Math.abs(touch.clientY - touchStartPos.y);
+
+      // If moved more than 10px, cancel long press
+      if (deltaX > 10 || deltaY > 10) {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          setLongPressTimer(null);
+        }
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+
+    if (draggedExercise?.isFromCarousel) {
+      // Find which day card is under the touch point
+      const touch = e.changedTouches[0];
+      const element = document.elementFromPoint(touch.clientX, touch.clientY);
+      const dayCard = element?.closest('[data-day]');
+
+      if (dayCard) {
+        const targetDay = dayCard.getAttribute('data-day') as DayName;
+        handleDayDrop(targetDay);
+      } else {
+        // Cancel drag if not dropped on a day
+        setDraggedExercise(null);
+      }
+    }
+
+    setTouchStartPos(null);
+  };
+
   return (
     <div className="pt-6 pb-4 flex flex-col h-[calc(100vh-4rem)]">
       {/* Header */}
@@ -114,12 +173,17 @@ export default function WeeklyPlannerPage() {
       {/* Day columns — horizontal Trello-style scroll */}
       <div
         className="flex gap-3 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory flex-1 px-4"
-        style={{ scrollPaddingLeft: "1rem" }}
+        style={{
+          scrollPaddingLeft: "1rem",
+          WebkitOverflowScrolling: "touch",
+          scrollBehavior: "smooth",
+        }}
       >
         {plan.map((dayPlan, index) => (
           <Card
             key={dayPlan.day}
-            className="flex-shrink-0 w-[80vw] max-w-[320px] p-4 flex flex-col snap-start h-fit max-h-[65vh]"
+            data-day={dayPlan.day}
+            className={`flex-shrink-0 w-[80vw] max-w-[320px] p-4 flex flex-col snap-start h-fit max-h-[65vh] ${draggedExercise?.isFromCarousel ? 'ring-2 ring-primary/30' : ''}`}
             onDragOver={(e) => {
               if (draggedExercise?.isFromCarousel) {
                 e.preventDefault();
@@ -151,16 +215,19 @@ export default function WeeklyPlannerPage() {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-8 w-8 flex-shrink-0"
+                  className="h-10 w-10 flex-shrink-0 min-w-[44px] min-h-[44px]"
                   onClick={() => navigate(`/workout/${dayPlan.day}`)}
                 >
-                  <Play className="w-4 h-4" />
+                  <Play className="w-5 h-5" />
                 </Button>
               )}
             </div>
 
             {/* Exercise list — vertical scroll inside the card */}
-            <div className="flex-1 overflow-y-auto space-y-3">
+            <div
+              className="flex-1 overflow-y-auto space-y-3"
+              style={{ WebkitOverflowScrolling: "touch" }}
+            >
               {dayPlan.exercises.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   Agrega ejercicios con el botón +
@@ -199,7 +266,7 @@ export default function WeeklyPlannerPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 flex-shrink-0"
+                            className="h-10 w-10 flex-shrink-0 min-w-[44px] min-h-[44px]"
                           >
                             <MoreVertical className="w-4 h-4" />
                           </Button>
@@ -245,7 +312,7 @@ export default function WeeklyPlannerPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                className="h-9 w-9 min-w-[44px] min-h-[44px]"
                 onClick={() => setIsCarouselCollapsed(!isCarouselCollapsed)}
               >
                 {isCarouselCollapsed ? (
@@ -257,7 +324,7 @@ export default function WeeklyPlannerPage() {
             </div>
             <button
               onClick={() => navigate("/exercises")}
-              className="text-sm text-primary font-medium hover:underline"
+              className="text-sm text-primary font-medium hover:underline min-h-[44px] px-2 flex items-center"
             >
               Ver todos
             </button>
@@ -266,14 +333,26 @@ export default function WeeklyPlannerPage() {
           {!isCarouselCollapsed && (
             <>
               {recentExercises.length > 0 ? (
-                <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+                <div
+                  className="flex gap-3 overflow-x-auto scrollbar-hide pb-2"
+                  style={{
+                    WebkitOverflowScrolling: "touch",
+                    scrollBehavior: "smooth",
+                  }}
+                >
                   {recentExercises.map((ex) => (
                     <Card
                       key={ex.exerciseId}
                       draggable
                       onDragStart={() => handleCarouselDragStart(ex.exerciseId)}
                       onDragEnd={() => setDraggedExercise(null)}
-                      className="flex-shrink-0 p-3 w-36 hover:bg-accent transition-colors cursor-grab active:cursor-grabbing"
+                      onTouchStart={(e) => handleTouchStart(e, ex.exerciseId)}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
+                      className={`flex-shrink-0 p-3 w-36 hover:bg-accent transition-all touch-none select-none ${draggedExercise?.exerciseId === ex.exerciseId
+                          ? 'opacity-50 scale-95'
+                          : 'cursor-grab active:cursor-grabbing'
+                        }`}
                     >
                       <div className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2">
                         <span className="text-xs text-muted-foreground">
