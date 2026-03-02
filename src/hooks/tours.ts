@@ -73,8 +73,8 @@ const sharedConfig: Omit<Config, "steps" | "onDestroyed"> = {
   stageRadius: 8,
   showProgress: true,
   progressText: "{{current}} de {{total}}",
-  nextBtnText: "Siguiente →",
-  prevBtnText: "← Atrás",
+  nextBtnText: "Siguiente",
+  prevBtnText: "Atrás",
   doneBtnText: "¡Entendido!",
 };
 
@@ -401,7 +401,7 @@ const plannerSteps: DriveStep[] = [
     popover: {
       title: "Tu rutina semanal",
       description:
-        "Esta es la vista principal donde organizas tu semana de entrenamiento. Cada columna representa un día.",
+        "¡Bienvenido! Esta es la vista principal donde organizarás tu semana de entrenamiento.",
       side: "bottom",
       align: "start",
     },
@@ -421,7 +421,7 @@ const plannerSteps: DriveStep[] = [
     popover: {
       title: "Ejercicio en la rutina",
       description:
-        "Toca la imagen o el nombre para ver los detalles del ejercicio. Usa el menú ⋮ para eliminarlo del día.",
+        "Toca la imagen o el nombre para ver los detalles del ejercicio. Usa el menú ⋮ para editar o eliminar este ejercicio de tu rutina.",
       side: "bottom",
       align: "start",
     },
@@ -431,7 +431,7 @@ const plannerSteps: DriveStep[] = [
     popover: {
       title: "Iniciar entrenamiento",
       description:
-        "Cuando estés listo, toca ▶ para comenzar el entrenamiento del día. Se abrirá la vista de entrenamiento activo.",
+        "Cuando estés listo, toca este botón para comenzar tu entrenamiento del día. Se abrirá la vista de entrenamiento activo con los ejercicios que planificaste.",
       side: "bottom",
       align: "end",
     },
@@ -441,7 +441,7 @@ const plannerSteps: DriveStep[] = [
     popover: {
       title: "Agregar ejercicio al día",
       description:
-        "Toca + para abrir la biblioteca de ejercicios y agregar más movimientos a este día.",
+        "Toca este botón para abrir la biblioteca de ejercicios y agregar más movimientos a este día.",
       side: "top",
       align: "center",
     },
@@ -451,7 +451,7 @@ const plannerSteps: DriveStep[] = [
     popover: {
       title: "Ejercicios recientes",
       description:
-        "Aquí aparecen los ejercicios que ya tienes en tu rutina. Mantenlos presionados y arrástralos a cualquier columna para agregarlos rápidamente.",
+        "Aquí encontrarás los ejercicios que ya tienes en tus rutinas. Mantenlos presionados y arrástralos a cualquier columna para agregarlos rápidamente.",
       side: "top",
       align: "center",
     },
@@ -478,17 +478,15 @@ const plannerSteps: DriveStep[] = [
   },
 ];
 
-// Índice del paso que apunta al botón + (dentro de la columna de día).
-// Si el carrusel lo tapa en pantallas pequeñas, lo colapsamos antes
-// de resaltarlo y lo restauramos al salir de ese paso.
+// Índices de pasos clave
 const ADD_BTN_STEP_INDEX = plannerSteps.findIndex(
   (s) => s.element === "#tour-planner-add-0",
 );
+const CAROUSEL_CARD_STEP_INDEX = plannerSteps.findIndex(
+  (s) => s.element === "#tour-carousel-card-0",
+);
 
-// Ejercicio seed insertado temporalmente cuando Lunes está vacío al iniciar el tour.
-// Debe existir en defaultExercises. Se elimina automáticamente al cerrar el tour.
-const TOUR_SEED_INSTANCE_ID = "__tour_seed__";
-const TOUR_SEED_EXERCISE_ID = "cable-lateral-raise";
+const TOUR_SEED_EXERCISE_ID = "0007";
 
 interface PlannedExerciseLike {
   id: string;
@@ -498,19 +496,12 @@ interface PlannedExerciseLike {
 }
 
 interface UsePlannerTourOptions {
-  /** true cuando el plan está cargado y al menos un día está renderizado */
   ready: boolean;
-  /**
-   * Setter del estado isCarouselCollapsed de WeeklyPlannerPage.
-   * El hook lo usa para colapsar/restaurar el carrusel en el paso del botón +.
-   */
   setCarouselCollapsed: (collapsed: boolean) => void;
-  /** Ejercicios actuales del primer día (Lunes). */
   lundayExercises: PlannedExerciseLike[];
-  /** Agrega el ejercicio seed a Lunes antes de lanzar el tour. */
   addExerciseToLunes: (exercise: PlannedExerciseLike) => void;
-  /** Elimina el ejercicio seed de Lunes al cerrar el tour. */
   removeSeedFromLunes: (instanceId: string) => void;
+  trackRecentExercise: (exerciseId: string) => void;
   forceShow?: boolean;
 }
 
@@ -520,13 +511,14 @@ export function usePlannerTour({
   lundayExercises,
   addExerciseToLunes,
   removeSeedFromLunes,
+  trackRecentExercise,
   forceShow = false,
 }: UsePlannerTourOptions) {
   const driverRef = useRef<ReturnType<typeof driver> | null>(null);
   const hasStartedRef = useRef(false);
   const carouselWasCollapsedRef = useRef(false);
-  // true si este hook insertó el seed (para limpiarlo al terminar)
-  const insertedSeedRef = useRef(false);
+  // true mientras esperamos que React renderice el ejercicio seed antes de lanzar el driver
+  const pendingLaunchRef = useRef(false);
 
   const launchDriver = () => {
     driverRef.current = driver({
@@ -537,17 +529,12 @@ export function usePlannerTour({
           const carouselCard = document.querySelector("#tour-carousel-card-0");
           carouselWasCollapsedRef.current = !carouselCard;
           setCarouselCollapsed(true);
-          // Scroll después de que el colapso del carrusel haya re-renderizado
-          // (el cambio de layout afecta la posición del botón).
           setTimeout(() => {
             const addBtn = document.querySelector("#tour-planner-add-0");
             if (addBtn) {
               addBtn.scrollIntoView({ behavior: "smooth", block: "center" });
             }
           }, 100);
-        }
-        if (state.activeIndex > ADD_BTN_STEP_INDEX) {
-          setCarouselCollapsed(false);
         }
       },
       onDeselected: (_element, _step, { state }) => {
@@ -556,16 +543,29 @@ export function usePlannerTour({
         }
       },
       onNextClick: (_element, _step, { state }) => {
-        // Scroll al elemento del paso siguiente antes de avanzar
-        const nextStep = plannerSteps[state.activeIndex + 1];
-        if (nextStep?.element) {
-          const el = document.querySelector(nextStep.element as string);
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        const nextIndex = state.activeIndex + 1;
+        const nextStep = plannerSteps[nextIndex];
+
+        // Si el siguiente paso necesita el carrusel visible, expandirlo primero
+        // y dar tiempo a React para re-renderizar antes de que Driver.js busque el elemento.
+        if (nextIndex >= CAROUSEL_CARD_STEP_INDEX) {
+          setCarouselCollapsed(false);
         }
-        driverRef.current?.moveNext();
+
+        const needsDelay = nextIndex === CAROUSEL_CARD_STEP_INDEX;
+        setTimeout(
+          () => {
+            if (nextStep?.element) {
+              const el = document.querySelector(nextStep.element as string);
+              if (el)
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+            driverRef.current?.moveNext();
+          },
+          needsDelay ? 150 : 0,
+        );
       },
       onPrevClick: (_element, _step, { state }) => {
-        // Scroll al elemento del paso anterior antes de retroceder
         const prevStep = plannerSteps[state.activeIndex - 1];
         if (prevStep?.element) {
           const el = document.querySelector(prevStep.element as string);
@@ -575,10 +575,6 @@ export function usePlannerTour({
       },
       onDestroyed: () => {
         setCarouselCollapsed(carouselWasCollapsedRef.current);
-        if (insertedSeedRef.current) {
-          removeSeedFromLunes(TOUR_SEED_INSTANCE_ID);
-          insertedSeedRef.current = false;
-        }
         markTourCompleted("tour_planner");
       },
     });
@@ -589,21 +585,35 @@ export function usePlannerTour({
     driverRef.current?.destroy();
 
     if (lundayExercises.length === 0) {
-      // Lunes vacío — insertar ejercicio de ejemplo y esperar un tick
-      // para que React lo renderice antes de que Driver.js busque los IDs.
-      insertedSeedRef.current = true;
+      // Trackear primero para que recentIds se actualice en localStorage
+      // antes de que React renderice el carrusel con el nuevo ejercicio.
+      trackRecentExercise(TOUR_SEED_EXERCISE_ID);
+      pendingLaunchRef.current = true;
       addExerciseToLunes({
-        id: TOUR_SEED_INSTANCE_ID,
+        id: `Lunes-${TOUR_SEED_EXERCISE_ID}-${Date.now()}`,
         exerciseId: TOUR_SEED_EXERCISE_ID,
         sets: 3,
         reps: 10,
       });
-      setTimeout(launchDriver, 200);
+      // No llamamos launchDriver aquí — lo hará el useEffect reactivo
     } else {
-      insertedSeedRef.current = false;
       launchDriver();
     }
   };
+
+  // Observa lundayExercises: cuando el seed ya está renderizado en el DOM,
+  // lanza el driver. Esto garantiza que #tour-planner-ex-0 y #tour-planner-play-0
+  // existen antes de que Driver.js los busque.
+  useEffect(() => {
+    if (!pendingLaunchRef.current) return;
+    if (lundayExercises.length === 0) return;
+
+    pendingLaunchRef.current = false;
+    // Pequeño delay para que el DOM termine de pintar tras el re-render
+    const timeout = setTimeout(launchDriver, 50);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lundayExercises]);
 
   useEffect(() => {
     if (!ready) return;

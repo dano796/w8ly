@@ -3,6 +3,7 @@ import { HelpCircle } from "lucide-react";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
+import { useRecentlyAddedExercises } from "@/hooks/useRecentlyAddedExercises";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { defaultExercises } from "@/utils/exerciseData";
@@ -92,6 +93,7 @@ export default function WeeklyPlannerPage() {
     moveExercise,
   } = useWeeklyPlan();
   const { settings } = useSettings();
+  const { recentIds, trackAdded } = useRecentlyAddedExercises();
 
   // ── Drag state ──────────────────────────────────────────────────────────────
   const [dragItem, setDragItem] = useState<{
@@ -239,6 +241,7 @@ export default function WeeklyPlannerPage() {
     addExerciseToLunes: (exercise) => addExerciseToDay("Lunes", exercise),
     removeSeedFromLunes: (instanceId) =>
       removeExerciseFromDay("Lunes", instanceId),
+    trackRecentExercise: trackAdded,
   });
 
   // ── Auto-scroll ─────────────────────────────────────────────────────────────
@@ -297,33 +300,27 @@ export default function WeeklyPlannerPage() {
   }, []);
 
   // ── Recent exercises ────────────────────────────────────────────────────────
+  // Uses persisted history from useRecentlyAddedExercises — stays intact
+  // even if the user removes exercises from days.
   const recentExercises = useMemo(() => {
-    const seen = new Set<string>();
-    const result: {
+    return recentIds
+      .map((id) => {
+        const data = exerciseMap[id];
+        if (!data) return null;
+        return {
+          exerciseId: id,
+          name: data.name,
+          muscleGroup: data.muscleGroup,
+          imageUrl: data.imageUrl,
+        };
+      })
+      .filter(Boolean) as {
       exerciseId: string;
       name: string;
       muscleGroup: string;
       imageUrl?: string;
-    }[] = [];
-    for (const day of plan) {
-      for (const ex of day.exercises) {
-        if (!seen.has(ex.exerciseId)) {
-          seen.add(ex.exerciseId);
-          const data = exerciseMap[ex.exerciseId];
-          if (data)
-            result.push({
-              exerciseId: ex.exerciseId,
-              name: data.name,
-              muscleGroup: data.muscleGroup,
-              imageUrl: data.imageUrl,
-            });
-        }
-        if (result.length >= 5) break;
-      }
-      if (result.length >= 5) break;
-    }
-    return result;
-  }, [plan, exerciseMap]);
+    }[];
+  }, [recentIds, exerciseMap]);
 
   // ── Drag handlers ───────────────────────────────────────────────────────────
   const handleDragStart = (day: DayName, idx: number, exerciseId: string) => {
@@ -772,7 +769,7 @@ export default function WeeklyPlannerPage() {
                               }
                             >
                               <ArrowLeftRight className="w-4 h-4 mr-2 text-muted-foreground" />
-                              Mover
+                              Mover a…
                             </DropdownMenuItem>
 
                             {/* Copiar a otro día */}
@@ -790,7 +787,7 @@ export default function WeeklyPlannerPage() {
                               }
                             >
                               <Copy className="w-4 h-4 mr-2 text-muted-foreground" />
-                              Copiar
+                              Copiar a…
                             </DropdownMenuItem>
 
                             <DropdownMenuSeparator />
@@ -1037,9 +1034,7 @@ export default function WeeklyPlannerPage() {
         <SheetContent side="bottom" className="rounded-t-2xl">
           <SheetHeader>
             <SheetTitle>
-              {dayPickerDialog.mode === "move"
-                ? "Mover ejercicio"
-                : "Copiar ejercicio"}
+              {dayPickerDialog.mode === "move" ? "Mover a…" : "Copiar a…"}
             </SheetTitle>
             <SheetDescription className="truncate text-sm text-muted-foreground">
               {dayPickerDialog.exName}

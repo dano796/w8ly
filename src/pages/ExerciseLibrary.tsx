@@ -304,10 +304,11 @@ export default function ExerciseLibraryPage() {
           reps: 10,
         }));
 
-        updateDayExercises(preselectedDay, [
-          ...currentDayPlan.exercises,
-          ...newExercises,
-        ]);
+        updateDayExercises(
+          preselectedDay,
+          [...currentDayPlan.exercises, ...newExercises],
+          newExercisesToAdd,
+        );
       }
 
       setSelectedExercises([]);

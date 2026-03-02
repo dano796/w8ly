@@ -1,5 +1,8 @@
 import { useLocalStorage } from "./useLocalStorage";
+import { useRecentlyAddedExercises } from "./useRecentlyAddedExercises";
 import { WeeklyPlan, DayName, PlannedExercise, DAYS } from "@/utils/types";
+
+const TOUR_SEED_INSTANCE_ID = "__tour_seed__";
 
 const createEmptyPlan = (): WeeklyPlan =>
   DAYS.map((day) => ({ day, label: "", exercises: [] }));
@@ -9,8 +12,13 @@ export function useWeeklyPlan() {
     "w8ly-weekly-plan",
     createEmptyPlan(),
   );
+  const { trackAdded } = useRecentlyAddedExercises();
 
   const addExerciseToDay = (day: DayName, exercise: PlannedExercise) => {
+    // No registrar el ejercicio seed del tour en el historial
+    if (exercise.id !== TOUR_SEED_INSTANCE_ID) {
+      trackAdded(exercise.exerciseId);
+    }
     setPlan((prev) =>
       prev.map((d) =>
         d.day === day ? { ...d, exercises: [...d.exercises, exercise] } : d,
@@ -23,9 +31,9 @@ export function useWeeklyPlan() {
       prev.map((d) =>
         d.day === day
           ? {
-            ...d,
-            exercises: d.exercises.filter((e) => e.id !== exerciseInstanceId),
-          }
+              ...d,
+              exercises: d.exercises.filter((e) => e.id !== exerciseInstanceId),
+            }
           : d,
       ),
     );
@@ -46,7 +54,6 @@ export function useWeeklyPlan() {
     toDay: DayName,
     exerciseInstanceId: string,
   ): boolean => {
-    // Check for duplicates before updating state
     const fromDayPlan = plan.find((d) => d.day === fromDay);
     const exercise = fromDayPlan?.exercises.find(
       (e) => e.id === exerciseInstanceId,
@@ -54,17 +61,13 @@ export function useWeeklyPlan() {
 
     if (!exercise) return false;
 
-    // Check if exercise already exists in target day
     const toDayPlan = plan.find((d) => d.day === toDay);
     const exerciseExists = toDayPlan?.exercises.some(
       (ex) => ex.exerciseId === exercise.exerciseId,
     );
 
-    if (exerciseExists) {
-      return false; // Don't move if duplicate
-    }
+    if (exerciseExists) return false;
 
-    // Perform the move
     setPlan((prev) =>
       prev.map((d) => {
         if (d.day === fromDay)
@@ -81,7 +84,14 @@ export function useWeeklyPlan() {
     return true;
   };
 
-  const updateDayExercises = (day: DayName, exercises: PlannedExercise[]) => {
+  const updateDayExercises = (
+    day: DayName,
+    exercises: PlannedExercise[],
+    newExerciseIds?: string[], // IDs a trackear (solo los recién añadidos)
+  ) => {
+    if (newExerciseIds?.length) {
+      newExerciseIds.forEach((id) => trackAdded(id));
+    }
     setPlan((prev) =>
       prev.map((d) => (d.day === day ? { ...d, exercises } : d)),
     );
