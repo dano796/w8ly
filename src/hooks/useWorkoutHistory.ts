@@ -8,7 +8,22 @@ export function useWorkoutHistory() {
   );
 
   const addWorkout = (workout: CompletedWorkout) => {
-    setHistory((prev) => [workout, ...prev]);
+    // Immediately update localStorage synchronously
+    try {
+      const currentHistory = JSON.parse(
+        window.localStorage.getItem("w8ly-workout-history") || "[]",
+      );
+      const newHistory = [workout, ...currentHistory];
+      window.localStorage.setItem(
+        "w8ly-workout-history",
+        JSON.stringify(newHistory),
+      );
+
+      // Then update React state
+      setHistory(newHistory);
+    } catch (e) {
+      console.error("Error saving workout:", e);
+    }
   };
 
   const getLastPerformance = (exerciseId: string) => {

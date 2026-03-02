@@ -141,11 +141,11 @@ export default function ActiveWorkoutPage() {
       prev.map((ex, ei) =>
         ei === exIdx
           ? {
-            ...ex,
-            sets: ex.sets.map((s, si) =>
-              si === setIdx ? { ...s, [field]: value } : s,
-            ),
-          }
+              ...ex,
+              sets: ex.sets.map((s, si) =>
+                si === setIdx ? { ...s, [field]: value } : s,
+              ),
+            }
           : ex,
       ),
     );
@@ -156,17 +156,17 @@ export default function ActiveWorkoutPage() {
       prev.map((ex, ei) =>
         ei === exIdx
           ? {
-            ...ex,
-            sets: [
-              ...ex.sets,
-              {
-                setNumber: ex.sets.length + 1,
-                weight: 0,
-                reps: 10,
-                completed: false,
-              },
-            ],
-          }
+              ...ex,
+              sets: [
+                ...ex.sets,
+                {
+                  setNumber: ex.sets.length + 1,
+                  weight: 0,
+                  reps: 10,
+                  completed: false,
+                },
+              ],
+            }
           : ex,
       ),
     );
@@ -177,11 +177,11 @@ export default function ActiveWorkoutPage() {
       prev.map((ex, ei) =>
         ei === exIdx
           ? {
-            ...ex,
-            sets: ex.sets
-              .filter((_, si) => si !== setIdx)
-              .map((s, i) => ({ ...s, setNumber: i + 1 })),
-          }
+              ...ex,
+              sets: ex.sets
+                .filter((_, si) => si !== setIdx)
+                .map((s, i) => ({ ...s, setNumber: i + 1 })),
+            }
           : ex,
       ),
     );
@@ -263,6 +263,25 @@ export default function ActiveWorkoutPage() {
   const handleConfirmExit = () => {
     setShowExitDialog(false);
     navigate("/");
+  };
+
+  const handleSaveAndExit = () => {
+    const workout = {
+      id: `w-${Date.now()}`,
+      day: day as DayName,
+      date: new Date().toISOString(),
+      durationSeconds: elapsed,
+      exercises,
+    };
+
+    // Check if there are structural changes
+    if (hasStructuralChanges()) {
+      applyChangesToPlan();
+    }
+
+    addWorkout(workout);
+    setShowExitDialog(false);
+    navigate(`/summary/${workout.id}`, { state: workout });
   };
 
   const formatTime = (s: number) => {
@@ -572,20 +591,28 @@ export default function ActiveWorkoutPage() {
       <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Descartar entrenamiento?</AlertDialogTitle>
+            <AlertDialogTitle>¿Qué deseas hacer?</AlertDialogTitle>
             <AlertDialogDescription>
-              Si sales ahora, perderás todo el progreso de este entrenamiento.
-              Esta acción no se puede deshacer.
+              Puedes guardar tu progreso y finalizar el entrenamiento, o
+              descartarlo completamente.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Continuar entrenando</AlertDialogCancel>
+          <AlertDialogFooter className="flex-col sm:flex-col gap-2">
+            <AlertDialogAction
+              onClick={handleSaveAndExit}
+              className="w-full m-0"
+            >
+              Guardar y finalizar
+            </AlertDialogAction>
             <AlertDialogAction
               onClick={handleConfirmExit}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full m-0"
             >
-              Descartar
+              Descartar entrenamiento
             </AlertDialogAction>
+            <AlertDialogCancel className="w-full m-0">
+              Continuar entrenando
+            </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

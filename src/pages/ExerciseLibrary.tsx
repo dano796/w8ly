@@ -41,7 +41,7 @@ export default function ExerciseLibraryPage() {
   const preselectedDay = searchParams.get("day") as DayName | null;
   const fromWorkout = searchParams.get("fromWorkout") as DayName | null;
 
-  const { addExerciseToDay } = useWeeklyPlan();
+  const { plan, addExerciseToDay, updateDayExercises } = useWeeklyPlan();
   const { settings } = useSettings();
   const [activeFilter, setActiveFilter] = useState<MuscleGroup | "Todos">(
     "Todos",
@@ -60,8 +60,8 @@ export default function ExerciseLibraryPage() {
 
   const searchFiltered = searchTerm.trim()
     ? filtered.filter((e) =>
-      e.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
+        e.name.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
     : filtered;
 
   const toggleSelection = (exerciseId: string) => {
@@ -93,12 +93,28 @@ export default function ExerciseLibraryPage() {
         },
       });
     } else if (preselectedDay && selectedExercises.length > 0) {
-      // Add multiple exercises to the preselected day
-      selectedExercises.forEach((exerciseId) => {
-        doAdd(exerciseId, preselectedDay);
-      });
+      // Add multiple exercises to the preselected day in a single operation
+      const currentDayPlan = plan.find((d) => d.day === preselectedDay);
+
+      if (currentDayPlan) {
+        const newExercises = selectedExercises.map((exerciseId, index) => ({
+          id: `${preselectedDay}-${exerciseId}-${Date.now()}-${index}`,
+          exerciseId,
+          sets: settings.defaultSets,
+          reps: 10,
+        }));
+
+        updateDayExercises(preselectedDay, [
+          ...currentDayPlan.exercises,
+          ...newExercises,
+        ]);
+      }
+
       setSelectedExercises([]);
-      navigate("/");
+      // Small delay to ensure state is saved to localStorage before navigation
+      setTimeout(() => {
+        navigate("/");
+      }, 50);
     }
   };
 
