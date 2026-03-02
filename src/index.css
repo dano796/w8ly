@@ -1,6 +1,8 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities; /* W8ly Design System — all colors HSL */
+@tailwind utilities;
+
+/* W8ly Design System — all colors HSL */
 
 @layer base {
   :root {
