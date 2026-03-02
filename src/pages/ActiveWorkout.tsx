@@ -66,6 +66,7 @@ export default function ActiveWorkoutPage() {
   const [elapsed, setElapsed] = useState(0);
   const [showChangesDialog, setShowChangesDialog] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [showFinishDialog, setShowFinishDialog] = useState(false);
   const [pendingWorkout, setPendingWorkout] = useState<any>(null);
   const [revealedSet, setRevealedSet] = useState<string | null>(null);
 
@@ -168,8 +169,12 @@ export default function ActiveWorkoutPage() {
 
         if (prev.timeLeft <= 1) {
           // Timer reached 0
-          toast.success("¡Descanso terminado! Listo para la siguiente serie", {
-            duration: 5000,
+          toast.success("¡Descanso terminado!", {
+            duration: 3000,
+            style: {
+              fontSize: "16px",
+              fontWeight: "600",
+            },
           });
           return null;
         }
@@ -350,7 +355,12 @@ export default function ActiveWorkoutPage() {
     updateDayExercises(day as DayName, updatedExercises);
   };
 
+  const handleFinishClick = () => {
+    setShowFinishDialog(true);
+  };
+
   const handleFinish = () => {
+    setShowFinishDialog(false);
     const workout = {
       id: `w-${Date.now()}`,
       day: day as DayName,
@@ -454,20 +464,20 @@ export default function ActiveWorkoutPage() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-lg font-bold">
+              <h1 className="text-xl sm:text-lg font-bold">
                 {day}
                 {dayPlan?.label && (
                   <span className="text-primary"> - {dayPlan.label}</span>
                 )}
               </h1>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm sm:text-xs text-muted-foreground">
                 {formatTime(elapsed)}
               </p>
             </div>
           </div>
           <Button
             size="icon"
-            onClick={handleFinish}
+            onClick={handleFinishClick}
             className="bg-accent text-accent-foreground hover:bg-accent/90"
           >
             <Check className="w-5 h-5" />
@@ -480,7 +490,7 @@ export default function ActiveWorkoutPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.3 }}
         >
-          <div className="flex justify-between text-xs text-muted-foreground mb-1">
+          <div className="flex justify-between text-sm sm:text-xs text-muted-foreground mb-1">
             <span>
               {completedSets} de {totalSets} series
             </span>
@@ -527,8 +537,13 @@ export default function ActiveWorkoutPage() {
                         </span>
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-semibold">{data.name}</p>
-                        <Badge variant="secondary" className="text-[10px]">
+                        <p className="text-base sm:text-sm font-semibold">
+                          {data.name}
+                        </p>
+                        <Badge
+                          variant="secondary"
+                          className="text-xs sm:text-[10px]"
+                        >
                           {data.muscleGroup}
                         </Badge>
                       </div>
@@ -545,7 +560,7 @@ export default function ActiveWorkoutPage() {
                     {/* Rest time editor */}
                     <div className="flex items-center gap-2 mb-3">
                       <Timer className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-sm sm:text-xs text-muted-foreground">
                         Descanso:
                       </span>
                       <Input
@@ -561,9 +576,11 @@ export default function ActiveWorkoutPage() {
                           const seconds = (exerciseRestTimes[exIdx] || 0) % 60;
                           updateRestTime(exIdx, minutes * 60 + seconds);
                         }}
-                        className="h-7 w-12 text-xs text-center px-1"
+                        className="h-8 sm:h-7 w-14 sm:w-12 text-sm sm:text-xs text-center px-1"
                       />
-                      <span className="text-xs text-muted-foreground">m</span>
+                      <span className="text-sm sm:text-xs text-muted-foreground">
+                        m
+                      </span>
                       <Input
                         type="number"
                         min="0"
@@ -579,14 +596,16 @@ export default function ActiveWorkoutPage() {
                           );
                           updateRestTime(exIdx, minutes * 60 + seconds);
                         }}
-                        className="h-7 w-12 text-xs text-center px-1"
+                        className="h-8 sm:h-7 w-14 sm:w-12 text-sm sm:text-xs text-center px-1"
                       />
-                      <span className="text-xs text-muted-foreground">s</span>
+                      <span className="text-sm sm:text-xs text-muted-foreground">
+                        s
+                      </span>
                     </div>
 
                     {/* Sets table */}
                     <div className="space-y-2">
-                      <div className="grid grid-cols-[2rem_3rem_1fr_1fr_2rem] gap-1 text-[10px] font-semibold text-muted-foreground px-1">
+                      <div className="grid grid-cols-[2rem_3rem_1fr_1fr_2rem] gap-1 text-xs sm:text-[10px] font-semibold text-muted-foreground px-1">
                         <span className="text-center">Serie</span>
                         <span className="text-center">Previo</span>
                         <span className="text-center">
@@ -603,7 +622,7 @@ export default function ActiveWorkoutPage() {
                           return (
                             <div
                               key={setKey}
-                              className="relative h-8 rounded overflow-hidden"
+                              className="relative h-9 sm:h-8 rounded overflow-hidden"
                             >
                               {/* Background red for delete */}
                               {ex.sets.length > 1 && (
@@ -611,7 +630,7 @@ export default function ActiveWorkoutPage() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="h-7 px-3 text-destructive-foreground hover:bg-destructive-foreground/20"
+                                    className="h-8 sm:h-7 px-3 text-destructive-foreground hover:bg-destructive-foreground/20"
                                     onClick={() => {
                                       deleteSet(exIdx, setIdx);
                                       setRevealedSet(null);
@@ -658,10 +677,10 @@ export default function ActiveWorkoutPage() {
                                   transition: { duration: 0.15 },
                                 }}
                               >
-                                <span className="text-xs text-center pointer-events-none">
+                                <span className="text-sm sm:text-xs text-center pointer-events-none">
                                   {set.setNumber}
                                 </span>
-                                <span className="text-xs text-muted-foreground text-center pointer-events-none">
+                                <span className="text-sm sm:text-xs text-muted-foreground text-center pointer-events-none">
                                   {set.previous
                                     ? `${set.previous.weight}×${set.previous.reps}`
                                     : "-"}
@@ -681,7 +700,7 @@ export default function ActiveWorkoutPage() {
                                         Number(e.target.value),
                                       )
                                     }
-                                    className="h-8 text-xs text-center px-1"
+                                    className="h-9 sm:h-8 text-sm sm:text-xs text-center px-1"
                                   />
                                 </div>
                                 <div
@@ -699,7 +718,7 @@ export default function ActiveWorkoutPage() {
                                         Number(e.target.value),
                                       )
                                     }
-                                    className="h-8 text-xs text-center px-1"
+                                    className="h-9 sm:h-8 text-sm sm:text-xs text-center px-1"
                                   />
                                 </div>
                                 <div
@@ -724,7 +743,7 @@ export default function ActiveWorkoutPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="mt-2 text-xs w-full"
+                      className="mt-2 text-sm sm:text-xs w-full"
                       onClick={(e) => {
                         e.stopPropagation();
                         setRevealedSet(null);
@@ -742,7 +761,7 @@ export default function ActiveWorkoutPage() {
 
         <Button
           variant="outline"
-          className="w-full mt-4"
+          className="w-full mt-4 text-sm"
           onClick={() => {
             setRevealedSet(null);
             navigate(`/exercises?fromWorkout=${day}`, {
@@ -771,6 +790,25 @@ export default function ActiveWorkoutPage() {
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleApplyChanges}>
               Aplicar a la rutina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Finish confirmation dialog */}
+      <AlertDialog open={showFinishDialog} onOpenChange={setShowFinishDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Finalizar entrenamiento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tu progreso será guardado y podrás ver el resumen del
+              entrenamiento.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleFinish}>
+              Finalizar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -817,20 +855,22 @@ export default function ActiveWorkoutPage() {
           >
             <div className="max-w-2xl mx-auto px-4 pb-4 pointer-events-auto">
               <Card className="p-3 bg-primary/20 border-primary shadow-lg backdrop-blur-sm">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-2">
+                  {/* Timer display */}
                   <div className="flex items-center gap-2">
-                    <Timer className="w-4 h-4 text-primary flex-shrink-0" />
-                    <div className="text-2xl font-bold text-primary tabular-nums">
+                    <Timer className="w-6 sm:w-5 h-6 sm:h-5 text-primary flex-shrink-0" />
+                    <div className="text-4xl sm:text-3xl font-bold text-primary tabular-nums">
                       {Math.floor(restTimer.timeLeft / 60)}:
                       {String(restTimer.timeLeft % 60).padStart(2, "0")}
                     </div>
                   </div>
 
+                  {/* Control buttons */}
                   <div className="flex items-center gap-1">
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-9 w-9"
                       onClick={() => adjustRestTimer(-15)}
                     >
                       <Minus className="w-4 h-4" />
@@ -838,7 +878,7 @@ export default function ActiveWorkoutPage() {
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-9 w-9"
                       onClick={() => adjustRestTimer(15)}
                     >
                       <Plus className="w-4 h-4" />
@@ -846,7 +886,7 @@ export default function ActiveWorkoutPage() {
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-9 w-9"
                       onClick={toggleRestTimer}
                     >
                       {restTimer.isPaused ? (
@@ -856,9 +896,9 @@ export default function ActiveWorkoutPage() {
                       )}
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-9 w-9"
                       onClick={cancelRestTimer}
                     >
                       <X className="w-4 h-4" />
