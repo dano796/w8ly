@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
 import { useSettings } from "@/hooks/useSettings";
+import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { defaultExercises } from "@/utils/exerciseData";
 import { DayName, DAYS } from "@/utils/types";
 import { Badge } from "@/components/ui/badge";
@@ -42,10 +43,20 @@ import {
   tapAnimation,
 } from "@/utils/animations";
 
-const exerciseMap = Object.fromEntries(defaultExercises.map((e) => [e.id, e]));
-
 export default function WeeklyPlannerPage() {
   const navigate = useNavigate();
+  const { customExercises } = useCustomExercises();
+
+  // Combine default and custom exercises
+  const allExercises = useMemo(
+    () => [...defaultExercises, ...customExercises],
+    [customExercises],
+  );
+  const exerciseMap = useMemo(
+    () => Object.fromEntries(allExercises.map((e) => [e.id, e])),
+    [allExercises],
+  );
+
   const {
     plan,
     removeExerciseFromDay,
@@ -168,7 +179,7 @@ export default function WeeklyPlannerPage() {
       if (result.length >= 8) break;
     }
     return result;
-  }, [plan]);
+  }, [plan, exerciseMap]);
 
   const handleDragStart = (day: DayName, idx: number, exerciseId: string) => {
     setDragItem({ day, idx, exerciseId });

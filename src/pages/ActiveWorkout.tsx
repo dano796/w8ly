@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { useSettings } from "@/hooks/useSettings";
+import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { defaultExercises } from "@/utils/exerciseData";
 import {
   DayName,
@@ -45,8 +46,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const exerciseMap = Object.fromEntries(defaultExercises.map((e) => [e.id, e]));
-
 export default function ActiveWorkoutPage() {
   const { day } = useParams<{ day: string }>();
   const navigate = useNavigate();
@@ -54,6 +53,11 @@ export default function ActiveWorkoutPage() {
   const { plan, updateDayExercises } = useWeeklyPlan();
   const { addWorkout, getLastPerformance } = useWorkoutHistory();
   const { settings } = useSettings();
+  const { customExercises } = useCustomExercises();
+
+  // Combine default and custom exercises
+  const allExercises = [...defaultExercises, ...customExercises];
+  const exerciseMap = Object.fromEntries(allExercises.map((e) => [e.id, e]));
 
   const dayPlan = plan.find((d) => d.day === day);
 
@@ -202,11 +206,11 @@ export default function ActiveWorkoutPage() {
       prev.map((ex, ei) =>
         ei === exIdx
           ? {
-              ...ex,
-              sets: ex.sets.map((s, si) =>
-                si === setIdx ? { ...s, [field]: value } : s,
-              ),
-            }
+            ...ex,
+            sets: ex.sets.map((s, si) =>
+              si === setIdx ? { ...s, [field]: value } : s,
+            ),
+          }
           : ex,
       ),
     );
@@ -262,17 +266,17 @@ export default function ActiveWorkoutPage() {
       prev.map((ex, ei) =>
         ei === exIdx
           ? {
-              ...ex,
-              sets: [
-                ...ex.sets,
-                {
-                  setNumber: ex.sets.length + 1,
-                  weight: 0,
-                  reps: 10,
-                  completed: false,
-                },
-              ],
-            }
+            ...ex,
+            sets: [
+              ...ex.sets,
+              {
+                setNumber: ex.sets.length + 1,
+                weight: 0,
+                reps: 10,
+                completed: false,
+              },
+            ],
+          }
           : ex,
       ),
     );
@@ -283,11 +287,11 @@ export default function ActiveWorkoutPage() {
       prev.map((ex, ei) =>
         ei === exIdx
           ? {
-              ...ex,
-              sets: ex.sets
-                .filter((_, si) => si !== setIdx)
-                .map((s, i) => ({ ...s, setNumber: i + 1 })),
-            }
+            ...ex,
+            sets: ex.sets
+              .filter((_, si) => si !== setIdx)
+              .map((s, i) => ({ ...s, setNumber: i + 1 })),
+          }
           : ex,
       ),
     );

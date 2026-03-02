@@ -4,17 +4,33 @@ import { defaultExercises } from "@/utils/exerciseData";
 import { DayName, DAYS, MuscleGroup } from "@/utils/types";
 import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
 import { useSettings } from "@/hooks/useSettings";
+import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Plus, Check, Search } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, Plus, Check, Search, Dumbbell } from "lucide-react";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -44,6 +60,7 @@ export default function ExerciseLibraryPage() {
 
   const { plan, addExerciseToDay, updateDayExercises } = useWeeklyPlan();
   const { settings } = useSettings();
+  const { customExercises, addCustomExercise } = useCustomExercises();
   const [activeFilter, setActiveFilter] = useState<MuscleGroup | "Todos">(
     "Todos",
   );
@@ -53,11 +70,18 @@ export default function ExerciseLibraryPage() {
     null,
   );
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newExerciseName, setNewExerciseName] = useState("");
+  const [newExerciseMuscleGroup, setNewExerciseMuscleGroup] =
+    useState<MuscleGroup>("Pecho");
+
+  // Combine default and custom exercises
+  const allExercises = [...defaultExercises, ...customExercises];
 
   const filtered =
     activeFilter === "Todos"
-      ? defaultExercises
-      : defaultExercises.filter((e) => e.muscleGroup === activeFilter);
+      ? allExercises
+      : allExercises.filter((e) => e.muscleGroup === activeFilter);
 
   const searchFiltered = searchTerm.trim()
     ? filtered.filter((e) =>
@@ -173,6 +197,22 @@ export default function ExerciseLibraryPage() {
     setSelectedExerciseId(null);
   };
 
+  const handleCreateExercise = () => {
+    if (!newExerciseName.trim()) {
+      toast.error("El nombre del ejercicio es requerido");
+      return;
+    }
+
+    const newExercise = addCustomExercise(
+      newExerciseName.trim(),
+      newExerciseMuscleGroup,
+    );
+    toast.success(`Ejercicio "${newExercise.name}" creado`);
+    setNewExerciseName("");
+    setNewExerciseMuscleGroup("Pecho");
+    setCreateDialogOpen(false);
+  };
+
   return (
     <motion.div
       className="px-4 pt-6 max-w-lg mx-auto"
@@ -185,7 +225,16 @@ export default function ExerciseLibraryPage() {
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h1 className="text-2xl font-bold">Ejercicios</h1>
+        <h1 className="text-2xl font-bold flex-1">Ejercicios</h1>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCreateDialogOpen(true)}
+          className="gap-2"
+        >
+          <Dumbbell className="w-4 h-4" />
+          Crear
+        </Button>
       </div>
 
       {/* Search bar */}
@@ -337,6 +386,65 @@ export default function ExerciseLibraryPage() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Create exercise dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="max-w-[425px] w-[calc(100%-2rem)]">
+          <DialogHeader>
+            <DialogTitle>Crear ejercicio personalizado</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="exercise-name">Nombre del ejercicio *</Label>
+              <Input
+                id="exercise-name"
+                placeholder="Ej: Press banca inclinado"
+                value={newExerciseName}
+                onChange={(e) => setNewExerciseName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleCreateExercise();
+                  }
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="muscle-group">Grupo muscular</Label>
+              <Select
+                value={newExerciseMuscleGroup}
+                onValueChange={(value) =>
+                  setNewExerciseMuscleGroup(value as MuscleGroup)
+                }
+              >
+                <SelectTrigger id="muscle-group">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Pecho">Pecho</SelectItem>
+                  <SelectItem value="Espalda">Espalda</SelectItem>
+                  <SelectItem value="Pierna">Pierna</SelectItem>
+                  <SelectItem value="Brazos">Brazos</SelectItem>
+                  <SelectItem value="Hombros">Hombros</SelectItem>
+                  <SelectItem value="Core">Core</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setCreateDialogOpen(false);
+                setNewExerciseName("");
+                setNewExerciseMuscleGroup("Pecho");
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleCreateExercise}>Crear ejercicio</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

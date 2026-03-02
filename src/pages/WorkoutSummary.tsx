@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { defaultExercises } from "@/utils/exerciseData";
 import { CompletedWorkout } from "@/utils/types";
 import { useSettings } from "@/hooks/useSettings";
+import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,13 +22,16 @@ import {
   listItemVariants,
 } from "@/utils/animations";
 
-const exerciseMap = Object.fromEntries(defaultExercises.map((e) => [e.id, e]));
-
 export default function WorkoutSummaryPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { settings } = useSettings();
+  const { customExercises } = useCustomExercises();
   const workout = location.state as CompletedWorkout | undefined;
+
+  // Combine default and custom exercises
+  const allExercises = [...defaultExercises, ...customExercises];
+  const exerciseMap = Object.fromEntries(allExercises.map((e) => [e.id, e]));
 
   if (!workout) {
     return (

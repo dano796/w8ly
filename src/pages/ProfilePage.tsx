@@ -37,17 +37,21 @@ import {
   Target,
 } from "lucide-react";
 import { defaultExercises } from "@/utils/exerciseData";
-
-const exerciseMap = Object.fromEntries(defaultExercises.map((e) => [e.id, e]));
+import { useCustomExercises } from "@/hooks/useCustomExercises";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
+  const { customExercises } = useCustomExercises();
   const [profile, setProfile] = useLocalStorage<Profile>("w8ly-profile", {
     name: "",
     email: "",
   });
   const { history } = useWorkoutHistory();
   const { settings } = useSettings();
+
+  // Combine default and custom exercises
+  const allExercises = [...defaultExercises, ...customExercises];
+  const exerciseMap = Object.fromEntries(allExercises.map((e) => [e.id, e]));
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [tempName, setTempName] = useState("");
