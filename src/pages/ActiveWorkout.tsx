@@ -51,6 +51,7 @@ export default function ActiveWorkoutPage() {
   const [startTime] = useState(Date.now());
   const [elapsed, setElapsed] = useState(0);
   const [showChangesDialog, setShowChangesDialog] = useState(false);
+  const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingWorkout, setPendingWorkout] = useState<any>(null);
   const [revealedSet, setRevealedSet] = useState<string | null>(null);
 
@@ -252,6 +253,15 @@ export default function ActiveWorkoutPage() {
     }
   };
 
+  const handleExitClick = () => {
+    setShowExitDialog(true);
+  };
+
+  const handleConfirmExit = () => {
+    setShowExitDialog(false);
+    navigate("/");
+  };
+
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);
     const sec = s % 60;
@@ -280,7 +290,7 @@ export default function ActiveWorkoutPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+          <Button variant="ghost" size="icon" onClick={handleExitClick}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
@@ -548,6 +558,28 @@ export default function ActiveWorkoutPage() {
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleApplyChanges}>
               Aplicar a la rutina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Exit confirmation dialog */}
+      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Descartar entrenamiento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Si sales ahora, perderás todo el progreso de este entrenamiento.
+              Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continuar entrenando</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmExit}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Descartar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
