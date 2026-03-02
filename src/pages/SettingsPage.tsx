@@ -15,6 +15,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { motion } from "framer-motion";
+import {
+  pageVariants,
+  tapAnimation,
+  listItemVariants,
+} from "@/utils/animations";
 
 function ChipSelector<T extends string | number>({
   options,
@@ -29,8 +35,8 @@ function ChipSelector<T extends string | number>({
 }) {
   return (
     <div className="flex gap-2 flex-wrap">
-      {options.map((o) => (
-        <button
+      {options.map((o, idx) => (
+        <motion.button
           key={String(o)}
           onClick={() => onChange(o)}
           className={cn(
@@ -39,9 +45,13 @@ function ChipSelector<T extends string | number>({
               ? "bg-primary text-primary-foreground border-primary"
               : "bg-card text-foreground border-border",
           )}
+          whileTap={tapAnimation}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: idx * 0.05 }}
         >
           {renderLabel ? renderLabel(o) : String(o)}
-        </button>
+        </motion.button>
       ))}
     </div>
   );
@@ -52,7 +62,13 @@ export default function SettingsPage() {
   const { resetPlan } = useWeeklyPlan();
 
   return (
-    <div className="px-4 pt-6 max-w-lg mx-auto">
+    <motion.div
+      className="px-4 pt-6 max-w-lg mx-auto"
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <h1 className="text-2xl font-bold mb-6">Configuración</h1>
 
       <div className="space-y-4">
@@ -141,6 +157,6 @@ export default function SettingsPage() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </div>
+    </motion.div>
   );
 }

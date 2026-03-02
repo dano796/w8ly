@@ -15,6 +15,13 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import {
+  pageVariants,
+  listContainerVariants,
+  listItemVariants,
+  tapAnimation,
+} from "@/utils/animations";
 
 const filters: (MuscleGroup | "Todos")[] = [
   "Todos",
@@ -67,7 +74,13 @@ export default function ExerciseLibraryPage() {
   };
 
   return (
-    <div className="px-4 pt-6 max-w-lg mx-auto">
+    <motion.div
+      className="px-4 pt-6 max-w-lg mx-auto"
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <div className="flex items-center gap-3 mb-4">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-5 h-5" />
@@ -77,8 +90,8 @@ export default function ExerciseLibraryPage() {
 
       {/* Filter chips */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-3 mb-4">
-        {filters.map((f) => (
-          <button
+        {filters.map((f, idx) => (
+          <motion.button
             key={f}
             onClick={() => setActiveFilter(f)}
             className={cn(
@@ -87,36 +100,47 @@ export default function ExerciseLibraryPage() {
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-card text-foreground border-border",
             )}
+            whileTap={tapAnimation}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
           >
             {f}
-          </button>
+          </motion.button>
         ))}
       </div>
 
       {/* Exercise list */}
-      <div className="space-y-2">
+      <motion.div
+        className="space-y-2"
+        variants={listContainerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {filtered.map((ex) => (
-          <Card key={ex.id} className="flex items-center gap-3 p-3">
-            <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-xs text-muted-foreground">IMG</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">{ex.name}</p>
-              <Badge variant="secondary" className="text-[10px] mt-0.5">
-                {ex.muscleGroup}
-              </Badge>
-            </div>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8"
-              onClick={() => handleAdd(ex.id)}
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
-          </Card>
+          <motion.div key={ex.id} variants={listItemVariants}>
+            <Card className="flex items-center gap-3 p-3">
+              <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-xs text-muted-foreground">IMG</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate">{ex.name}</p>
+                <Badge variant="secondary" className="text-[10px] mt-0.5">
+                  {ex.muscleGroup}
+                </Badge>
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8"
+                onClick={() => handleAdd(ex.id)}
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </Card>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Day selection sheet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
@@ -147,6 +171,6 @@ export default function ExerciseLibraryPage() {
           </div>
         </SheetContent>
       </Sheet>
-    </div>
+    </motion.div>
   );
 }

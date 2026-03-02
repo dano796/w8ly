@@ -21,6 +21,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  pageVariants,
+  listItemVariants,
+  tapAnimation,
+} from "@/utils/animations";
 
 const exerciseMap = Object.fromEntries(defaultExercises.map((e) => [e.id, e]));
 
@@ -38,8 +44,13 @@ export default function WeeklyPlannerPage() {
     isFromCarousel: boolean;
   } | null>(null);
   const [isCarouselCollapsed, setIsCarouselCollapsed] = useState(false);
-  const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [touchStartPos, setTouchStartPos] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
+    null,
+  );
 
   // Recent exercises from plan
   const recentExercises = useMemo(() => {
@@ -149,10 +160,10 @@ export default function WeeklyPlannerPage() {
       // Find which day card is under the touch point
       const touch = e.changedTouches[0];
       const element = document.elementFromPoint(touch.clientX, touch.clientY);
-      const dayCard = element?.closest('[data-day]');
+      const dayCard = element?.closest("[data-day]");
 
       if (dayCard) {
-        const targetDay = dayCard.getAttribute('data-day') as DayName;
+        const targetDay = dayCard.getAttribute("data-day") as DayName;
         handleDayDrop(targetDay);
       } else {
         // Cancel drag if not dropped on a day
@@ -164,7 +175,13 @@ export default function WeeklyPlannerPage() {
   };
 
   return (
-    <div className="pt-6 pb-4 flex flex-col h-[calc(100vh-4rem)]">
+    <motion.div
+      className="pt-6 pb-4 flex flex-col h-[calc(100vh-4rem)]"
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-4 px-4">
         <h1 className="text-2xl font-bold">Mi rutina semanal</h1>
@@ -180,126 +197,133 @@ export default function WeeklyPlannerPage() {
         }}
       >
         {plan.map((dayPlan, index) => (
-          <Card
+          <motion.div
             key={dayPlan.day}
-            data-day={dayPlan.day}
-            className={`flex-shrink-0 w-[80vw] max-w-[320px] p-4 flex flex-col snap-start h-fit max-h-[65vh] ${draggedExercise?.isFromCarousel ? 'ring-2 ring-primary/30' : ''}`}
-            onDragOver={(e) => {
-              if (draggedExercise?.isFromCarousel) {
-                e.preventDefault();
-                e.currentTarget.classList.add("ring-2", "ring-primary");
-              }
-            }}
-            onDragLeave={(e) => {
-              e.currentTarget.classList.remove("ring-2", "ring-primary");
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              e.currentTarget.classList.remove("ring-2", "ring-primary");
-              handleDayDrop(dayPlan.day);
-            }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.05, duration: 0.3 }}
+            className="flex-shrink-0 w-[80vw] max-w-[320px] snap-start"
           >
-            {/* Day header */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg">
-                  {dayPlan.day}
-                  {dayPlan.label ? ` - ${dayPlan.label}` : ""}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {dayPlan.exercises.length} ejercicio
-                  {dayPlan.exercises.length !== 1 ? "s" : ""}
-                </p>
-              </div>
-              {dayPlan.exercises.length > 0 && (
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-10 w-10 flex-shrink-0 min-w-[44px] min-h-[44px]"
-                  onClick={() => navigate(`/workout/${dayPlan.day}`)}
-                >
-                  <Play className="w-5 h-5" />
-                </Button>
-              )}
-            </div>
-
-            {/* Exercise list — vertical scroll inside the card */}
-            <div
-              className="flex-1 overflow-y-auto space-y-3"
-              style={{ WebkitOverflowScrolling: "touch" }}
+            <Card
+              data-day={dayPlan.day}
+              className={`p-4 flex flex-col h-fit max-h-[65vh] ${draggedExercise?.isFromCarousel ? "ring-2 ring-primary/30" : ""}`}
+              onDragOver={(e) => {
+                if (draggedExercise?.isFromCarousel) {
+                  e.preventDefault();
+                  e.currentTarget.classList.add("ring-2", "ring-primary");
+                }
+              }}
+              onDragLeave={(e) => {
+                e.currentTarget.classList.remove("ring-2", "ring-primary");
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove("ring-2", "ring-primary");
+                handleDayDrop(dayPlan.day);
+              }}
             >
-              {dayPlan.exercises.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  Agrega ejercicios con el botón +
-                </p>
-              ) : (
-                dayPlan.exercises.map((ex, idx) => {
-                  const data = exerciseMap[ex.exerciseId];
-                  if (!data) return null;
-                  return (
-                    <div
-                      key={ex.id}
-                      draggable
-                      onDragStart={() => handleDragStart(dayPlan.day, idx)}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={() => handleDrop(dayPlan.day, idx)}
-                      className="flex items-start gap-3 p-3 bg-card rounded-lg border hover:bg-accent/50 transition-colors"
-                    >
-                      <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs text-muted-foreground">
-                          IMG
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold mb-1">
-                          {data.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground mb-1.5">
-                          {ex.sets} series x {ex.reps} reps
-                        </p>
-                        <Badge variant="secondary" className="text-xs">
-                          {data.muscleGroup}
-                        </Badge>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-10 w-10 flex-shrink-0 min-w-[44px] min-h-[44px]"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() =>
-                              removeExerciseFromDay(dayPlan.day, ex.id)
-                            }
-                          >
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  );
-                })
-              )}
-
-              {/* Add exercise button at bottom of list */}
-              <div className="flex justify-center pt-2">
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-12 w-12 rounded-full"
-                  onClick={() => navigate(`/exercises?day=${dayPlan.day}`)}
-                >
-                  <Plus className="w-5 h-5" />
-                </Button>
+              {/* Day header */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg">
+                    {dayPlan.day}
+                    {dayPlan.label ? ` - ${dayPlan.label}` : ""}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {dayPlan.exercises.length} ejercicio
+                    {dayPlan.exercises.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+                {dayPlan.exercises.length > 0 && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-10 w-10 flex-shrink-0 min-w-[44px] min-h-[44px]"
+                    onClick={() => navigate(`/workout/${dayPlan.day}`)}
+                  >
+                    <Play className="w-5 h-5" />
+                  </Button>
+                )}
               </div>
-            </div>
-          </Card>
+
+              {/* Exercise list — vertical scroll inside the card */}
+              <div
+                className="flex-1 overflow-y-auto space-y-3"
+                style={{ WebkitOverflowScrolling: "touch" }}
+              >
+                {dayPlan.exercises.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    Agrega ejercicios con el botón +
+                  </p>
+                ) : (
+                  dayPlan.exercises.map((ex, idx) => {
+                    const data = exerciseMap[ex.exerciseId];
+                    if (!data) return null;
+                    return (
+                      <div
+                        key={ex.id}
+                        draggable
+                        onDragStart={() => handleDragStart(dayPlan.day, idx)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => handleDrop(dayPlan.day, idx)}
+                        className="flex items-start gap-3 p-3 bg-card rounded-lg border hover:bg-accent/50 transition-colors"
+                      >
+                        <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs text-muted-foreground">
+                            IMG
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold mb-1">
+                            {data.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground mb-1.5">
+                            {ex.sets} series x {ex.reps} reps
+                          </p>
+                          <Badge variant="secondary" className="text-xs">
+                            {data.muscleGroup}
+                          </Badge>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-10 w-10 flex-shrink-0 min-w-[44px] min-h-[44px]"
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() =>
+                                removeExerciseFromDay(dayPlan.day, ex.id)
+                              }
+                            >
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    );
+                  })
+                )}
+
+                {/* Add exercise button at bottom of list */}
+                <div className="flex justify-center pt-2">
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="h-12 w-12 rounded-full"
+                    onClick={() => navigate(`/exercises?day=${dayPlan.day}`)}
+                  >
+                    <Plus className="w-5 h-5" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
         ))}
       </div>
 
@@ -340,32 +364,44 @@ export default function WeeklyPlannerPage() {
                     scrollBehavior: "smooth",
                   }}
                 >
-                  {recentExercises.map((ex) => (
-                    <Card
+                  {recentExercises.map((ex, idx) => (
+                    <motion.div
                       key={ex.exerciseId}
-                      draggable
-                      onDragStart={() => handleCarouselDragStart(ex.exerciseId)}
-                      onDragEnd={() => setDraggedExercise(null)}
-                      onTouchStart={(e) => handleTouchStart(e, ex.exerciseId)}
-                      onTouchMove={handleTouchMove}
-                      onTouchEnd={handleTouchEnd}
-                      className={`flex-shrink-0 p-3 w-36 hover:bg-accent transition-all touch-none select-none ${draggedExercise?.exerciseId === ex.exerciseId
-                          ? 'opacity-50 scale-95'
-                          : 'cursor-grab active:cursor-grabbing'
-                        }`}
+                      variants={listItemVariants}
+                      initial="hidden"
+                      animate="visible"
+                      transition={{ delay: idx * 0.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex-shrink-0"
                     >
-                      <div className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2">
-                        <span className="text-xs text-muted-foreground">
-                          IMG
-                        </span>
-                      </div>
-                      <p className="text-sm font-semibold truncate mb-1">
-                        {ex.name}
-                      </p>
-                      <Badge variant="secondary" className="text-xs">
-                        {ex.muscleGroup}
-                      </Badge>
-                    </Card>
+                      <Card
+                        draggable
+                        onDragStart={() =>
+                          handleCarouselDragStart(ex.exerciseId)
+                        }
+                        onDragEnd={() => setDraggedExercise(null)}
+                        onTouchStart={(e) => handleTouchStart(e, ex.exerciseId)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                        className={`p-3 w-36 hover:bg-accent transition-all touch-none select-none ${
+                          draggedExercise?.exerciseId === ex.exerciseId
+                            ? "opacity-50 scale-95"
+                            : "cursor-grab active:cursor-grabbing"
+                        }`}
+                      >
+                        <div className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2">
+                          <span className="text-xs text-muted-foreground">
+                            IMG
+                          </span>
+                        </div>
+                        <p className="text-sm font-semibold truncate mb-1">
+                          {ex.name}
+                        </p>
+                        <Badge variant="secondary" className="text-xs">
+                          {ex.muscleGroup}
+                        </Badge>
+                      </Card>
+                    </motion.div>
                   ))}
                 </div>
               ) : (
@@ -386,6 +422,6 @@ export default function WeeklyPlannerPage() {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

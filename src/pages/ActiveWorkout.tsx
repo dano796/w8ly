@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
@@ -12,6 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Check, Plus } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  pageVariants,
+  listContainerVariants,
+  listItemVariants,
+} from "@/utils/animations";
 
 const exerciseMap = Object.fromEntries(defaultExercises.map((e) => [e.id, e]));
 
@@ -24,9 +30,14 @@ export default function ActiveWorkoutPage() {
 
   const dayPlan = plan.find((d) => d.day === day);
 
-  const [exercises, setExercises] = useState<WorkoutExercise[]>(() => {
-    if (!dayPlan) return [];
-    return dayPlan.exercises.map((pe) => {
+  const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
+  const [startTime] = useState(Date.now());
+  const [elapsed, setElapsed] = useState(0);
+
+  // Initialize exercises from plan
+  useEffect(() => {
+    if (!dayPlan) return;
+    const init: WorkoutExercise[] = dayPlan.exercises.map((pe) => {
       const prev = getLastPerformance(pe.exerciseId);
       const sets: WorkoutSet[] = Array.from({ length: pe.sets }, (_, i) => ({
         setNumber: i + 1,
@@ -39,9 +50,8 @@ export default function ActiveWorkoutPage() {
       }));
       return { exerciseId: pe.exerciseId, sets };
     });
-  });
-  const [startTime] = useState(() => Date.now());
-  const [elapsed, setElapsed] = useState(0);
+    setExercises(init);
+  }, []);
 
   // Timer
   useEffect(() => {
@@ -129,7 +139,13 @@ export default function ActiveWorkoutPage() {
   }
 
   return (
-    <div className="px-4 pt-6 pb-8 max-w-lg mx-auto">
+    <motion.div
+      className="px-4 pt-6 pb-8 max-w-lg mx-auto"
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -153,7 +169,12 @@ export default function ActiveWorkoutPage() {
       </div>
 
       {/* Progress */}
-      <div className="mb-6">
+      <motion.div
+        className="mb-6"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
+      >
         <div className="flex justify-between text-xs text-muted-foreground mb-1">
           <span>
             {completedSets} de {totalSets} series
@@ -166,97 +187,111 @@ export default function ActiveWorkoutPage() {
           value={totalSets > 0 ? (completedSets / totalSets) * 100 : 0}
           className="h-2"
         />
-      </div>
+      </motion.div>
 
       {/* Exercise cards */}
-      <div className="space-y-4">
+      <motion.div
+        className="space-y-4"
+        variants={listContainerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {exercises.map((ex, exIdx) => {
           const data = exerciseMap[ex.exerciseId];
           if (!data) return null;
 
           return (
-            <Card key={exIdx} className="p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs text-muted-foreground">IMG</span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">{data.name}</p>
-                  <Badge variant="secondary" className="text-[10px]">
-                    {data.muscleGroup}
-                  </Badge>
-                </div>
-              </div>
-
-              <p className="text-xs text-muted-foreground mb-3">
-                Tiempo de descanso: {settings.defaultRestTime}m 0s
-              </p>
-
-              {/* Sets table */}
-              <div className="space-y-1">
-                <div className="grid grid-cols-[2rem_3rem_1fr_1fr_2rem] gap-1 text-[10px] font-semibold text-muted-foreground px-1">
-                  <span>Serie</span>
-                  <span>Previo</span>
-                  <span>Peso ({settings.defaultUnit})</span>
-                  <span>Reps</span>
-                  <span>✓</span>
-                </div>
-                {ex.sets.map((set, setIdx) => (
-                  <div
-                    key={setIdx}
-                    className="grid grid-cols-[2rem_3rem_1fr_1fr_2rem] gap-1 items-center px-1"
-                  >
-                    <span className="text-xs text-center">{set.setNumber}</span>
-                    <span className="text-xs text-muted-foreground text-center">
-                      {set.previous
-                        ? `${set.previous.weight}×${set.previous.reps}`
-                        : "-"}
-                    </span>
-                    <Input
-                      type="number"
-                      value={set.weight || ""}
-                      onChange={(e) =>
-                        updateSet(
-                          exIdx,
-                          setIdx,
-                          "weight",
-                          Number(e.target.value),
-                        )
-                      }
-                      className="h-8 text-xs text-center px-1"
-                    />
-                    <Input
-                      type="number"
-                      value={set.reps || ""}
-                      onChange={(e) =>
-                        updateSet(exIdx, setIdx, "reps", Number(e.target.value))
-                      }
-                      className="h-8 text-xs text-center px-1"
-                    />
-                    <div className="flex justify-center">
-                      <Checkbox
-                        checked={set.completed}
-                        onCheckedChange={(v) =>
-                          updateSet(exIdx, setIdx, "completed", v)
-                        }
-                      />
-                    </div>
+            <motion.div key={exIdx} variants={listItemVariants}>
+              <Card className="p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs text-muted-foreground">IMG</span>
                   </div>
-                ))}
-              </div>
+                  <div>
+                    <p className="text-sm font-semibold">{data.name}</p>
+                    <Badge variant="secondary" className="text-[10px]">
+                      {data.muscleGroup}
+                    </Badge>
+                  </div>
+                </div>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-2 text-xs w-full"
-                onClick={() => addSet(exIdx)}
-              >
-                <Plus className="w-3 h-3 mr-1" /> Agregar serie
-              </Button>
-            </Card>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Tiempo de descanso: {settings.defaultRestTime}m 0s
+                </p>
+
+                {/* Sets table */}
+                <div className="space-y-1">
+                  <div className="grid grid-cols-[2rem_3rem_1fr_1fr_2rem] gap-1 text-[10px] font-semibold text-muted-foreground px-1">
+                    <span>Serie</span>
+                    <span>Previo</span>
+                    <span>Peso ({settings.defaultUnit})</span>
+                    <span>Reps</span>
+                    <span>✓</span>
+                  </div>
+                  {ex.sets.map((set, setIdx) => (
+                    <div
+                      key={setIdx}
+                      className="grid grid-cols-[2rem_3rem_1fr_1fr_2rem] gap-1 items-center px-1"
+                    >
+                      <span className="text-xs text-center">
+                        {set.setNumber}
+                      </span>
+                      <span className="text-xs text-muted-foreground text-center">
+                        {set.previous
+                          ? `${set.previous.weight}×${set.previous.reps}`
+                          : "-"}
+                      </span>
+                      <Input
+                        type="number"
+                        value={set.weight || ""}
+                        onChange={(e) =>
+                          updateSet(
+                            exIdx,
+                            setIdx,
+                            "weight",
+                            Number(e.target.value),
+                          )
+                        }
+                        className="h-8 text-xs text-center px-1"
+                      />
+                      <Input
+                        type="number"
+                        value={set.reps || ""}
+                        onChange={(e) =>
+                          updateSet(
+                            exIdx,
+                            setIdx,
+                            "reps",
+                            Number(e.target.value),
+                          )
+                        }
+                        className="h-8 text-xs text-center px-1"
+                      />
+                      <div className="flex justify-center">
+                        <Checkbox
+                          checked={set.completed}
+                          onCheckedChange={(v) =>
+                            updateSet(exIdx, setIdx, "completed", v)
+                          }
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 text-xs w-full"
+                  onClick={() => addSet(exIdx)}
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Agregar serie
+                </Button>
+              </Card>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
 
       <Button
         variant="outline"
@@ -265,6 +300,6 @@ export default function ActiveWorkoutPage() {
       >
         <Plus className="w-4 h-4 mr-1" /> Agregar ejercicio
       </Button>
-    </div>
+    </motion.div>
   );
 }

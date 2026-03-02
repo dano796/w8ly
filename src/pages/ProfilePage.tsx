@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { pageVariants, scaleInVariants } from "@/utils/animations";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useLocalStorage<Profile>("w8ly-profile", {
@@ -32,43 +34,55 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="px-4 pt-6 max-w-lg mx-auto">
+    <motion.div
+      className="px-4 pt-6 max-w-lg mx-auto"
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <h1 className="text-2xl font-bold mb-6">Perfil</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Información personal</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="name">Nombre</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Tu nombre"
-            />
-            {errors.name && (
-              <p className="text-xs text-destructive mt-1">{errors.name}</p>
-            )}
-          </div>
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
-            />
-            {errors.email && (
-              <p className="text-xs text-destructive mt-1">{errors.email}</p>
-            )}
-          </div>
-          <Button onClick={handleSave} className="w-full">
-            Guardar
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+      <motion.div
+        variants={scaleInVariants}
+        initial="initial"
+        animate="animate"
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Información personal</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="name">Nombre</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Tu nombre"
+              />
+              {errors.name && (
+                <p className="text-xs text-destructive mt-1">{errors.name}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@email.com"
+              />
+              {errors.email && (
+                <p className="text-xs text-destructive mt-1">{errors.email}</p>
+              )}
+            </div>
+            <Button onClick={handleSave} className="w-full">
+              Guardar
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }
