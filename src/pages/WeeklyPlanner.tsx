@@ -304,16 +304,27 @@ export default function WeeklyPlannerPage() {
       const deltaX = Math.abs(touch.clientX - touchStartPos.x);
       const deltaY = Math.abs(touch.clientY - touchStartPos.y);
 
-      // If moved more than 15px before long press, cancel it (user is scrolling)
-      if ((deltaX > 15 || deltaY > 15) && longPressTimer) {
+      // If moved vertically before long press completes, cancel it (user is scrolling)
+      if (deltaY > 10 && longPressTimer) {
         clearTimeout(longPressTimer);
         setLongPressTimer(null);
         setTouchStartPos(null);
+        return; // Allow native scroll to continue
+      }
+
+      // Also cancel if moved too much horizontally
+      if (deltaX > 15 && longPressTimer) {
+        clearTimeout(longPressTimer);
+        setLongPressTimer(null);
+        setTouchStartPos(null);
+        return;
       }
     }
 
     // If drag is active, update position and detect target
     if (draggedExercise) {
+      // Prevent default scrolling only when actively dragging
+      e.preventDefault();
       setTouchCurrentPos({ x: touch.clientX, y: touch.clientY });
       lastTouchXRef.current = touch.clientX;
 
@@ -548,7 +559,12 @@ export default function WeeklyPlannerPage() {
                             ? "opacity-50"
                             : ""
                         }`}
-                        style={{ touchAction: "none" }}
+                        style={{
+                          touchAction:
+                            draggedExercise?.sourceExId === ex.id
+                              ? "none"
+                              : "pan-y",
+                        }}
                       >
                         <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
                           <span className="text-xs text-muted-foreground">
