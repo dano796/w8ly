@@ -29,16 +29,7 @@ import {
   listContainerVariants,
   listItemVariants,
 } from "@/utils/animations";
-import {
-  User,
-  Calendar,
-  Clock,
-  Dumbbell,
-  Edit2,
-  Flame,
-  TrendingUp,
-  Target,
-} from "lucide-react";
+import { User, Clock, Edit2, Flame, TrendingUp } from "lucide-react";
 import { convertWeight } from "@/utils/unitConversion";
 import { defaultExercises } from "@/utils/exerciseData";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
@@ -127,9 +118,11 @@ export default function ProfilePage() {
   };
 
   const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins} min ${secs} s`;
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    if (h > 0) return `${h}h ${m}min`;
+    return `${m}min ${s}s`;
   };
 
   const getInitial = () => {
@@ -138,17 +131,6 @@ export default function ProfilePage() {
 
   const totalWorkouts = localHistory.length;
   const recentWorkouts = localHistory.slice(0, 10);
-
-  // Calculate stats
-  const totalSets = localHistory.reduce((sum, workout) => {
-    return (
-      sum +
-      workout.exercises.reduce(
-        (exSum, ex) => exSum + ex.sets.filter((s) => s.completed).length,
-        0,
-      )
-    );
-  }, 0);
 
   const totalTime = localHistory.reduce(
     (sum, workout) => sum + workout.durationSeconds,
@@ -163,9 +145,6 @@ export default function ProfilePage() {
     }
     return `${mins} min`;
   };
-
-  const avgDuration =
-    totalWorkouts > 0 ? Math.floor(totalTime / totalWorkouts / 60) : 0;
 
   const uniqueExercises = new Set(
     localHistory.flatMap((workout) =>
@@ -268,14 +247,14 @@ export default function ProfilePage() {
       exit="exit"
     >
       {/* Profile Header */}
-      <div className="flex flex-col items-center mb-6">
-        <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center mb-3">
+      <div className="flex flex-col items-center mb-4">
+        <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mb-3">
           <span className="text-3xl font-bold text-primary-foreground">
             {getInitial()}
           </span>
         </div>
 
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2 mb-3">
           <h1 className="text-2xl font-bold">{profile.name || "Usuario"}</h1>
           <Button
             size="icon"
@@ -294,7 +273,7 @@ export default function ProfilePage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Editar perfil</AlertDialogTitle>
             <AlertDialogDescription>
-              Actualiza tu nombre de usuario aquí.
+              Actualiza tu nombre de usuario aquí
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-2">
@@ -322,44 +301,31 @@ export default function ProfilePage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3 mb-3">
-        <Card className="p-4 flex items-center gap-3">
-          <Dumbbell className="w-8 h-8 text-primary" />
-          <div>
-            <p className="text-sm text-muted-foreground">Entrenamientos</p>
-            <p className="text-base font-semibold">{totalWorkouts}</p>
+      {/* Compact stats row en tarjeta */}
+      {totalWorkouts > 0 && (
+        <Card className="w-full mx-auto p-4 mb-3">
+          <div className="flex items-center justify-between gap-5 text-center">
+            <div className="flex-1">
+              <p className="text-lg font-semibold">{totalWorkouts}</p>
+              <p className="text-sm text-muted-foreground">entrenos</p>
+            </div>
+            <div className="w-px h-8 bg-border" />
+            <div className="flex-1">
+              <p className="text-lg font-semibold">{totalTimeFormatted()}</p>
+              <p className="text-sm text-muted-foreground">tiempo total</p>
+            </div>
+            <div className="w-px h-8 bg-border" />
+            <div className="flex-1">
+              <p className="text-lg font-semibold">{uniqueExercises}</p>
+              <p className="text-sm text-muted-foreground">ejercicios</p>
+            </div>
           </div>
         </Card>
-
-        <Card className="p-4 flex items-center gap-3">
-          <Target className="w-8 h-8 text-primary" />
-          <div>
-            <p className="text-sm text-muted-foreground">Series totales</p>
-            <p className="text-base font-semibold">{totalSets}</p>
-          </div>
-        </Card>
-
-        <Card className="p-4 flex items-center gap-3">
-          <Clock className="w-8 h-8 text-primary" />
-          <div>
-            <p className="text-sm text-muted-foreground">Tiempo total</p>
-            <p className="text-base font-semibold">{totalTimeFormatted()}</p>
-          </div>
-        </Card>
-
-        <Card className="p-4 flex items-center gap-3">
-          <TrendingUp className="w-8 h-8 text-primary" />
-          <div>
-            <p className="text-sm text-muted-foreground">Promedio</p>
-            <p className="text-base font-semibold">{avgDuration} min</p>
-          </div>
-        </Card>
-      </div>
+      )}
 
       {/* Weekly Streak Card */}
       {totalWorkouts > 0 && (
-        <Card className="p-4 mb-6">
+        <Card className="p-4 mb-3">
           <div className="flex items-center gap-3">
             <Flame
               className={`w-8 h-8 ${weeklyStreak > 0 ? "text-orange-500" : "text-muted-foreground"}`}
@@ -383,7 +349,14 @@ export default function ProfilePage() {
       )}
 
       <WeeklyStatsChart history={localHistory} />
-      <WorkoutCalendar history={localHistory} />
+      <WorkoutCalendar
+        history={localHistory}
+        onSummaryNavigate={(workout) =>
+          navigate(`/summary/${workout.id}`, {
+            state: { ...workout, fromProfile: true },
+          })
+        }
+      />
 
       <div className="mb-4">
         <h2 className="text-lg font-semibold mb-3">Entrenamientos recientes</h2>

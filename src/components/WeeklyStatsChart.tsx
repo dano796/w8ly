@@ -155,7 +155,12 @@ export default function WeeklyStatsChart({ history }: WeeklyStatsChartProps) {
     });
   }, [weekBuckets, mode, volumeByDay, secondsByDay]);
 
-  const maxValue = Math.max(...bucketValues, 1);
+  // realMax: actual maximum across buckets (0 if no data).
+  // Used to decide time axis unit — must NOT fall back to 1 so that
+  // "all sessions < 1h" correctly renders the axis in minutes.
+  const realMax = Math.max(...bucketValues, 0);
+  // maxValue: used for bar height scaling — fallback to 1 avoids division by zero.
+  const maxValue = Math.max(realMax, 1);
   const monthTotal = bucketValues.reduce((a, b) => a + b, 0);
 
   const monthDays = useMemo(() => {
@@ -212,15 +217,16 @@ export default function WeeklyStatsChart({ history }: WeeklyStatsChartProps) {
 
   // For time mode: decide axis unit based on maxValue (hours).
   // If max weekly time >= 1h → show in hours; otherwise show in minutes.
-  const timeAxisInHours = mode === "time" && maxValue >= 1;
+  // Use realMax so that months with only short sessions stay in minutes.
+  const timeAxisInHours = mode === "time" && realMax >= 1;
 
   const formatTotal = (val: number) => {
     if (mode === "time") {
       const h = Math.floor(val);
       const m = Math.round((val - h) * 60);
-      if (h === 0) return `${m}m`;
-      if (m === 0) return `${h}h`;
-      return `${h}h ${m}m`;
+      if (h === 0) return `${m} min`;
+      if (m === 0) return `${h} h`;
+      return `${h} h ${m} min`;
     }
     if (val >= 1000) return `${(val / 1000).toFixed(1)}k ${unit}`;
     return `${Math.round(val)} ${unit}`;
@@ -234,16 +240,16 @@ export default function WeeklyStatsChart({ history }: WeeklyStatsChartProps) {
 
     if (mode === "time") {
       if (timeAxisInHours) {
-        // Horas con sufijo "hrs"
+        // Show in hours with "hrs" suffix always
         const formatted = Number.isInteger(val) ? val : val.toFixed(1);
         return `${formatted} hrs`;
       } else {
-        // Minutos con sufijo "min"
+        // Show in minutes with "min" suffix always (maxValue < 1h, so val*60 is minutes)
         return `${Math.round(val * 60)} min`;
       }
     }
 
-    // Modo volumen — mostrar kg o lbs según configuración
+    // Volume mode — always append unit
     if (val >= 1000) {
       const k = val / 1000;
       return `${k % 1 === 0 ? k : k.toFixed(1)}k ${unit}`;
@@ -268,19 +274,16 @@ export default function WeeklyStatsChart({ history }: WeeklyStatsChartProps) {
               {displayLabel}
             </motion.p>
           </AnimatePresence>
-          {/* Línea aparte para el total de la semana seleccionada */}
           <AnimatePresence mode="wait">
             <motion.p
-              key={`detail-${selectedBucket !== null ? selectedBucket : "month"}-${mode}`}
+              key={`${displayValue}-${mode}`}
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.12 }}
-              className="text-base font-semibold tabular-nums my-1"
+              className="text-lg font-semibold tabular-nums"
             >
-              {selectedBucket !== null
-                ? `${formatTotal(bucketValues[selectedBucket])} esta semana`
-                : formatTotal(monthTotal)}
+              {formatTotal(displayValue)}
             </motion.p>
           </AnimatePresence>
           <AnimatePresence mode="wait">
@@ -360,8 +363,9 @@ export default function WeeklyStatsChart({ history }: WeeklyStatsChartProps) {
       {/* Chart */}
       <div className="px-4 pb-4 pt-4">
         <div className="flex gap-2">
+          {/* Y-axis — wider to fit "1.2k kg" style labels */}
           <div
-            className="relative flex-shrink-0 w-11"
+            className="relative flex-shrink-0 w-12"
             style={{ height: BAR_MAX_H + 24 }}
           >
             {Y_TICK_RATIOS.map((ratio) => (

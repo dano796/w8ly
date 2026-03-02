@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface WorkoutCalendarProps {
   history: CompletedWorkout[];
+  onSummaryNavigate?: (workout: CompletedWorkout) => void;
 }
 
 const MONTH_NAMES = [
@@ -33,7 +34,10 @@ const toLocalDateKey = (date: Date): string => {
   return `${y}-${m}-${d}`;
 };
 
-export default function WorkoutCalendar({ history }: WorkoutCalendarProps) {
+export default function WorkoutCalendar({
+  history,
+  onSummaryNavigate,
+}: WorkoutCalendarProps) {
   const navigate = useNavigate();
   const today = new Date();
 
@@ -106,7 +110,11 @@ export default function WorkoutCalendar({ history }: WorkoutCalendarProps) {
     const key = `${viewDate.year}-${String(viewDate.month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     const workout = workoutByDay.get(key);
     if (workout) {
-      navigate(`/summary/${workout.id}`, { state: workout });
+      if (onSummaryNavigate) {
+        onSummaryNavigate(workout);
+      } else {
+        navigate(`/summary/${workout.id}`, { state: workout });
+      }
     }
   };
 
