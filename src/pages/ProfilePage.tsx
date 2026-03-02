@@ -57,6 +57,11 @@ export default function ProfilePage() {
   const [tempName, setTempName] = useState("");
   const [localHistory, setLocalHistory] = useState<CompletedWorkout[]>(history);
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
+
   // Update history when page becomes visible or when history prop changes
   useEffect(() => {
     setLocalHistory(history);
@@ -373,7 +378,6 @@ export default function ProfilePage() {
         </Card>
       )}
 
-      {/* Recent Workouts */}
       <div className="mb-4">
         <h2 className="text-lg font-semibold mb-3">Entrenamientos recientes</h2>
       </div>

@@ -40,7 +40,7 @@ export default function ExerciseDetailSheet({
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <SheetHeader className="p-0 space-y-0 absolute left-1/2 -translate-x-1/2">
-              <SheetTitle className="text-xl font-bold">
+              <SheetTitle className="text-base font-bold">
                 {exercise.name}
               </SheetTitle>
               <SheetDescription className="sr-only">
@@ -74,26 +74,20 @@ export default function ExerciseDetailSheet({
               {exercise.difficulty && (
                 <Badge
                   variant="outline"
-                  className={`text-sm px-3 py-1 ${
-                    exercise.difficulty === "beginner"
+                  className={`text-sm px-3 py-1 capitalize ${
+                    exercise.difficulty.toLowerCase() === "principiante"
                       ? "border-green-600 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950"
-                      : exercise.difficulty === "intermediate"
+                      : exercise.difficulty.toLowerCase() === "intermedio"
                         ? "border-yellow-600 text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950"
                         : "border-red-600 text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950"
                   }`}
                 >
-                  {exercise.difficulty === "beginner"
-                    ? "Principiante"
-                    : exercise.difficulty === "intermediate"
-                      ? "Intermedio"
-                      : "Avanzado"}
+                  {exercise.difficulty.charAt(0).toUpperCase() +
+                    exercise.difficulty.slice(1)}
                 </Badge>
               )}
               {exercise.equipment && (
-                <Badge
-                  variant="outline"
-                  className="text-sm px-3 py-1 capitalize"
-                >
+                <Badge variant="outline" className="text-sm px-3 py-1">
                   {exercise.equipment}
                 </Badge>
               )}

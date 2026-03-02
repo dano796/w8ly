@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { defaultExercises } from "@/utils/exerciseData";
 import { DayName, DAYS, MuscleGroup, Exercise } from "@/utils/types";
@@ -78,6 +78,7 @@ export default function ExerciseLibraryPage() {
   const [detailExercise, setDetailExercise] = useState<Exercise | null>(null);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(15);
+  const observerRef = useRef<HTMLDivElement>(null);
 
   // Get currently added exercises if coming from active workout
   const state = location.state as {
@@ -119,14 +120,32 @@ export default function ExerciseLibraryPage() {
   const visibleExercises = searchFiltered.slice(0, visibleCount);
   const hasMore = searchFiltered.length > visibleCount;
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     setVisibleCount((prev) => Math.min(prev + 15, searchFiltered.length));
-  };
+  }, [searchFiltered.length]);
 
   // Reset visible count when filters change
   useEffect(() => {
     setVisibleCount(15);
   }, [activeFilter, searchTerm]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!observerRef.current || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" },
+    );
+
+    observer.observe(observerRef.current);
+
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
 
   const toggleSelection = (exerciseId: string) => {
     // Don't allow selection of exercises already in the workout
@@ -451,21 +470,16 @@ export default function ExerciseLibraryPage() {
           );
         })}
 
-        {/* Load More Button */}
+        {/* Infinite scroll sentinel */}
         {hasMore && (
-          <motion.div
-            variants={listItemVariants}
-            className="flex justify-center py-4"
+          <div
+            ref={observerRef}
+            className="h-10 flex items-center justify-center"
           >
-            <Button
-              variant="outline"
-              onClick={loadMore}
-              className="w-full max-w-xs"
-            >
-              Cargar más ejercicios ({searchFiltered.length - visibleCount}{" "}
-              restantes)
-            </Button>
-          </motion.div>
+            <div className="text-sm text-muted-foreground animate-pulse">
+              Cargando más ejercicios...
+            </div>
+          </div>
         )}
       </motion.div>
 
