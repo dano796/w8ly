@@ -46,27 +46,27 @@ export function useWeeklyPlan() {
     toDay: DayName,
     exerciseInstanceId: string,
   ): boolean => {
-    let moved = false;
-    setPlan((prev) => {
-      const fromDayPlan = prev.find((d) => d.day === fromDay);
-      const exercise = fromDayPlan?.exercises.find(
-        (e) => e.id === exerciseInstanceId,
-      );
-      if (!exercise) return prev;
+    // Check for duplicates before updating state
+    const fromDayPlan = plan.find((d) => d.day === fromDay);
+    const exercise = fromDayPlan?.exercises.find(
+      (e) => e.id === exerciseInstanceId,
+    );
 
-      // Check if exercise already exists in target day
-      const toDayPlan = prev.find((d) => d.day === toDay);
-      const exerciseExists = toDayPlan?.exercises.some(
-        (ex) => ex.exerciseId === exercise.exerciseId,
-      );
+    if (!exercise) return false;
 
-      if (exerciseExists) {
-        moved = false;
-        return prev; // Don't move if duplicate
-      }
+    // Check if exercise already exists in target day
+    const toDayPlan = plan.find((d) => d.day === toDay);
+    const exerciseExists = toDayPlan?.exercises.some(
+      (ex) => ex.exerciseId === exercise.exerciseId,
+    );
 
-      moved = true;
-      return prev.map((d) => {
+    if (exerciseExists) {
+      return false; // Don't move if duplicate
+    }
+
+    // Perform the move
+    setPlan((prev) =>
+      prev.map((d) => {
         if (d.day === fromDay)
           return {
             ...d,
@@ -75,9 +75,10 @@ export function useWeeklyPlan() {
         if (d.day === toDay)
           return { ...d, exercises: [...d.exercises, exercise] };
         return d;
-      });
-    });
-    return moved;
+      }),
+    );
+
+    return true;
   };
 
   const updateDayExercises = (day: DayName, exercises: PlannedExercise[]) => {

@@ -1,5 +1,5 @@
-const CACHE_NAME = "w8ly-v1";
-const urlsToCache = ["/", "/index.html", "/src/main.tsx", "/src/index.css"];
+const CACHE_NAME = "w8ly-v2"; // Increment version to force update
+const urlsToCache = ["/", "/index.html"];
 
 // Install service worker and cache assets
 self.addEventListener("install", (event) => {
@@ -8,17 +8,31 @@ self.addEventListener("install", (event) => {
       return cache.addAll(urlsToCache);
     }),
   );
+  // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
 });
 
-// Fetch from cache first, then network
+// Stale-While-Revalidate strategy:
+// Serve from cache immediately, but update cache in background
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Cache hit - return response
-      if (response) {
-        return response;
-      }
-      return fetch(event.request);
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.match(event.request).then((cachedResponse) => {
+        // Fetch from network and update cache in background
+        const fetchPromise = fetch(event.request)
+          .then((networkResponse) => {
+            // Update cache with new version
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          })
+          .catch(() => {
+            // Network failed, return cached response if available
+            return cachedResponse;
+          });
+
+        // Return cached response immediately if available, otherwise wait for network
+        return cachedResponse || fetchPromise;
+      });
     }),
   );
 });
@@ -36,4 +50,6 @@ self.addEventListener("activate", (event) => {
       );
     }),
   );
+  // Take control of all pages immediately
+  return self.clients.claim();
 });
