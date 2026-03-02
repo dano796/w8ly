@@ -8,6 +8,17 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -15,7 +26,16 @@ import {
   listContainerVariants,
   listItemVariants,
 } from "@/utils/animations";
-import { User, Calendar, Clock, Dumbbell, Edit2, Check, X } from "lucide-react";
+import {
+  User,
+  Calendar,
+  Clock,
+  Dumbbell,
+  Edit2,
+  Flame,
+  TrendingUp,
+  Target,
+} from "lucide-react";
 import { defaultExercises } from "@/utils/exerciseData";
 
 const exerciseMap = Object.fromEntries(defaultExercises.map((e) => [e.id, e]));
@@ -29,9 +49,8 @@ export default function ProfilePage() {
   const { history } = useWorkoutHistory();
   const { settings } = useSettings();
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(profile.name || "Usuario");
-  const [error, setError] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [tempName, setTempName] = useState("");
   const [localHistory, setLocalHistory] = useState<CompletedWorkout[]>(history);
 
   // Update history when page becomes visible or when history prop changes
@@ -60,20 +79,19 @@ export default function ProfilePage() {
   }, []);
 
   const handleSave = () => {
-    if (!name.trim()) {
-      setError("El nombre no puede estar vacío");
+    const trimmedName = tempName.trim();
+    if (!trimmedName) {
+      toast.error("El nombre no puede estar vacío");
       return;
     }
-    setError("");
-    setProfile({ ...profile, name: name.trim() });
-    setIsEditing(false);
+    setProfile({ ...profile, name: trimmedName });
+    setIsDialogOpen(false);
     toast.success("Perfil actualizado");
   };
 
-  const handleCancel = () => {
-    setName(profile.name || "Usuario");
-    setError("");
-    setIsEditing(false);
+  const handleOpenDialog = () => {
+    setTempName(profile.name || "");
+    setIsDialogOpen(true);
   };
 
   const formatDate = (dateString: string) => {
@@ -108,6 +126,126 @@ export default function ProfilePage() {
   const totalWorkouts = localHistory.length;
   const recentWorkouts = localHistory.slice(0, 10);
 
+  // Calculate stats
+  const totalSets = localHistory.reduce((sum, workout) => {
+    return (
+      sum +
+      workout.exercises.reduce(
+        (exSum, ex) => exSum + ex.sets.filter((s) => s.completed).length,
+        0,
+      )
+    );
+  }, 0);
+
+  const totalTime = localHistory.reduce(
+    (sum, workout) => sum + workout.durationSeconds,
+    0,
+  );
+
+  const totalTimeFormatted = () => {
+    const hours = Math.floor(totalTime / 3600);
+    const mins = Math.floor((totalTime % 3600) / 60);
+    if (hours > 0) {
+      return `${hours}h ${mins}m`;
+    }
+    return `${mins} min`;
+  };
+
+  const avgDuration =
+    totalWorkouts > 0 ? Math.floor(totalTime / totalWorkouts / 60) : 0;
+
+  const uniqueExercises = new Set(
+    localHistory.flatMap((workout) =>
+      workout.exercises
+        .filter((ex) => ex.sets.some((s) => s.completed))
+        .map((ex) => ex.exerciseId),
+    ),
+  ).size;
+
+  // Calculate weekly streak
+  const getWeekKey = (date: Date) => {
+    // Get Monday of the week
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    const monday = new Date(d.setDate(diff));
+    monday.setHours(0, 0, 0, 0);
+    return monday.toISOString().split("T")[0];
+  };
+
+  const calculateWeeklyStreak = () => {
+    if (localHistory.length === 0) return { current: 0, best: 0 };
+
+    // Group workouts by week
+    const weekMap = new Map<string, boolean>();
+    localHistory.forEach((workout) => {
+      const weekKey = getWeekKey(new Date(workout.date));
+      weekMap.set(weekKey, true);
+    });
+
+    // Sort weeks
+    const sortedWeeks = Array.from(weekMap.keys()).sort(
+      (a, b) => new Date(b).getTime() - new Date(a).getTime(),
+    );
+
+    if (sortedWeeks.length === 0) return { current: 0, best: 0 };
+
+    // Calculate current streak from most recent week
+    const today = new Date();
+    const currentWeek = getWeekKey(today);
+    const lastWeekDate = new Date(today);
+    lastWeekDate.setDate(lastWeekDate.getDate() - 7);
+    const lastWeek = getWeekKey(lastWeekDate);
+
+    let currentStreak = 0;
+    let bestStreak = 0;
+    let tempStreak = 0;
+
+    // Check if current or last week has workouts
+    if (sortedWeeks[0] === currentWeek || sortedWeeks[0] === lastWeek) {
+      currentStreak = 1;
+      tempStreak = 1;
+
+      // Count consecutive weeks backwards
+      for (let i = 1; i < sortedWeeks.length; i++) {
+        const expectedPrevWeek = new Date(sortedWeeks[i - 1]);
+        expectedPrevWeek.setDate(expectedPrevWeek.getDate() - 7);
+        const expectedWeekKey = getWeekKey(expectedPrevWeek);
+
+        if (sortedWeeks[i] === expectedWeekKey) {
+          currentStreak++;
+          tempStreak++;
+        } else {
+          // Gap found, start counting for best streak
+          if (tempStreak > bestStreak) bestStreak = tempStreak;
+          tempStreak = 1;
+        }
+      }
+    } else {
+      // Current streak is broken, calculate best from history
+      tempStreak = 1;
+      for (let i = 1; i < sortedWeeks.length; i++) {
+        const expectedPrevWeek = new Date(sortedWeeks[i - 1]);
+        expectedPrevWeek.setDate(expectedPrevWeek.getDate() - 7);
+        const expectedWeekKey = getWeekKey(expectedPrevWeek);
+
+        if (sortedWeeks[i] === expectedWeekKey) {
+          tempStreak++;
+        } else {
+          if (tempStreak > bestStreak) bestStreak = tempStreak;
+          tempStreak = 1;
+        }
+      }
+    }
+
+    if (tempStreak > bestStreak) bestStreak = tempStreak;
+    if (bestStreak < currentStreak) bestStreak = currentStreak;
+
+    return { current: currentStreak, best: bestStreak };
+  };
+
+  const { current: weeklyStreak, best: bestStreak } = calculateWeeklyStreak();
+
   return (
     <motion.div
       className="px-4 pt-6 pb-24 max-w-lg mx-auto"
@@ -124,59 +262,112 @@ export default function ProfilePage() {
           </span>
         </div>
 
-        {isEditing ? (
-          <div className="w-full max-w-xs space-y-2">
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Tu nombre"
-              className="text-center"
-              autoFocus
-            />
-            {error && (
-              <p className="text-xs text-destructive text-center">{error}</p>
-            )}
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex-1"
-                onClick={handleCancel}
-              >
-                <X className="w-4 h-4 mr-1" /> Cancelar
-              </Button>
-              <Button size="sm" className="flex-1" onClick={handleSave}>
-                <Check className="w-4 h-4 mr-1" /> Guardar
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">{profile.name || "Usuario"}</h1>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8"
-              onClick={() => setIsEditing(true)}
-            >
-              <Edit2 className="w-4 h-4" />
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center justify-center gap-2">
+          <h1 className="text-2xl font-bold">{profile.name || "Usuario"}</h1>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8"
+            onClick={handleOpenDialog}
+          >
+            <Edit2 className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
-      {/* Stats Card */}
-      <Card className="p-4 mb-6">
-        <div className="flex items-center gap-3">
+      {/* Edit Profile Dialog */}
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Editar perfil</AlertDialogTitle>
+            <AlertDialogDescription>
+              Actualiza tu nombre de usuario aquí.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid gap-2">
+            <Label htmlFor="name">Nombre</Label>
+            <Input
+              id="name"
+              value={tempName}
+              onChange={(e) => setTempName(e.target.value)}
+              placeholder="Ingresa tu nombre"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSave();
+                }
+              }}
+            />
+          </div>
+          <AlertDialogFooter className="flex-col sm:flex-col gap-2">
+            <AlertDialogAction onClick={handleSave} className="w-full m-0">
+              Guardar cambios
+            </AlertDialogAction>
+            <AlertDialogCancel className="w-full m-0">
+              Cancelar
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <Card className="p-4 flex items-center gap-3">
           <Dumbbell className="w-8 h-8 text-primary" />
           <div>
-            <p className="text-xs text-muted-foreground">
-              Entrenamientos completados
-            </p>
-            <p className="text-2xl font-semibold">{totalWorkouts}</p>
+            <p className="text-xs text-muted-foreground">Entrenamientos</p>
+            <p className="text-base font-semibold">{totalWorkouts}</p>
           </div>
-        </div>
-      </Card>
+        </Card>
+
+        <Card className="p-4 flex items-center gap-3">
+          <Target className="w-8 h-8 text-primary" />
+          <div>
+            <p className="text-xs text-muted-foreground">Series totales</p>
+            <p className="text-base font-semibold">{totalSets}</p>
+          </div>
+        </Card>
+
+        <Card className="p-4 flex items-center gap-3">
+          <Clock className="w-8 h-8 text-primary" />
+          <div>
+            <p className="text-xs text-muted-foreground">Tiempo total</p>
+            <p className="text-base font-semibold">{totalTimeFormatted()}</p>
+          </div>
+        </Card>
+
+        <Card className="p-4 flex items-center gap-3">
+          <TrendingUp className="w-8 h-8 text-primary" />
+          <div>
+            <p className="text-xs text-muted-foreground">Promedio</p>
+            <p className="text-base font-semibold">{avgDuration} min</p>
+          </div>
+        </Card>
+      </div>
+
+      {/* Weekly Streak Card */}
+      {totalWorkouts > 0 && (
+        <Card className="p-4 mb-6">
+          <div className="flex items-center gap-3">
+            <Flame
+              className={`w-8 h-8 ${weeklyStreak > 0 ? "text-orange-500" : "text-muted-foreground"}`}
+            />
+            <div className="flex-1">
+              <p className="text-xs text-muted-foreground">Racha semanal</p>
+              <p className="text-base font-semibold">
+                {weeklyStreak > 0
+                  ? `${weeklyStreak} ${weeklyStreak === 1 ? "semana" : "semanas"}`
+                  : "Sin racha activa"}
+              </p>
+            </div>
+            {bestStreak > 0 && bestStreak > weeklyStreak && (
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">Mejor</p>
+                <p className="text-sm font-semibold">{bestStreak}</p>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
 
       {/* Recent Workouts */}
       <div className="mb-4">
@@ -185,7 +376,7 @@ export default function ProfilePage() {
 
       {recentWorkouts.length > 0 ? (
         <motion.div
-          className="space-y-2"
+          className="space-y-3"
           variants={listContainerVariants}
           initial="hidden"
           animate="visible"
@@ -208,33 +399,32 @@ export default function ProfilePage() {
                 }
               >
                 <Card className="p-4 cursor-pointer hover:bg-accent/50 transition-colors">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-sm font-medium">{workout.day}</h3>
-                        <Badge variant="secondary" className="text-[10px]">
-                          {completedExercises} ejercicios
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {formatDate(workout.date)}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {formatDuration(workout.durationSeconds)}
-                        </div>
-                      </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-medium">{workout.day}</h3>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {completedExercises}{" "}
+                        {completedExercises === 1 ? "ejercicio" : "ejercicios"}
+                      </Badge>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">Series</p>
-                      <p className="text-sm font-semibold">{totalSets}</p>
+                    <Badge variant="outline" className="text-[10px]">
+                      {totalSets} {totalSets === 1 ? "serie" : "series"}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {formatDate(workout.date)}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {formatDuration(workout.durationSeconds)}
                     </div>
                   </div>
 
                   {/* Exercise preview */}
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  <div className="flex flex-wrap gap-1">
                     {workout.exercises
                       .filter((ex) => ex.sets.some((s) => s.completed))
                       .slice(0, 3)
