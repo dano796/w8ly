@@ -19,6 +19,13 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   ArrowLeft,
   Check,
   Plus,
@@ -46,6 +53,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function ActiveWorkoutPage() {
   const { day } = useParams<{ day: string }>();
@@ -74,6 +89,9 @@ export default function ActiveWorkoutPage() {
   const [showFinishDialog, setShowFinishDialog] = useState(false);
   const [pendingWorkout, setPendingWorkout] = useState<any>(null);
   const [revealedSet, setRevealedSet] = useState<string | null>(null);
+  const [unitChangeDialogExIdx, setUnitChangeDialogExIdx] = useState<
+    number | null
+  >(null);
 
   // Rest timer state
   const [restTimer, setRestTimer] = useState<{
@@ -258,6 +276,15 @@ export default function ActiveWorkoutPage() {
     });
   };
 
+  const formatRestTime = (seconds: number): string => {
+    if (seconds === 0) return "Sin descanso";
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (mins === 0) return `${secs}s`;
+    if (secs === 0) return `${mins}min`;
+    return `${mins}min ${secs}s`;
+  };
+
   const toggleExerciseUnit = (exIdx: number) => {
     setExercises((prev) =>
       prev.map((ex, ei) => {
@@ -390,19 +417,12 @@ export default function ActiveWorkoutPage() {
 
   const applyRestTimesOnly = () => {
     // Only update rest times for existing exercises in the original plan
+    // If there are no structural changes, indices should match directly
     const updatedExercises: PlannedExercise[] = originalPlan.map(
-      (original, idx) => {
-        const currentExIdx = exercises.findIndex(
-          (e) => e.exerciseId === original.exerciseId,
-        );
-        return {
-          ...original,
-          restTime:
-            currentExIdx >= 0
-              ? exerciseRestTimes[currentExIdx]
-              : original.restTime,
-        };
-      },
+      (original, idx) => ({
+        ...original,
+        restTime: exerciseRestTimes[idx] ?? original.restTime,
+      }),
     );
 
     updateDayExercises(day as DayName, updatedExercises);
@@ -431,7 +451,11 @@ export default function ActiveWorkoutPage() {
       // Only save rest times if no structural changes
       applyRestTimesOnly();
       addWorkout(workout);
-      navigate(`/summary/${workout.id}`, { state: workout });
+
+      // Wait a tick to ensure localStorage is updated before navigating
+      setTimeout(() => {
+        navigate(`/summary/${workout.id}`, { state: workout });
+      }, 0);
     }
   };
 
@@ -439,7 +463,10 @@ export default function ActiveWorkoutPage() {
     applyChangesToPlan();
     if (pendingWorkout) {
       addWorkout(pendingWorkout);
-      navigate(`/summary/${pendingWorkout.id}`, { state: pendingWorkout });
+      // Wait a tick to ensure localStorage is updated before navigating
+      setTimeout(() => {
+        navigate(`/summary/${pendingWorkout.id}`, { state: pendingWorkout });
+      }, 0);
     }
   };
 
@@ -448,7 +475,10 @@ export default function ActiveWorkoutPage() {
     applyRestTimesOnly();
     if (pendingWorkout) {
       addWorkout(pendingWorkout);
-      navigate(`/summary/${pendingWorkout.id}`, { state: pendingWorkout });
+      // Wait a tick to ensure localStorage is updated before navigating
+      setTimeout(() => {
+        navigate(`/summary/${pendingWorkout.id}`, { state: pendingWorkout });
+      }, 0);
     }
   };
 
@@ -457,6 +487,7 @@ export default function ActiveWorkoutPage() {
   };
 
   const handleConfirmExit = () => {
+    // Don't save anything when discarding
     setShowExitDialog(false);
     navigate("/");
   };
@@ -480,7 +511,11 @@ export default function ActiveWorkoutPage() {
 
     addWorkout(workout);
     setShowExitDialog(false);
-    navigate(`/summary/${workout.id}`, { state: workout });
+
+    // Wait a tick to ensure localStorage is updated before navigating
+    setTimeout(() => {
+      navigate(`/summary/${workout.id}`, { state: workout });
+    }, 0);
   };
 
   const formatTime = (s: number) => {
@@ -593,25 +628,12 @@ export default function ActiveWorkoutPage() {
                         <p className="text-base sm:text-sm font-semibold">
                           {data.name}
                         </p>
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            variant="secondary"
-                            className="text-xs sm:text-[10px]"
-                          >
-                            {data.muscleGroup}
-                          </Badge>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-5 px-2 text-xs font-medium"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleExerciseUnit(exIdx);
-                            }}
-                          >
-                            {ex.unit || settings.defaultUnit}
-                          </Button>
-                        </div>
+                        <Badge
+                          variant="secondary"
+                          className="text-xs sm:text-[10px]"
+                        >
+                          {data.muscleGroup}
+                        </Badge>
                       </div>
                       <Button
                         variant="ghost"
@@ -629,52 +651,41 @@ export default function ActiveWorkoutPage() {
                       <span className="text-sm sm:text-xs text-muted-foreground">
                         Descanso:
                       </span>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={Math.floor((exerciseRestTimes[exIdx] || 0) / 60)}
-                        onChange={(e) => {
-                          const minutes = Math.max(
-                            0,
-                            Math.min(59, Number(e.target.value)),
-                          );
-                          const seconds = (exerciseRestTimes[exIdx] || 0) % 60;
-                          updateRestTime(exIdx, minutes * 60 + seconds);
-                        }}
-                        className="h-8 sm:h-7 w-14 sm:w-12 text-sm sm:text-xs text-center px-1"
-                      />
-                      <span className="text-sm sm:text-xs text-muted-foreground">
-                        m
-                      </span>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={(exerciseRestTimes[exIdx] || 0) % 60}
-                        onChange={(e) => {
-                          const minutes = Math.floor(
-                            (exerciseRestTimes[exIdx] || 0) / 60,
-                          );
-                          const seconds = Math.max(
-                            0,
-                            Math.min(59, Number(e.target.value)),
-                          );
-                          updateRestTime(exIdx, minutes * 60 + seconds);
-                        }}
-                        className="h-8 sm:h-7 w-14 sm:w-12 text-sm sm:text-xs text-center px-1"
-                      />
-                      <span className="text-sm sm:text-xs text-muted-foreground">
-                        s
-                      </span>
+                      <Select
+                        value={String(exerciseRestTimes[exIdx] || 0)}
+                        onValueChange={(value) =>
+                          updateRestTime(exIdx, Number(value))
+                        }
+                      >
+                        <SelectTrigger className="h-auto w-auto border-0 bg-transparent px-0 py-0 text-sm sm:text-xs font-medium hover:text-primary transition-colors focus:ring-0 focus:ring-offset-0 gap-1">
+                          <SelectValue>
+                            {formatRestTime(exerciseRestTimes[exIdx] || 0)}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">Sin descanso</SelectItem>
+                          <SelectItem value="30">30s</SelectItem>
+                          <SelectItem value="60">1min</SelectItem>
+                          <SelectItem value="90">1min 30s</SelectItem>
+                          <SelectItem value="120">2min</SelectItem>
+                          <SelectItem value="150">2min 30s</SelectItem>
+                          <SelectItem value="180">3min</SelectItem>
+                          <SelectItem value="210">3min 30s</SelectItem>
+                          <SelectItem value="240">4min</SelectItem>
+                          <SelectItem value="300">5min</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     {/* Sets table */}
                     <div className="space-y-2">
-                      <div className="grid grid-cols-[2rem_3rem_1fr_1fr_2rem] gap-1 text-sm sm:text-xs font-semibold text-muted-foreground px-1">
+                      <div className="grid grid-cols-[2.5rem_4.5rem_1fr_4rem_2.5rem] gap-1 text-sm sm:text-xs font-semibold text-muted-foreground px-1">
                         <span className="text-center">Serie</span>
                         <span className="text-center">Previo</span>
-                        <span className="text-center">
+                        <span
+                          className="text-center cursor-pointer hover:text-primary transition-colors"
+                          onClick={() => setUnitChangeDialogExIdx(exIdx)}
+                        >
                           Peso ({ex.unit || settings.defaultUnit})
                         </span>
                         <span className="text-center">Reps</span>
@@ -734,7 +745,7 @@ export default function ActiveWorkoutPage() {
                                     setRevealedSet(null);
                                   }
                                 }}
-                                className="absolute inset-0 grid grid-cols-[2rem_3rem_1fr_1fr_2rem] gap-1 items-center px-1 bg-card touch-draggable"
+                                className="absolute inset-0 grid grid-cols-[2.5rem_4.5rem_1fr_4rem_2.5rem] gap-1 items-center px-1 bg-card touch-draggable"
                                 style={{ touchAction: "pan-y" }}
                                 initial={{ opacity: 1, x: 0 }}
                                 exit={{
@@ -909,6 +920,85 @@ export default function ActiveWorkoutPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Unit Change Dialog */}
+      <Dialog
+        open={unitChangeDialogExIdx !== null}
+        onOpenChange={(open) => !open && setUnitChangeDialogExIdx(null)}
+      >
+        <DialogContent className="max-w-sm rounded-xl">
+          <DialogHeader>
+            <DialogTitle>Cambiar unidad de peso</DialogTitle>
+            <DialogDescription>
+              {unitChangeDialogExIdx !== null && (
+                <>
+                  Selecciona la unidad que deseas usar para{" "}
+                  <strong>
+                    {exerciseMap[exercises[unitChangeDialogExIdx]?.exerciseId]
+                      ?.name || "este ejercicio"}
+                  </strong>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          {unitChangeDialogExIdx !== null && (
+            <div className="flex gap-3 py-2">
+              <Button
+                variant={
+                  exercises[unitChangeDialogExIdx]?.unit === "kg"
+                    ? "default"
+                    : "outline"
+                }
+                className="flex-1 h-20"
+                onClick={() => {
+                  if (exercises[unitChangeDialogExIdx]?.unit !== "kg") {
+                    toggleExerciseUnit(unitChangeDialogExIdx);
+                  }
+                }}
+              >
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-2xl font-bold">kg</span>
+                  <span className="text-xs text-muted-foreground">
+                    Kilogramos
+                  </span>
+                </div>
+              </Button>
+              <Button
+                variant={
+                  exercises[unitChangeDialogExIdx]?.unit === "lbs" ||
+                    !exercises[unitChangeDialogExIdx]?.unit
+                    ? "default"
+                    : "outline"
+                }
+                className="flex-1 h-20"
+                onClick={() => {
+                  if (
+                    exercises[unitChangeDialogExIdx]?.unit !== "lbs" &&
+                    exercises[unitChangeDialogExIdx]?.unit !== undefined
+                  ) {
+                    toggleExerciseUnit(unitChangeDialogExIdx);
+                  }
+                }}
+              >
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-2xl font-bold">lbs</span>
+                  <span className="text-xs text-muted-foreground">Libras</span>
+                </div>
+              </Button>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              onClick={() => setUnitChangeDialogExIdx(null)}
+              className="w-full"
+            >
+              Confirmar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Fixed Rest Timer at Bottom */}
       <AnimatePresence>
