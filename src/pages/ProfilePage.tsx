@@ -400,14 +400,28 @@ export default function ProfilePage() {
               >
                 <Card className="p-4 cursor-pointer hover:bg-accent/50 transition-colors">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-medium">{workout.day}</h3>
-                      <Badge variant="secondary" className="text-[10px]">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <h3 className="text-sm font-medium truncate">
+                        {workout.day}
+                        {workout.label && (
+                          <span className="text-primary">
+                            {" "}
+                            - {workout.label}
+                          </span>
+                        )}
+                      </h3>
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] flex-shrink-0"
+                      >
                         {completedExercises}{" "}
                         {completedExercises === 1 ? "ejercicio" : "ejercicios"}
                       </Badge>
                     </div>
-                    <Badge variant="outline" className="text-[10px]">
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] flex-shrink-0"
+                    >
                       {totalSets} {totalSets === 1 ? "serie" : "series"}
                     </Badge>
                   </div>

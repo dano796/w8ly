@@ -7,6 +7,8 @@ import { DayName, DAYS } from "@/utils/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Plus,
   MoreVertical,
@@ -14,6 +16,7 @@ import {
   GripVertical,
   ChevronDown,
   ChevronUp,
+  Edit2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -21,6 +24,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   pageVariants,
@@ -32,8 +46,13 @@ const exerciseMap = Object.fromEntries(defaultExercises.map((e) => [e.id, e]));
 
 export default function WeeklyPlannerPage() {
   const navigate = useNavigate();
-  const { plan, removeExerciseFromDay, reorderExercises, addExerciseToDay } =
-    useWeeklyPlan();
+  const {
+    plan,
+    removeExerciseFromDay,
+    reorderExercises,
+    addExerciseToDay,
+    updateDayLabel,
+  } = useWeeklyPlan();
   const { settings } = useSettings();
   const [dragItem, setDragItem] = useState<{
     day: DayName;
@@ -51,6 +70,11 @@ export default function WeeklyPlannerPage() {
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
     null,
   );
+  const [editLabelDialog, setEditLabelDialog] = useState<{
+    isOpen: boolean;
+    day: DayName | null;
+    currentLabel: string;
+  }>({ isOpen: false, day: null, currentLabel: "" });
 
   // Recent exercises from plan
   const recentExercises = useMemo(() => {
@@ -179,6 +203,26 @@ export default function WeeklyPlannerPage() {
     setTouchStartPos(null);
   };
 
+  const handleOpenEditLabel = (day: DayName, currentLabel: string) => {
+    setEditLabelDialog({ isOpen: true, day, currentLabel });
+  };
+
+  const handleSaveLabel = () => {
+    if (editLabelDialog.day) {
+      updateDayLabel(editLabelDialog.day, editLabelDialog.currentLabel.trim());
+      setEditLabelDialog({ isOpen: false, day: null, currentLabel: "" });
+      toast.success("Título actualizado");
+    }
+  };
+
+  const handleClearLabel = () => {
+    if (editLabelDialog.day) {
+      updateDayLabel(editLabelDialog.day, "");
+      setEditLabelDialog({ isOpen: false, day: null, currentLabel: "" });
+      toast.success("Título eliminado");
+    }
+  };
+
   return (
     <motion.div
       className="pt-6 pb-4 flex flex-col h-[calc(100vh-4rem)]"
@@ -229,11 +273,25 @@ export default function WeeklyPlannerPage() {
             >
               {/* Day header */}
               <div className="flex items-center justify-between mb-3">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-lg">
-                    {dayPlan.day}
-                    {dayPlan.label ? ` - ${dayPlan.label}` : ""}
-                  </h3>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-semibold text-lg truncate">
+                      {dayPlan.day}
+                      {dayPlan.label && (
+                        <span className="text-primary"> - {dayPlan.label}</span>
+                      )}
+                    </h3>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 flex-shrink-0"
+                      onClick={() =>
+                        handleOpenEditLabel(dayPlan.day, dayPlan.label)
+                      }
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     {dayPlan.exercises.length} ejercicio
                     {dayPlan.exercises.length !== 1 ? "s" : ""}
@@ -388,10 +446,11 @@ export default function WeeklyPlannerPage() {
                         onTouchStart={(e) => handleTouchStart(e, ex.exerciseId)}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
-                        className={`p-3 w-36 hover:bg-accent transition-all select-none ${draggedExercise?.exerciseId === ex.exerciseId
+                        className={`p-3 w-36 hover:bg-accent transition-all select-none ${
+                          draggedExercise?.exerciseId === ex.exerciseId
                             ? "opacity-50 scale-95"
                             : "cursor-grab active:cursor-grabbing"
-                          }`}
+                        }`}
                       >
                         <div className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2">
                           <span className="text-xs text-muted-foreground">
@@ -426,6 +485,61 @@ export default function WeeklyPlannerPage() {
           )}
         </div>
       </div>
+
+      {/* Edit Label Dialog */}
+      <AlertDialog
+        open={editLabelDialog.isOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditLabelDialog({ isOpen: false, day: null, currentLabel: "" });
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Editar título de la rutina</AlertDialogTitle>
+            <AlertDialogDescription>
+              Dale un nombre personalizado a tu rutina del {editLabelDialog.day}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid gap-2">
+            <Label htmlFor="label">Título (opcional)</Label>
+            <Input
+              id="label"
+              value={editLabelDialog.currentLabel}
+              onChange={(e) =>
+                setEditLabelDialog({
+                  ...editLabelDialog,
+                  currentLabel: e.target.value,
+                })
+              }
+              placeholder="Ej: Torso A, Pierna, Pull..."
+              maxLength={30}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSaveLabel();
+                }
+              }}
+            />
+          </div>
+          <AlertDialogFooter className="flex-col sm:flex-col gap-2">
+            <AlertDialogAction onClick={handleSaveLabel} className="w-full m-0">
+              Guardar
+            </AlertDialogAction>
+            {editLabelDialog.currentLabel && (
+              <AlertDialogAction
+                onClick={handleClearLabel}
+                className="w-full m-0 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Eliminar título
+              </AlertDialogAction>
+            )}
+            <AlertDialogCancel className="w-full m-0">
+              Cancelar
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 }

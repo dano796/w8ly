@@ -226,6 +226,7 @@ export default function ActiveWorkoutPage() {
     const workout = {
       id: `w-${Date.now()}`,
       day: day as DayName,
+      label: dayPlan?.label,
       date: new Date().toISOString(),
       durationSeconds: elapsed,
       exercises,
@@ -269,6 +270,7 @@ export default function ActiveWorkoutPage() {
     const workout = {
       id: `w-${Date.now()}`,
       day: day as DayName,
+      label: dayPlan?.label,
       date: new Date().toISOString(),
       durationSeconds: elapsed,
       exercises,
@@ -316,7 +318,12 @@ export default function ActiveWorkoutPage() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-lg font-bold">{day} - Entrenamiento</h1>
+            <h1 className="text-lg font-bold">
+              {day}
+              {dayPlan?.label && (
+                <span className="text-primary"> - {dayPlan.label}</span>
+              )}
+            </h1>
             <p className="text-xs text-muted-foreground">
               {formatTime(elapsed)}
             </p>

@@ -85,6 +85,12 @@ export default function WorkoutSummaryPage() {
       >
         <CheckCircle className="w-16 h-16 text-accent mb-3" />
         <h2 className="text-xl font-bold">¡Excelente trabajo!</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          {workout.day}
+          {workout.label && (
+            <span className="text-primary"> - {workout.label}</span>
+          )}
+        </p>
       </motion.div>
 
       {/* Stats */}

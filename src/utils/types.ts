@@ -59,6 +59,7 @@ export interface ActiveWorkout {
 export interface CompletedWorkout {
   id: string;
   day: DayName;
+  label?: string;
   date: string; // ISO
   durationSeconds: number;
   exercises: WorkoutExercise[];
