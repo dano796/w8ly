@@ -196,8 +196,21 @@ export default function WeeklyPlannerPage() {
     setDraggedExercise(null);
   };
 
-  const handleDayDrop = (targetDay: DayName) => {
+  const handleDayDrop = (targetDay: DayName): boolean => {
     if (draggedExercise?.isFromCarousel) {
+      // Check if exercise already exists in this day
+      const targetDayPlan = plan.find((d) => d.day === targetDay);
+      const exerciseExists = targetDayPlan?.exercises.some(
+        (ex) => ex.exerciseId === draggedExercise.exerciseId,
+      );
+
+      if (exerciseExists) {
+        toast.error("Este ejercicio ya existe en este día");
+        setDraggedExercise(null);
+        setDragItem(null);
+        return false;
+      }
+
       // Add exercise from carousel to day
       const newExercise = {
         id: `${targetDay}-${draggedExercise.exerciseId}-${Date.now()}`,
@@ -206,18 +219,26 @@ export default function WeeklyPlannerPage() {
         reps: 8, // Default reps
       };
       addExerciseToDay(targetDay, newExercise);
+      setDraggedExercise(null);
+      setDragItem(null);
+      return true;
     } else if (dragItem && dragItem.day !== targetDay) {
       // Move exercise from one day to another
       const sourceDayPlan = plan.find((d) => d.day === dragItem.day);
       const sourceExercise = sourceDayPlan?.exercises[dragItem.idx];
 
       if (sourceExercise) {
-        moveExercise(dragItem.day, targetDay, sourceExercise.id);
-        toast.success(`Ejercicio movido a ${targetDay}`);
+        const moved = moveExercise(dragItem.day, targetDay, sourceExercise.id);
+        if (moved) {
+          toast.success(`Ejercicio movido a ${targetDay}`);
+        } else {
+          toast.error("Este ejercicio ya existe en este día");
+        }
       }
     }
     setDraggedExercise(null);
     setDragItem(null);
+    return false;
   };
 
   // Touch event handlers for mobile drag and drop
@@ -321,8 +342,10 @@ export default function WeeklyPlannerPage() {
       // Use the hovered day if available
       if (hoveredDay) {
         if (draggedExercise.isFromCarousel) {
-          handleDayDrop(hoveredDay);
-          toast.success(`Ejercicio añadido a ${hoveredDay}`);
+          const success = handleDayDrop(hoveredDay);
+          if (success) {
+            toast.success(`Ejercicio añadido a ${hoveredDay}`);
+          }
         } else if (
           draggedExercise.sourceDay &&
           draggedExercise.sourceDay !== hoveredDay
@@ -334,12 +357,16 @@ export default function WeeklyPlannerPage() {
           const sourceExercise =
             sourceDayPlan?.exercises[draggedExercise.sourceIdx!];
           if (sourceExercise) {
-            moveExercise(
+            const moved = moveExercise(
               draggedExercise.sourceDay,
               hoveredDay,
               sourceExercise.id,
             );
-            toast.success(`Ejercicio movido a ${hoveredDay}`);
+            if (moved) {
+              toast.success(`Ejercicio movido a ${hoveredDay}`);
+            } else {
+              toast.error("Este ejercicio ya existe en este día");
+            }
           }
         }
       }
@@ -387,9 +414,8 @@ export default function WeeklyPlannerPage() {
       {/* Day columns — horizontal Trello-style scroll */}
       <div
         ref={scrollContainerRef}
-        className={`flex gap-3 overflow-x-auto scrollbar-hide pb-4 flex-1 px-4 ${
-          draggedExercise ? "" : "snap-x snap-mandatory"
-        }`}
+        className={`flex gap-3 overflow-x-auto scrollbar-hide pb-4 flex-1 px-4 ${draggedExercise ? "" : "snap-x snap-mandatory"
+          }`}
         style={{
           scrollPaddingLeft: "1rem",
           WebkitOverflowScrolling: "touch",
@@ -406,15 +432,14 @@ export default function WeeklyPlannerPage() {
           >
             <Card
               data-day={dayPlan.day}
-              className={`p-4 flex flex-col h-fit max-h-[65vh] transition-all ${
-                hoveredDay === dayPlan.day
+              className={`p-4 flex flex-col h-fit max-h-[65vh] transition-all ${hoveredDay === dayPlan.day
                   ? "ring-4 ring-primary bg-primary/10 scale-[1.02]"
                   : draggedExercise &&
-                      (draggedExercise.isFromCarousel ||
-                        draggedExercise.sourceDay !== dayPlan.day)
+                    (draggedExercise.isFromCarousel ||
+                      draggedExercise.sourceDay !== dayPlan.day)
                     ? "ring-2 ring-primary/30"
                     : ""
-              }`}
+                }`}
               onDragOver={(e) => {
                 if (
                   draggedExercise?.isFromCarousel ||
@@ -430,7 +455,10 @@ export default function WeeklyPlannerPage() {
               onDrop={(e) => {
                 e.preventDefault();
                 e.currentTarget.classList.remove("ring-2", "ring-primary");
-                handleDayDrop(dayPlan.day);
+                const success = handleDayDrop(dayPlan.day);
+                if (success && draggedExercise?.isFromCarousel) {
+                  toast.success(`Ejercicio añadido a ${dayPlan.day}`);
+                }
               }}
             >
               {/* Day header */}
@@ -499,11 +527,10 @@ export default function WeeklyPlannerPage() {
                         }
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
-                        className={`flex items-start gap-3 p-2.5 bg-card rounded-lg border hover:bg-accent/50 transition-colors touch-draggable ${
-                          draggedExercise?.sourceExId === ex.id
+                        className={`flex items-start gap-3 p-2.5 bg-card rounded-lg border hover:bg-accent/50 transition-colors touch-draggable ${draggedExercise?.sourceExId === ex.id
                             ? "opacity-50"
                             : ""
-                        }`}
+                          }`}
                         style={{ touchAction: "none" }}
                       >
                         <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
@@ -618,11 +645,10 @@ export default function WeeklyPlannerPage() {
                         onTouchStart={(e) => handleTouchStart(e, ex.exerciseId)}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
-                        className={`p-3 w-36 hover:bg-accent transition-all touch-draggable ${
-                          draggedExercise?.exerciseId === ex.exerciseId
+                        className={`p-3 w-36 hover:bg-accent transition-all touch-draggable ${draggedExercise?.exerciseId === ex.exerciseId
                             ? "opacity-50 scale-95 shadow-lg"
                             : "cursor-grab active:cursor-grabbing"
-                        }`}
+                          }`}
                         style={{
                           touchAction:
                             draggedExercise?.exerciseId === ex.exerciseId

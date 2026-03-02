@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import {
   pageVariants,
   listContainerVariants,
@@ -60,8 +61,8 @@ export default function ExerciseLibraryPage() {
 
   const searchFiltered = searchTerm.trim()
     ? filtered.filter((e) =>
-        e.name.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
+      e.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
     : filtered;
 
   const toggleSelection = (exerciseId: string) => {
@@ -100,7 +101,34 @@ export default function ExerciseLibraryPage() {
       const currentDayPlan = plan.find((d) => d.day === preselectedDay);
 
       if (currentDayPlan) {
-        const newExercises = selectedExercises.map((exerciseId, index) => ({
+        // Filter out exercises that already exist in the day
+        const existingExerciseIds = new Set(
+          currentDayPlan.exercises.map((ex) => ex.exerciseId),
+        );
+        const newExercisesToAdd = selectedExercises.filter(
+          (exerciseId) => !existingExerciseIds.has(exerciseId),
+        );
+
+        if (newExercisesToAdd.length === 0) {
+          toast.error(
+            "Todos los ejercicios seleccionados ya existen en este día",
+          );
+          setSelectedExercises([]);
+          setTimeout(() => {
+            navigate("/");
+          }, 50);
+          return;
+        }
+
+        if (newExercisesToAdd.length < selectedExercises.length) {
+          const skippedCount =
+            selectedExercises.length - newExercisesToAdd.length;
+          toast.warning(
+            `Se omitieron ${skippedCount} ejercicio(s) duplicado(s)`,
+          );
+        }
+
+        const newExercises = newExercisesToAdd.map((exerciseId, index) => ({
           id: `${preselectedDay}-${exerciseId}-${Date.now()}-${index}`,
           exerciseId,
           sets: settings.defaultSets,
@@ -122,6 +150,19 @@ export default function ExerciseLibraryPage() {
   };
 
   const doAdd = (exerciseId: string, day: DayName) => {
+    // Check if exercise already exists in this day
+    const dayPlan = plan.find((d) => d.day === day);
+    const exerciseExists = dayPlan?.exercises.some(
+      (ex) => ex.exerciseId === exerciseId,
+    );
+
+    if (exerciseExists) {
+      toast.error("Este ejercicio ya existe en este día");
+      setSheetOpen(false);
+      setSelectedExerciseId(null);
+      return;
+    }
+
     addExerciseToDay(day, {
       id: `${day}-${exerciseId}-${Date.now()}`,
       exerciseId,

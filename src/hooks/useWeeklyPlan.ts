@@ -45,13 +45,27 @@ export function useWeeklyPlan() {
     fromDay: DayName,
     toDay: DayName,
     exerciseInstanceId: string,
-  ) => {
+  ): boolean => {
+    let moved = false;
     setPlan((prev) => {
       const fromDayPlan = prev.find((d) => d.day === fromDay);
       const exercise = fromDayPlan?.exercises.find(
         (e) => e.id === exerciseInstanceId,
       );
       if (!exercise) return prev;
+
+      // Check if exercise already exists in target day
+      const toDayPlan = prev.find((d) => d.day === toDay);
+      const exerciseExists = toDayPlan?.exercises.some(
+        (ex) => ex.exerciseId === exercise.exerciseId,
+      );
+
+      if (exerciseExists) {
+        moved = false;
+        return prev; // Don't move if duplicate
+      }
+
+      moved = true;
       return prev.map((d) => {
         if (d.day === fromDay)
           return {
@@ -63,6 +77,7 @@ export function useWeeklyPlan() {
         return d;
       });
     });
+    return moved;
   };
 
   const updateDayExercises = (day: DayName, exercises: PlannedExercise[]) => {
