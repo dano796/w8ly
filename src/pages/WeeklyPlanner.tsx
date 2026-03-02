@@ -658,7 +658,7 @@ export default function WeeklyPlannerPage() {
       </div>
 
       {/* Recent exercises carousel at bottom - Fixed above navigation */}
-      <div className="flex-shrink-0 border-t bg-background shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-20">
+      <div className="flex-shrink-0 border-t bg-background z-20">
         <div className="px-4 pt-4 pb-2">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">

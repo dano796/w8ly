@@ -180,7 +180,7 @@ export default function ExerciseDetailSheet({
                   {/* Description */}
                   {exercise.description && (
                     <Card
-                      className="p-5 bg-gradient-to-br from-muted/40 to-muted/20 border shadow-sm"
+                      className="p-5 bg-muted/30 border shadow-sm"
                       id="exercise-description"
                     >
                       <div>
@@ -203,7 +203,7 @@ export default function ExerciseDetailSheet({
                   <div className="grid gap-4">
                     {/* Target Muscle */}
                     {exercise.target && (
-                      <Card className="p-5 bg-gradient-to-br from-muted/40 to-muted/20 border shadow-sm">
+                      <Card className="p-5 bg-muted/30 border shadow-sm">
                         <div className="flex items-start gap-3">
                           <div className="flex-shrink-0 w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center mt-0.5">
                             <Target className="w-5 h-5 text-primary" />
@@ -224,7 +224,7 @@ export default function ExerciseDetailSheet({
                     {/* Secondary Muscles */}
                     {exercise.secondaryMuscles &&
                       exercise.secondaryMuscles.length > 0 && (
-                        <Card className="p-5 bg-gradient-to-br from-muted/40 to-muted/20 border shadow-sm">
+                        <Card className="p-5 bg-muted/30 border shadow-sm">
                           <div className="flex items-start gap-3">
                             <div className="flex-shrink-0 w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center mt-0.5">
                               <Zap className="w-5 h-5 text-primary" />
