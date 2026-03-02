@@ -4,6 +4,8 @@ import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
+import { useWorkoutTour, resetWorkoutTour } from "@/hooks/tours";
+import { HelpCircle } from "lucide-react";
 import { defaultExercises } from "@/utils/exerciseData";
 import { convertWeight } from "@/utils/unitConversion";
 import {
@@ -109,6 +111,11 @@ export default function ActiveWorkoutPage() {
     isPaused: boolean;
   } | null>(null);
   const [exerciseRestTimes, setExerciseRestTimes] = useState<number[]>([]);
+
+  // Workout tour hook
+  const { startTour } = useWorkoutTour({
+    ready: exercises.length > 0,
+  });
 
   // Initialize exercises from plan
   useEffect(() => {
@@ -646,7 +653,10 @@ export default function ActiveWorkoutPage() {
       {/* Fixed Header */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b px-4 pt-6 pb-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div
+          className="flex items-center justify-between mb-4"
+          data-tour="workout-header"
+        >
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={handleExitClick}>
               <ArrowLeft className="w-5 h-5" />
@@ -663,17 +673,29 @@ export default function ActiveWorkoutPage() {
               </p>
             </div>
           </div>
-          <Button
-            size="icon"
-            onClick={handleFinishClick}
-            className="bg-accent text-accent-foreground hover:bg-accent/90"
-          >
-            <Check className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={startTour}
+              title="Ver tutorial"
+            >
+              <HelpCircle className="w-4 h-4 text-muted-foreground" />
+            </Button>
+            <Button
+              size="icon"
+              onClick={handleFinishClick}
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+              data-tour="finish-btn"
+            >
+              <Check className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Progress */}
         <motion.div
+          data-tour="workout-progress"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.3 }}
@@ -717,7 +739,11 @@ export default function ActiveWorkoutPage() {
                   exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
                   layout
                 >
-                  <Card className="p-4" onClick={() => setRevealedSet(null)}>
+                  <Card
+                    className="p-4"
+                    onClick={() => setRevealedSet(null)}
+                    id={exIdx === 0 ? "tour-exercise-card-0" : undefined}
+                  >
                     <div className="flex items-center gap-3 mb-3">
                       <div
                         className="w-12 h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
@@ -769,7 +795,10 @@ export default function ActiveWorkoutPage() {
                     </div>
 
                     {/* Rest time editor */}
-                    <div className="flex items-center gap-2 mb-3">
+                    <div
+                      className="flex items-center gap-2 mb-3"
+                      id={exIdx === 0 ? "tour-rest-time-0" : undefined}
+                    >
                       <Timer className="w-4 h-4 text-muted-foreground" />
                       <span className="text-sm sm:text-xs text-muted-foreground">
                         Descanso:
@@ -808,6 +837,7 @@ export default function ActiveWorkoutPage() {
                         <span
                           className="text-center cursor-pointer hover:text-primary transition-colors"
                           onClick={() => setUnitChangeDialogExIdx(exIdx)}
+                          id={exIdx === 0 ? "tour-weight-unit-0" : undefined}
                         >
                           Peso ({ex.unit || settings.defaultUnit})
                         </span>
@@ -823,6 +853,11 @@ export default function ActiveWorkoutPage() {
                             <div
                               key={setKey}
                               className="relative h-9 sm:h-8 rounded overflow-hidden"
+                              id={
+                                exIdx === 0 && setIdx === 0
+                                  ? "tour-set-row-0"
+                                  : undefined
+                              }
                             >
                               {/* Background red for delete */}
                               {ex.sets.length > 1 && (
@@ -931,6 +966,11 @@ export default function ActiveWorkoutPage() {
                                     onCheckedChange={(v) =>
                                       updateSet(exIdx, setIdx, "completed", v)
                                     }
+                                    id={
+                                      exIdx === 0 && setIdx === 0
+                                        ? "tour-set-checkbox-0"
+                                        : undefined
+                                    }
                                   />
                                 </div>
                               </motion.div>
@@ -944,6 +984,7 @@ export default function ActiveWorkoutPage() {
                       variant="ghost"
                       size="sm"
                       className="mt-2 text-sm sm:text-xs w-full border border-border"
+                      id={exIdx === 0 ? "tour-add-set-0" : undefined}
                       onClick={(e) => {
                         e.stopPropagation();
                         setRevealedSet(null);
@@ -962,6 +1003,7 @@ export default function ActiveWorkoutPage() {
         <Button
           variant="outline"
           className="w-full mt-4 text-sm"
+          data-tour="add-exercise-btn"
           onClick={() => {
             setRevealedSet(null);
             // Save current state to sessionStorage before navigating

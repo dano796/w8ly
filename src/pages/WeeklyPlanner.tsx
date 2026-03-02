@@ -1,3 +1,5 @@
+import { usePlannerTour } from "@/hooks/tours";
+import { HelpCircle } from "lucide-react";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
@@ -426,6 +428,12 @@ export default function WeeklyPlannerPage() {
     }
   };
 
+  // Guided tour hook
+  const { startTour } = usePlannerTour({
+    ready: plan.length > 0,
+    setCarouselCollapsed: setIsCarouselCollapsed,
+  });
+
   return (
     <motion.div
       className="fixed inset-0 flex flex-col"
@@ -439,8 +447,19 @@ export default function WeeklyPlannerPage() {
     >
       {/* Header - Fixed at top */}
       <div className="flex-shrink-0 bg-background border-b pt-6 pb-4 px-4 z-20">
-        <div className="flex items-center justify-between">
+        <div
+          className="flex items-center justify-between"
+          data-tour="planner-header"
+        >
           <h1 className="text-2xl font-bold">Mi rutina semanal</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={startTour}
+            title="Ver tutorial"
+          >
+            <HelpCircle className="w-4 h-4 text-muted-foreground" />
+          </Button>
         </div>
       </div>
 
@@ -466,6 +485,7 @@ export default function WeeklyPlannerPage() {
           >
             <Card
               data-day={dayPlan.day}
+              id={index === 0 ? "tour-planner-day-0" : undefined}
               className={`p-4 flex flex-col h-full transition-all ${
                 hoveredDay === dayPlan.day
                   ? "ring-4 ring-primary bg-primary/10 scale-[1.02]"
@@ -527,6 +547,7 @@ export default function WeeklyPlannerPage() {
                     size="icon"
                     variant="ghost"
                     className="h-10 w-10 flex-shrink-0 min-w-[44px] min-h-[44px]"
+                    id={index === 0 ? "tour-planner-play-0" : undefined}
                     onClick={() => navigate(`/workout/${dayPlan.day}`)}
                   >
                     <Play className="w-5 h-5" />
@@ -550,6 +571,11 @@ export default function WeeklyPlannerPage() {
                     return (
                       <div
                         key={ex.id}
+                        id={
+                          index === 0 && idx === 0
+                            ? "tour-planner-ex-0"
+                            : undefined
+                        }
                         draggable={false}
                         onTouchStart={(e) =>
                           handleDayExerciseTouchStart(
@@ -646,6 +672,7 @@ export default function WeeklyPlannerPage() {
                     size="icon"
                     variant="outline"
                     className="h-12 w-12 rounded-full"
+                    id={index === 0 ? "tour-planner-add-0" : undefined}
                     onClick={() => navigate(`/exercises?day=${dayPlan.day}`)}
                   >
                     <Plus className="w-5 h-5" />
@@ -658,7 +685,10 @@ export default function WeeklyPlannerPage() {
       </div>
 
       {/* Recent exercises carousel at bottom - Fixed above navigation */}
-      <div className="flex-shrink-0 border-t bg-background z-20">
+      <div
+        className="flex-shrink-0 border-t bg-background z-20"
+        data-tour="planner-carousel"
+      >
         <div className="px-4 pt-4 pb-2">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -679,6 +709,7 @@ export default function WeeklyPlannerPage() {
             <button
               onClick={() => navigate("/exercises")}
               className="text-sm text-primary font-medium hover:underline min-h-[44px] px-2 flex items-center"
+              data-tour="planner-carousel-all"
             >
               Ver todos
             </button>
@@ -707,6 +738,7 @@ export default function WeeklyPlannerPage() {
                     >
                       <Card
                         draggable={false}
+                        id={idx === 0 ? "tour-carousel-card-0" : undefined}
                         onTouchStart={(e) => handleTouchStart(e, ex.exerciseId)}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}

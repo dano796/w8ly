@@ -1,3 +1,6 @@
+import "driver.js/dist/driver.css";
+import "@/styles/driver-tour.css";
+
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";

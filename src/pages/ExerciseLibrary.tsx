@@ -10,7 +10,16 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Plus, Check, Search, Dumbbell, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  Check,
+  Search,
+  Dumbbell,
+  Trash2,
+  HelpCircle,
+} from "lucide-react";
+import { useExerciseTour } from "@/hooks/tours";
 import ExerciseDetailSheet from "@/components/ExerciseDetailSheet";
 import {
   Sheet,
@@ -69,6 +78,9 @@ export default function ExerciseLibraryPage() {
   const preselectedDay = searchParams.get("day") as DayName | null;
   const fromWorkout = searchParams.get("fromWorkout") as DayName | null;
 
+  // Detecta el modo: "add" si viene de un workout o día, "browse" si navega la biblioteca
+  const mode = fromWorkout || preselectedDay ? "add" : "browse";
+
   const { plan, addExerciseToDay, updateDayExercises } = useWeeklyPlan();
   const { settings } = useSettings();
   const { customExercises, addCustomExercise, removeCustomExercise } =
@@ -121,19 +133,35 @@ export default function ExerciseLibraryPage() {
     [activeFilter, allExercises],
   );
 
-  const searchFiltered = useMemo(
-    () =>
-      searchTerm.trim()
-        ? filtered.filter((e) =>
-            e.name.toLowerCase().includes(searchTerm.toLowerCase()),
-          )
-        : filtered,
-    [searchTerm, filtered],
-  );
+  const searchFiltered = useMemo(() => {
+    if (!searchTerm.trim()) return filtered;
+
+    const searchResults = filtered.filter((e) =>
+      e.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+
+    // Priorizar ejercicios personalizados en los resultados de búsqueda
+    return searchResults.sort((a, b) => {
+      const aIsCustom = a.id.startsWith("custom-");
+      const bIsCustom = b.id.startsWith("custom-");
+
+      // Si uno es personalizado y el otro no, el personalizado va primero
+      if (aIsCustom && !bIsCustom) return -1;
+      if (!aIsCustom && bIsCustom) return 1;
+
+      // Si ambos son del mismo tipo, mantener el orden original
+      return 0;
+    });
+  }, [searchTerm, filtered]);
 
   // Limit visible exercises for performance
   const visibleExercises = searchFiltered.slice(0, visibleCount);
   const hasMore = searchFiltered.length > visibleCount;
+
+  const { startTour } = useExerciseTour({
+    ready: visibleExercises.length > 0,
+    mode,
+  });
 
   const loadMore = useCallback(() => {
     setVisibleCount((prev) => Math.min(prev + 15, searchFiltered.length));
@@ -359,10 +387,19 @@ export default function ExerciseLibraryPage() {
         </Button>
         <h1 className="text-2xl font-bold flex-1">Ejercicios</h1>
         <Button
+          variant="ghost"
+          size="icon"
+          onClick={startTour}
+          title="Ver tutorial"
+        >
+          <HelpCircle className="w-4 h-4 text-muted-foreground" />
+        </Button>
+        <Button
           variant="outline"
           size="sm"
           onClick={() => setCreateDialogOpen(true)}
           className="gap-2"
+          data-tour="ex-create-btn"
         >
           <Dumbbell className="w-4 h-4" />
           Crear
@@ -370,7 +407,7 @@ export default function ExerciseLibraryPage() {
       </div>
 
       {/* Search bar */}
-      <div className="relative mb-4">
+      <div className="relative mb-4" data-tour="ex-search">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           type="text"
@@ -382,7 +419,10 @@ export default function ExerciseLibraryPage() {
       </div>
 
       {/* Filter chips */}
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-3 mb-4">
+      <div
+        className="flex gap-2 overflow-x-auto scrollbar-hide pb-3 mb-4"
+        data-tour="ex-filters"
+      >
         {filters.map((f, idx) => (
           <motion.button
             key={f}
@@ -410,7 +450,7 @@ export default function ExerciseLibraryPage() {
         initial="hidden"
         animate="visible"
       >
-        {visibleExercises.map((ex) => {
+        {visibleExercises.map((ex, idx) => {
           const isSelected = selectedExercises.includes(ex.id);
           const isAlreadyAdded = currentExercises.has(ex.id);
 
@@ -439,6 +479,7 @@ export default function ExerciseLibraryPage() {
                     setDetailSheetOpen(true);
                   }
                 }}
+                id={idx === 0 ? "tour-ex-card-0" : undefined}
               >
                 <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {ex.imageUrl ? (
@@ -482,6 +523,7 @@ export default function ExerciseLibraryPage() {
                       className="h-8 w-8"
                       onClick={(e) => handleAdd(ex.id, e)}
                       disabled={isAlreadyAdded}
+                      id={idx === 0 ? "tour-ex-add-btn-0" : undefined}
                     >
                       <Plus className="w-4 h-4" />
                     </Button>
@@ -503,6 +545,7 @@ export default function ExerciseLibraryPage() {
                       variant="ghost"
                       className="h-8 w-8"
                       onClick={(e) => handleAdd(ex.id, e)}
+                      id={idx === 0 ? "tour-ex-add-btn-0" : undefined}
                     >
                       <Plus className="w-4 h-4" />
                     </Button>
