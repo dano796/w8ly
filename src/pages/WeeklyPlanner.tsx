@@ -383,11 +383,10 @@ export default function WeeklyPlannerPage() {
                         onTouchStart={(e) => handleTouchStart(e, ex.exerciseId)}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
-                        className={`p-3 w-36 hover:bg-accent transition-all touch-none select-none ${
-                          draggedExercise?.exerciseId === ex.exerciseId
+                        className={`p-3 w-36 hover:bg-accent transition-all touch-none select-none ${draggedExercise?.exerciseId === ex.exerciseId
                             ? "opacity-50 scale-95"
                             : "cursor-grab active:cursor-grabbing"
-                        }`}
+                          }`}
                       >
                         <div className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2">
                           <span className="text-xs text-muted-foreground">

@@ -5,7 +5,14 @@ import { useSettings } from "@/hooks/useSettings";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, CheckCircle, Clock, Layers } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle,
+  Clock,
+  Layers,
+  Dumbbell,
+  TrendingUp,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import {
   pageVariants,
@@ -44,6 +51,16 @@ export default function WorkoutSummaryPage() {
     0,
   );
 
+  const totalVolume = workout.exercises.reduce((vol, ex) => {
+    const completedSets = ex.sets.filter((s) => s.completed);
+    return vol + completedSets.reduce((v, s) => v + s.weight * s.reps, 0);
+  }, 0);
+
+  const totalExercises = workout.exercises.length;
+  const exercisesWithCompletedSets = workout.exercises.filter((ex) =>
+    ex.sets.some((s) => s.completed),
+  ).length;
+
   return (
     <motion.div
       className="px-4 pt-6 pb-8 max-w-lg mx-auto"
@@ -76,7 +93,7 @@ export default function WorkoutSummaryPage() {
           <Clock className="w-8 h-8 text-primary" />
           <div>
             <p className="text-xs text-muted-foreground">Duración</p>
-            <p className="text-lg font-bold">
+            <p className="text-base font-semibold">
               {formatDuration(workout.durationSeconds)}
             </p>
           </div>
@@ -85,7 +102,25 @@ export default function WorkoutSummaryPage() {
           <Layers className="w-8 h-8 text-primary" />
           <div>
             <p className="text-xs text-muted-foreground">Series</p>
-            <p className="text-lg font-bold">{totalSets}</p>
+            <p className="text-base font-semibold">{totalSets}</p>
+          </div>
+        </Card>
+        <Card className="p-4 flex items-center gap-3">
+          <Dumbbell className="w-8 h-8 text-primary" />
+          <div>
+            <p className="text-xs text-muted-foreground">Ejercicios</p>
+            <p className="text-base font-semibold">
+              {exercisesWithCompletedSets}/{totalExercises}
+            </p>
+          </div>
+        </Card>
+        <Card className="p-4 flex items-center gap-3">
+          <TrendingUp className="w-8 h-8 text-primary" />
+          <div>
+            <p className="text-xs text-muted-foreground">Volumen total</p>
+            <p className="text-base font-semibold">
+              {totalVolume.toLocaleString()} {settings.defaultUnit}
+            </p>
           </div>
         </Card>
       </div>
@@ -104,30 +139,71 @@ export default function WorkoutSummaryPage() {
           const data = exerciseMap[ex.exerciseId];
           if (!data) return null;
           const completedSets = ex.sets.filter((s) => s.completed);
+          const totalSetsForExercise = ex.sets.length;
+          const allCompleted = completedSets.length === totalSetsForExercise;
           const volume = completedSets.reduce(
             (v, s) => v + s.weight * s.reps,
             0,
           );
           return (
             <motion.div key={i} variants={listItemVariants}>
-              <Card className="flex items-center gap-3 p-3">
-                <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs text-muted-foreground">IMG</span>
+              <Card className="p-3">
+                <div className="flex items-start gap-3 mb-2">
+                  <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs text-muted-foreground">IMG</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{data.name}</p>
+                    <Badge variant="secondary" className="text-[10px] mt-1">
+                      {data.muscleGroup}
+                    </Badge>
+                  </div>
+                  {!allCompleted && (
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] text-amber-600 border-amber-600"
+                    >
+                      Incompleto
+                    </Badge>
+                  )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate">{data.name}</p>
-                  <Badge variant="secondary" className="text-[10px]">
-                    {data.muscleGroup}
-                  </Badge>
+
+                <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Series</p>
+                    <p className="text-sm font-medium">
+                      {completedSets.length} de {totalSetsForExercise}{" "}
+                      completadas
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">Volumen</p>
+                    <p className="text-sm font-medium">
+                      {volume.toLocaleString()} {settings.defaultUnit}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">
-                    {completedSets.length} series
-                  </p>
-                  <p className="text-xs font-semibold">
-                    {volume} {settings.defaultUnit}
-                  </p>
-                </div>
+
+                {/* Detalles de cada serie */}
+                {completedSets.length > 0 && (
+                  <div className="mt-2 pt-2 border-t">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Detalle
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {completedSets.map((set, idx) => (
+                        <Badge
+                          key={idx}
+                          variant="outline"
+                          className="text-[10px]"
+                        >
+                          {set.weight}
+                          {settings.defaultUnit} × {set.reps}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </Card>
             </motion.div>
           );

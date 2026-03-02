@@ -23,9 +23,9 @@ export function useWeeklyPlan() {
       prev.map((d) =>
         d.day === day
           ? {
-              ...d,
-              exercises: d.exercises.filter((e) => e.id !== exerciseInstanceId),
-            }
+            ...d,
+            exercises: d.exercises.filter((e) => e.id !== exerciseInstanceId),
+          }
           : d,
       ),
     );
@@ -65,6 +65,12 @@ export function useWeeklyPlan() {
     });
   };
 
+  const updateDayExercises = (day: DayName, exercises: PlannedExercise[]) => {
+    setPlan((prev) =>
+      prev.map((d) => (d.day === day ? { ...d, exercises } : d)),
+    );
+  };
+
   const resetPlan = () => setPlan(createEmptyPlan());
 
   return {
@@ -74,6 +80,7 @@ export function useWeeklyPlan() {
     updateDayLabel,
     reorderExercises,
     moveExercise,
+    updateDayExercises,
     resetPlan,
   };
 }
