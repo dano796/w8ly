@@ -17,15 +17,21 @@ import {
   Plus,
   MoreVertical,
   Play,
-  GripVertical,
   ChevronDown,
   ChevronUp,
   Edit2,
+  Info,
+  Layers,
+  ArrowLeftRight,
+  Copy,
+  Trash2,
+  Minus,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -36,6 +42,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -44,11 +57,20 @@ import {
   tapAnimation,
 } from "@/utils/animations";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface EditExDialog {
+  isOpen: boolean;
+  day: DayName | null;
+  exId: string | null;
+  exName: string;
+  sets: number;
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 export default function WeeklyPlannerPage() {
   const navigate = useNavigate();
   const { customExercises } = useCustomExercises();
 
-  // Combine default and custom exercises
   const allExercises = useMemo(
     () => [...defaultExercises, ...customExercises],
     [customExercises],
@@ -67,6 +89,8 @@ export default function WeeklyPlannerPage() {
     moveExercise,
   } = useWeeklyPlan();
   const { settings } = useSettings();
+
+  // ── Drag state ──────────────────────────────────────────────────────────────
   const [dragItem, setDragItem] = useState<{
     day: DayName;
     idx: number;
@@ -79,7 +103,6 @@ export default function WeeklyPlannerPage() {
     sourceIdx?: number;
     sourceExId?: string;
   } | null>(null);
-  const [isCarouselCollapsed, setIsCarouselCollapsed] = useState(false);
   const [touchStartPos, setTouchStartPos] = useState<{
     x: number;
     y: number;
@@ -92,6 +115,9 @@ export default function WeeklyPlannerPage() {
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
     null,
   );
+
+  // ── UI state ────────────────────────────────────────────────────────────────
+  const [isCarouselCollapsed, setIsCarouselCollapsed] = useState(false);
   const [editLabelDialog, setEditLabelDialog] = useState<{
     isOpen: boolean;
     day: DayName | null;
@@ -100,16 +126,117 @@ export default function WeeklyPlannerPage() {
   const [detailExercise, setDetailExercise] = useState<Exercise | null>(null);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
 
+  // ── Edit sets dialog ───────────────────────────────────────────────────────
+  const [editExDialog, setEditExDialog] = useState<EditExDialog>({
+    isOpen: false,
+    day: null,
+    exId: null,
+    exName: "",
+    sets: 3,
+  });
+
+  // ── Move/copy day picker dialog ─────────────────────────────────────────────
+  const [dayPickerDialog, setDayPickerDialog] = useState<{
+    isOpen: boolean;
+    mode: "move" | "copy";
+    sourceDay: DayName | null;
+    exId: string | null;
+    exerciseId: string | null;
+    exName: string;
+    sets: number;
+    reps: number;
+  }>({
+    isOpen: false,
+    mode: "move",
+    sourceDay: null,
+    exId: null,
+    exerciseId: null,
+    exName: "",
+    sets: 3,
+    reps: 10,
+  });
+
+  const openDayPicker = (
+    mode: "move" | "copy",
+    sourceDay: DayName,
+    exId: string,
+    exerciseId: string,
+    exName: string,
+    sets: number,
+    reps: number,
+  ) => {
+    setDayPickerDialog({
+      isOpen: true,
+      mode,
+      sourceDay,
+      exId,
+      exerciseId,
+      exName,
+      sets,
+      reps,
+    });
+  };
+
+  const closeDayPicker = () => {
+    setDayPickerDialog((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const openEditExDialog = (
+    day: DayName,
+    exId: string,
+    exName: string,
+    sets: number,
+  ) => {
+    setEditExDialog({ isOpen: true, day, exId, exName, sets });
+  };
+
+  const closeEditExDialog = () => {
+    setEditExDialog((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleSaveEditEx = () => {
+    const { day, exId, sets } = editExDialog;
+    if (!day || !exId) return;
+
+    const dayPlan = plan.find((d) => d.day === day);
+    if (!dayPlan) return;
+
+    const updatedExercises = dayPlan.exercises.map((e) =>
+      e.id === exId ? { ...e, sets } : e,
+    );
+    reorderExercises(day, updatedExercises);
+    toast.success("Ejercicio actualizado");
+    closeEditExDialog();
+  };
+
+  const adjustValue = (
+    field: "sets",
+    delta: number,
+    min: number,
+    max: number,
+  ) => {
+    setEditExDialog((prev) => ({
+      ...prev,
+      [field]: Math.min(max, Math.max(min, prev[field] + delta)),
+    }));
+  };
+
+  // ── Refs ────────────────────────────────────────────────────────────────────
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const autoScrollFrameRef = useRef<number | null>(null);
   const lastTouchXRef = useRef<number>(0);
 
-  // Auto-scroll when dragging near edges
+  // ── Tour ────────────────────────────────────────────────────────────────────
+  const { startTour } = usePlannerTour({
+    ready: plan.length > 0,
+    setCarouselCollapsed: setIsCarouselCollapsed,
+  });
+
+  // ── Auto-scroll ─────────────────────────────────────────────────────────────
   const handleAutoScroll = () => {
     const container = scrollContainerRef.current;
     const clientX = lastTouchXRef.current;
-
     if (!container || !draggedExercise) {
       if (autoScrollFrameRef.current) {
         cancelAnimationFrame(autoScrollFrameRef.current);
@@ -117,40 +244,23 @@ export default function WeeklyPlannerPage() {
       }
       return;
     }
-
-    const containerRect = container.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
-    const edgeThreshold = 120; // Distance from viewport edge to trigger scroll
-    const maxScrollSpeed = 20; // Maximum pixels to scroll per frame
-
+    const edgeThreshold = 120;
+    const maxScrollSpeed = 20;
     let scrollSpeed = 0;
-
-    // Check if near left edge of viewport
     const distanceFromLeft = clientX;
     if (distanceFromLeft > 0 && distanceFromLeft < edgeThreshold) {
-      // Closer to edge = faster scroll
-      const intensity = 1 - distanceFromLeft / edgeThreshold;
-      scrollSpeed = -maxScrollSpeed * intensity;
-    }
-    // Check if near right edge of viewport
-    else {
+      scrollSpeed = -maxScrollSpeed * (1 - distanceFromLeft / edgeThreshold);
+    } else {
       const distanceFromRight = viewportWidth - clientX;
       if (distanceFromRight > 0 && distanceFromRight < edgeThreshold) {
-        const intensity = 1 - distanceFromRight / edgeThreshold;
-        scrollSpeed = maxScrollSpeed * intensity;
+        scrollSpeed = maxScrollSpeed * (1 - distanceFromRight / edgeThreshold);
       }
     }
-
-    // Apply scroll and continue if needed
-    if (Math.abs(scrollSpeed) > 0.5) {
-      container.scrollLeft += scrollSpeed;
-    }
-
-    // Always continue loop while dragging
+    if (Math.abs(scrollSpeed) > 0.5) container.scrollLeft += scrollSpeed;
     autoScrollFrameRef.current = requestAnimationFrame(handleAutoScroll);
   };
 
-  // Cleanup auto-scroll on unmount
   useEffect(() => {
     return () => {
       if (autoScrollFrameRef.current) {
@@ -160,7 +270,25 @@ export default function WeeklyPlannerPage() {
     };
   }, []);
 
-  // Recent exercises from plan - limited to 5 for performance
+  // Native touchmove listener with { passive: false } so preventDefault works
+  // during drag. React's synthetic onTouchMove uses passive listeners by default,
+  // which silently ignores preventDefault and logs the console warning.
+  const draggedExerciseRef = useRef(draggedExercise);
+  useEffect(() => {
+    draggedExerciseRef.current = draggedExercise;
+  }, [draggedExercise]);
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const onTouchMove = (e: TouchEvent) => {
+      if (draggedExerciseRef.current) e.preventDefault();
+    };
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => el.removeEventListener("touchmove", onTouchMove);
+  }, []);
+
+  // ── Recent exercises ────────────────────────────────────────────────────────
   const recentExercises = useMemo(() => {
     const seen = new Set<string>();
     const result: {
@@ -189,6 +317,7 @@ export default function WeeklyPlannerPage() {
     return result;
   }, [plan, exerciseMap]);
 
+  // ── Drag handlers ───────────────────────────────────────────────────────────
   const handleDragStart = (day: DayName, idx: number, exerciseId: string) => {
     setDragItem({ day, idx, exerciseId });
     setDraggedExercise(null);
@@ -200,16 +329,13 @@ export default function WeeklyPlannerPage() {
   };
 
   const handleDrop = (targetDay: DayName, targetIdx: number) => {
-    if (dragItem) {
-      // Existing reorder logic within same day
-      if (dragItem.day === targetDay) {
-        const dayPlan = plan.find((d) => d.day === targetDay);
-        if (!dayPlan) return;
-        const exercises = [...dayPlan.exercises];
-        const [moved] = exercises.splice(dragItem.idx, 1);
-        exercises.splice(targetIdx, 0, moved);
-        reorderExercises(targetDay, exercises);
-      }
+    if (dragItem?.day === targetDay) {
+      const dayPlan = plan.find((d) => d.day === targetDay);
+      if (!dayPlan) return;
+      const exercises = [...dayPlan.exercises];
+      const [moved] = exercises.splice(dragItem.idx, 1);
+      exercises.splice(targetIdx, 0, moved);
+      reorderExercises(targetDay, exercises);
     }
     setDragItem(null);
     setDraggedExercise(null);
@@ -217,42 +343,33 @@ export default function WeeklyPlannerPage() {
 
   const handleDayDrop = (targetDay: DayName): boolean => {
     if (draggedExercise?.isFromCarousel) {
-      // Check if exercise already exists in this day
       const targetDayPlan = plan.find((d) => d.day === targetDay);
-      const exerciseExists = targetDayPlan?.exercises.some(
-        (ex) => ex.exerciseId === draggedExercise.exerciseId,
-      );
-
-      if (exerciseExists) {
+      if (
+        targetDayPlan?.exercises.some(
+          (ex) => ex.exerciseId === draggedExercise.exerciseId,
+        )
+      ) {
         toast.error("Este ejercicio ya existe en este día");
         setDraggedExercise(null);
         setDragItem(null);
         return false;
       }
-
-      // Add exercise from carousel to day
-      const newExercise = {
+      addExerciseToDay(targetDay, {
         id: `${targetDay}-${draggedExercise.exerciseId}-${Date.now()}`,
         exerciseId: draggedExercise.exerciseId,
         sets: settings.defaultSets,
-        reps: 8, // Default reps
-      };
-      addExerciseToDay(targetDay, newExercise);
+        reps: 8,
+      });
       setDraggedExercise(null);
       setDragItem(null);
       return true;
     } else if (dragItem && dragItem.day !== targetDay) {
-      // Move exercise from one day to another
       const sourceDayPlan = plan.find((d) => d.day === dragItem.day);
       const sourceExercise = sourceDayPlan?.exercises[dragItem.idx];
-
       if (sourceExercise) {
         const moved = moveExercise(dragItem.day, targetDay, sourceExercise.id);
-        if (moved) {
-          toast.success(`Ejercicio movido a ${targetDay}`);
-        } else {
-          toast.error("Este ejercicio ya existe en este día");
-        }
+        if (moved) toast.success(`Ejercicio movido a ${targetDay}`);
+        else toast.error("Este ejercicio ya existe en este día");
       }
     }
     setDraggedExercise(null);
@@ -260,21 +377,14 @@ export default function WeeklyPlannerPage() {
     return false;
   };
 
-  // Touch event handlers for mobile drag and drop
   const handleTouchStart = (e: React.TouchEvent, exerciseId: string) => {
     const touch = e.touches[0];
     setTouchStartPos({ x: touch.clientX, y: touch.clientY });
     lastTouchXRef.current = touch.clientX;
-
-    // Long press to initiate drag
     const timer = setTimeout(() => {
       setDraggedExercise({ exerciseId, isFromCarousel: true });
-      // Haptic feedback if available
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-    }, 400); // 400ms long press for better distinction from scroll
-
+      if (navigator.vibrate) navigator.vibrate(50);
+    }, 400);
     setLongPressTimer(timer);
   };
 
@@ -288,8 +398,6 @@ export default function WeeklyPlannerPage() {
     const touch = e.touches[0];
     setTouchStartPos({ x: touch.clientX, y: touch.clientY });
     lastTouchXRef.current = touch.clientX;
-
-    // Long press to initiate drag
     const timer = setTimeout(() => {
       setDraggedExercise({
         exerciseId,
@@ -298,61 +406,33 @@ export default function WeeklyPlannerPage() {
         sourceIdx: idx,
         sourceExId: exId,
       });
-      // Haptic feedback if available
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-    }, 400); // 400ms long press
-
+      if (navigator.vibrate) navigator.vibrate(50);
+    }, 400);
     setLongPressTimer(timer);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     const touch = e.touches[0];
-
     if (touchStartPos) {
       const deltaX = Math.abs(touch.clientX - touchStartPos.x);
       const deltaY = Math.abs(touch.clientY - touchStartPos.y);
-
-      // If moved vertically before long press completes, cancel it (user is scrolling)
-      if (deltaY > 10 && longPressTimer) {
-        clearTimeout(longPressTimer);
-        setLongPressTimer(null);
-        setTouchStartPos(null);
-        return; // Allow native scroll to continue
-      }
-
-      // Also cancel if moved too much horizontally
-      if (deltaX > 15 && longPressTimer) {
+      if ((deltaY > 10 || deltaX > 15) && longPressTimer) {
         clearTimeout(longPressTimer);
         setLongPressTimer(null);
         setTouchStartPos(null);
         return;
       }
     }
-
-    // If drag is active, update position and detect target
     if (draggedExercise) {
-      // Prevent default scrolling only when actively dragging
-      e.preventDefault();
+      // preventDefault is handled by the native listener registered with { passive: false }
       setTouchCurrentPos({ x: touch.clientX, y: touch.clientY });
       lastTouchXRef.current = touch.clientX;
-
-      // Find which day card is under the touch point
       const element = document.elementFromPoint(touch.clientX, touch.clientY);
       const dayCard = element?.closest("[data-day]");
-
-      if (dayCard) {
-        const day = dayCard.getAttribute("data-day") as DayName;
-        setHoveredDay(day);
-      } else {
-        setHoveredDay(null);
-      }
-
-      // Ensure auto-scroll is running
-      if (!autoScrollFrameRef.current) {
-        handleAutoScroll();
-      }
+      setHoveredDay(
+        dayCard ? (dayCard.getAttribute("data-day") as DayName) : null,
+      );
+      if (!autoScrollFrameRef.current) handleAutoScroll();
     }
   };
 
@@ -361,53 +441,41 @@ export default function WeeklyPlannerPage() {
       clearTimeout(longPressTimer);
       setLongPressTimer(null);
     }
-
-    // Stop auto-scroll
     if (autoScrollFrameRef.current) {
       cancelAnimationFrame(autoScrollFrameRef.current);
       autoScrollFrameRef.current = null;
     }
-
-    if (draggedExercise) {
-      // Use the hovered day if available
-      if (hoveredDay) {
-        if (draggedExercise.isFromCarousel) {
-          const success = handleDayDrop(hoveredDay);
-          if (success) {
-            toast.success(`Ejercicio añadido a ${hoveredDay}`);
-          }
-        } else if (
-          draggedExercise.sourceDay &&
-          draggedExercise.sourceDay !== hoveredDay
-        ) {
-          // Move exercise between days
-          const sourceDayPlan = plan.find(
-            (d) => d.day === draggedExercise.sourceDay,
+    if (draggedExercise && hoveredDay) {
+      if (draggedExercise.isFromCarousel) {
+        const success = handleDayDrop(hoveredDay);
+        if (success) toast.success(`Ejercicio añadido a ${hoveredDay}`);
+      } else if (
+        draggedExercise.sourceDay &&
+        draggedExercise.sourceDay !== hoveredDay
+      ) {
+        const sourceDayPlan = plan.find(
+          (d) => d.day === draggedExercise.sourceDay,
+        );
+        const sourceExercise =
+          sourceDayPlan?.exercises[draggedExercise.sourceIdx!];
+        if (sourceExercise) {
+          const moved = moveExercise(
+            draggedExercise.sourceDay,
+            hoveredDay,
+            sourceExercise.id,
           );
-          const sourceExercise =
-            sourceDayPlan?.exercises[draggedExercise.sourceIdx!];
-          if (sourceExercise) {
-            const moved = moveExercise(
-              draggedExercise.sourceDay,
-              hoveredDay,
-              sourceExercise.id,
-            );
-            if (moved) {
-              toast.success(`Ejercicio movido a ${hoveredDay}`);
-            } else {
-              toast.error("Este ejercicio ya existe en este día");
-            }
-          }
+          if (moved) toast.success(`Ejercicio movido a ${hoveredDay}`);
+          else toast.error("Este ejercicio ya existe en este día");
         }
       }
     }
-
     setTouchStartPos(null);
     setTouchCurrentPos(null);
     setHoveredDay(null);
     setDraggedExercise(null);
   };
 
+  // ── Label handlers ──────────────────────────────────────────────────────────
   const handleOpenEditLabel = (day: DayName, currentLabel: string) => {
     setEditLabelDialog({ isOpen: true, day, currentLabel });
   };
@@ -428,12 +496,7 @@ export default function WeeklyPlannerPage() {
     }
   };
 
-  // Guided tour hook
-  const { startTour } = usePlannerTour({
-    ready: plan.length > 0,
-    setCarouselCollapsed: setIsCarouselCollapsed,
-  });
-
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <motion.div
       className="fixed inset-0 flex flex-col"
@@ -445,7 +508,7 @@ export default function WeeklyPlannerPage() {
         paddingBottom: "calc(5rem + max(env(safe-area-inset-bottom), 0px))",
       }}
     >
-      {/* Header - Fixed at top */}
+      {/* Header */}
       <div className="flex-shrink-0 bg-background border-b pt-6 pb-4 px-4 z-20">
         <div
           className="flex items-center justify-between"
@@ -463,7 +526,7 @@ export default function WeeklyPlannerPage() {
         </div>
       </div>
 
-      {/* Day columns — horizontal Trello-style scroll */}
+      {/* Day columns */}
       <div
         ref={scrollContainerRef}
         className={`flex gap-3 overflow-x-auto overflow-y-hidden scrollbar-hide py-4 flex-1 px-4 min-h-0 ${
@@ -504,9 +567,9 @@ export default function WeeklyPlannerPage() {
                   e.currentTarget.classList.add("ring-2", "ring-primary");
                 }
               }}
-              onDragLeave={(e) => {
-                e.currentTarget.classList.remove("ring-2", "ring-primary");
-              }}
+              onDragLeave={(e) =>
+                e.currentTarget.classList.remove("ring-2", "ring-primary")
+              }
               onDrop={(e) => {
                 e.preventDefault();
                 e.currentTarget.classList.remove("ring-2", "ring-primary");
@@ -555,7 +618,7 @@ export default function WeeklyPlannerPage() {
                 )}
               </div>
 
-              {/* Exercise list — vertical scroll inside the card */}
+              {/* Exercise list */}
               <div
                 className="flex-1 overflow-y-auto space-y-3"
                 style={{ WebkitOverflowScrolling: "touch" }}
@@ -568,6 +631,7 @@ export default function WeeklyPlannerPage() {
                   dayPlan.exercises.map((ex, idx) => {
                     const data = exerciseMap[ex.exerciseId];
                     if (!data) return null;
+
                     return (
                       <div
                         key={ex.id}
@@ -600,6 +664,7 @@ export default function WeeklyPlannerPage() {
                               : "pan-y",
                         }}
                       >
+                        {/* Thumbnail */}
                         <div
                           className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity select-none"
                           onClick={(e) => {
@@ -622,6 +687,8 @@ export default function WeeklyPlannerPage() {
                             </span>
                           )}
                         </div>
+
+                        {/* Info */}
                         <div className="flex-1 min-w-0">
                           <p
                             className="text-base font-semibold mb-1 cursor-pointer hover:text-primary transition-colors"
@@ -634,12 +701,14 @@ export default function WeeklyPlannerPage() {
                             {data.name}
                           </p>
                           <p className="text-sm text-muted-foreground mb-1.5">
-                            {ex.sets} series x {ex.reps} reps
+                            {ex.sets} series × {ex.reps} reps
                           </p>
                           <Badge variant="secondary" className="text-sm">
                             {data.muscleGroup}
                           </Badge>
                         </div>
+
+                        {/* ⋮ Menu */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -650,13 +719,82 @@ export default function WeeklyPlannerPage() {
                               <MoreVertical className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+
+                          <DropdownMenuContent align="end" className="w-52">
+                            {/* Ver detalles */}
                             <DropdownMenuItem
-                              className="text-destructive"
+                              onClick={() => {
+                                setDetailExercise(data);
+                                setDetailSheetOpen(true);
+                              }}
+                            >
+                              <Info className="w-4 h-4 mr-2 text-muted-foreground" />
+                              Ver detalles
+                            </DropdownMenuItem>
+
+                            <DropdownMenuSeparator />
+
+                            {/* Editar series */}
+                            <DropdownMenuItem
+                              onClick={() =>
+                                openEditExDialog(
+                                  dayPlan.day,
+                                  ex.id,
+                                  data.name,
+                                  ex.sets,
+                                )
+                              }
+                            >
+                              <Layers className="w-4 h-4 mr-2 text-muted-foreground" />
+                              Editar series
+                            </DropdownMenuItem>
+
+                            {/* Mover a otro día */}
+                            <DropdownMenuItem
+                              onClick={() =>
+                                openDayPicker(
+                                  "move",
+                                  dayPlan.day,
+                                  ex.id,
+                                  ex.exerciseId,
+                                  data.name,
+                                  ex.sets,
+                                  ex.reps,
+                                )
+                              }
+                            >
+                              <ArrowLeftRight className="w-4 h-4 mr-2 text-muted-foreground" />
+                              Mover
+                            </DropdownMenuItem>
+
+                            {/* Copiar a otro día */}
+                            <DropdownMenuItem
+                              onClick={() =>
+                                openDayPicker(
+                                  "copy",
+                                  dayPlan.day,
+                                  ex.id,
+                                  ex.exerciseId,
+                                  data.name,
+                                  ex.sets,
+                                  ex.reps,
+                                )
+                              }
+                            >
+                              <Copy className="w-4 h-4 mr-2 text-muted-foreground" />
+                              Copiar
+                            </DropdownMenuItem>
+
+                            <DropdownMenuSeparator />
+
+                            {/* Eliminar */}
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
                               onClick={() =>
                                 removeExerciseFromDay(dayPlan.day, ex.id)
                               }
                             >
+                              <Trash2 className="w-4 h-4 mr-2" />
                               Eliminar
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -666,7 +804,7 @@ export default function WeeklyPlannerPage() {
                   })
                 )}
 
-                {/* Add exercise button at bottom of list */}
+                {/* Add exercise button */}
                 <div className="flex justify-center pt-2">
                   <Button
                     size="icon"
@@ -684,7 +822,7 @@ export default function WeeklyPlannerPage() {
         ))}
       </div>
 
-      {/* Recent exercises carousel at bottom - Fixed above navigation */}
+      {/* Recent exercises carousel */}
       <div
         className="flex-shrink-0 border-t bg-background z-20"
         data-tour="planner-carousel"
@@ -820,13 +958,144 @@ export default function WeeklyPlannerPage() {
         </div>
       </div>
 
-      {/* Edit Label Dialog */}
+      {/* ── Edit series dialog ──────────────────────────────────────────────── */}
+      <Dialog
+        open={editExDialog.isOpen}
+        onOpenChange={(open) => !open && closeEditExDialog()}
+      >
+        <DialogContent className="max-w-sm w-[calc(100%-2rem)]">
+          <DialogHeader>
+            <DialogTitle>Editar series</DialogTitle>
+            <DialogDescription className="truncate">
+              {editExDialog.exName}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5 py-2">
+            {/* Sets */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Series</Label>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 flex-shrink-0"
+                  onClick={() => adjustValue("sets", -1, 1, 20)}
+                  disabled={editExDialog.sets <= 1}
+                >
+                  <Minus className="w-4 h-4" />
+                </Button>
+                <div className="flex-1 text-center">
+                  <span className="text-3xl font-bold tabular-nums">
+                    {editExDialog.sets}
+                  </span>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {editExDialog.sets === 1 ? "serie" : "series"}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 flex-shrink-0"
+                  onClick={() => adjustValue("sets", +1, 1, 20)}
+                  disabled={editExDialog.sets >= 20}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex-col sm:flex-col gap-2 pt-2">
+            <Button onClick={handleSaveEditEx} className="w-full m-0">
+              Guardar
+            </Button>
+            <Button
+              variant="outline"
+              onClick={closeEditExDialog}
+              className="w-full m-0"
+            >
+              Cancelar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Move / Copy day picker sheet ───────────────────────────────────── */}
+      <Sheet
+        open={dayPickerDialog.isOpen}
+        onOpenChange={(open) => !open && closeDayPicker()}
+      >
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader>
+            <SheetTitle>
+              {dayPickerDialog.mode === "move"
+                ? "Mover ejercicio"
+                : "Copiar ejercicio"}
+            </SheetTitle>
+            <SheetDescription className="truncate text-sm text-muted-foreground">
+              {dayPickerDialog.exName}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="grid grid-cols-2 gap-2 mt-4 pb-4">
+            {DAYS.filter((d) => d !== dayPickerDialog.sourceDay).map(
+              (targetDay) => {
+                const alreadyExists = plan
+                  .find((d) => d.day === targetDay)
+                  ?.exercises.some(
+                    (e) => e.exerciseId === dayPickerDialog.exerciseId,
+                  );
+                return (
+                  <Button
+                    key={targetDay}
+                    variant="outline"
+                    disabled={alreadyExists}
+                    onClick={() => {
+                      if (!dayPickerDialog.sourceDay || !dayPickerDialog.exId)
+                        return;
+                      if (dayPickerDialog.mode === "move") {
+                        const moved = moveExercise(
+                          dayPickerDialog.sourceDay,
+                          targetDay,
+                          dayPickerDialog.exId,
+                        );
+                        if (moved) toast.success(`Movido a ${targetDay}`);
+                        else toast.error("Ya existe en ese día");
+                      } else {
+                        addExerciseToDay(targetDay, {
+                          id: `${targetDay}-${dayPickerDialog.exerciseId}-${Date.now()}`,
+                          exerciseId: dayPickerDialog.exerciseId!,
+                          sets: dayPickerDialog.sets,
+                          reps: dayPickerDialog.reps,
+                        });
+                        toast.success(`Copiado a ${targetDay}`);
+                      }
+                      closeDayPicker();
+                    }}
+                    className="h-11"
+                  >
+                    {targetDay}
+                  </Button>
+                );
+              },
+            )}
+            <Button
+              variant="outline"
+              className="col-span-2 mt-2"
+              onClick={closeDayPicker}
+            >
+              Cancelar
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* ── Edit label dialog ───────────────────────────────────────────────── */}
       <Dialog
         open={editLabelDialog.isOpen}
         onOpenChange={(open) => {
-          if (!open) {
+          if (!open)
             setEditLabelDialog({ isOpen: false, day: null, currentLabel: "" });
-          }
         }}
       >
         <DialogContent className="max-w-[425px] w-[calc(100%-2rem)]">
@@ -850,9 +1119,7 @@ export default function WeeklyPlannerPage() {
               placeholder="Ej: Torso A, Pierna, Pull..."
               maxLength={30}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSaveLabel();
-                }
+                if (e.key === "Enter") handleSaveLabel();
               }}
             />
           </div>
@@ -886,7 +1153,7 @@ export default function WeeklyPlannerPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Drag ghost element that follows finger */}
+      {/* Drag ghost */}
       <AnimatePresence>
         {draggedExercise && touchCurrentPos && (
           <motion.div
@@ -924,7 +1191,7 @@ export default function WeeklyPlannerPage() {
         )}
       </AnimatePresence>
 
-      {/* Exercise Detail Sheet */}
+      {/* Exercise detail sheet */}
       <ExerciseDetailSheet
         exercise={detailExercise}
         open={detailSheetOpen}

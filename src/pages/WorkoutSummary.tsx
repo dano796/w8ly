@@ -166,7 +166,7 @@ export default function WorkoutSummaryPage() {
       </div>
 
       {/* Completed exercises */}
-      <h3 className="text-xl font-bold text-primary mb-3">
+      <h3 className="text-lg font-bold text-primary mb-3">
         Ejercicios completados
       </h3>
       <motion.div

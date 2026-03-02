@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useRestTimerSound } from "@/hooks/useRestTimerSound";
 import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { useSettings } from "@/hooks/useSettings";
@@ -77,6 +78,9 @@ export default function ActiveWorkoutPage() {
     useWorkoutHistory();
   const { settings } = useSettings();
   const { customExercises } = useCustomExercises();
+
+  // Rest timer sound hook
+  const { playBeep, unlock } = useRestTimerSound();
 
   // Combine default and custom exercises
   const allExercises = [...defaultExercises, ...customExercises];
@@ -262,14 +266,17 @@ export default function ActiveWorkoutPage() {
         if (!prev || prev.isPaused) return prev;
 
         if (prev.timeLeft <= 1) {
-          // Timer reached 0
-          toast.success("¡Descanso terminado!", {
-            duration: 3000,
-            style: {
-              fontSize: "16px",
-              fontWeight: "600",
-            },
-          });
+          // Schedule sound and toast outside updater
+          setTimeout(() => {
+            playBeep();
+            toast.success("¡Descanso terminado!", {
+              duration: 3000,
+              style: {
+                fontSize: "16px",
+                fontWeight: "600",
+              },
+            });
+          }, 0);
           return null;
         }
 
@@ -278,7 +285,7 @@ export default function ActiveWorkoutPage() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [restTimer]);
+  }, [restTimer, playBeep]);
 
   const totalSets = exercises.reduce((s, e) => s + e.sets.length, 0);
   const completedSets = exercises.reduce(
@@ -523,7 +530,32 @@ export default function ActiveWorkoutPage() {
       return;
     }
 
-    setShowFinishDialog(true);
+    // Si la opción de confirmar al finalizar está activada, mostrar el diálogo
+    if (settings.confirmOnFinish) {
+      setShowFinishDialog(true);
+    } else {
+      // Si no, finalizar directamente, pero respetar el flujo de cambios estructurales
+      // Replicar la lógica de handleFinish aquí, pero sin mostrar el diálogo simple
+      const workout = {
+        id: `w-${Date.now()}`,
+        day: day as DayName,
+        label: dayPlan?.label,
+        date: new Date().toISOString(),
+        durationSeconds: elapsed,
+        exercises,
+      };
+
+      if (hasStructuralChanges()) {
+        setPendingWorkout(workout);
+        setShowChangesDialog(true);
+      } else {
+        applyRestTimesOnly();
+        addWorkout(workout);
+        setTimeout(() => {
+          navigate(`/summary/${workout.id}`, { state: workout });
+        }, 0);
+      }
+    }
   };
 
   const handleFinish = () => {
@@ -1103,7 +1135,7 @@ export default function ActiveWorkoutPage() {
         open={unitChangeDialogExIdx !== null}
         onOpenChange={(open) => !open && setUnitChangeDialogExIdx(null)}
       >
-        <DialogContent className="max-w-sm rounded-xl">
+        <DialogContent className="max-w-sm w-[calc(100%-2rem)] rounded-xl">
           <DialogHeader>
             <DialogTitle>Cambiar unidad de peso</DialogTitle>
             <DialogDescription>
@@ -1136,9 +1168,7 @@ export default function ActiveWorkoutPage() {
               >
                 <div className="flex flex-col items-center gap-1">
                   <span className="text-2xl font-bold">kg</span>
-                  <span className="text-xs text-muted-foreground">
-                    Kilogramos
-                  </span>
+                  <span className="text-xs opacity-80">Kilogramos</span>
                 </div>
               </Button>
               <Button
@@ -1160,7 +1190,7 @@ export default function ActiveWorkoutPage() {
               >
                 <div className="flex flex-col items-center gap-1">
                   <span className="text-2xl font-bold">lbs</span>
-                  <span className="text-xs text-muted-foreground">Libras</span>
+                  <span className="text-xs opacity-80">Libras</span>
                 </div>
               </Button>
             </div>
@@ -1191,8 +1221,8 @@ export default function ActiveWorkoutPage() {
                 <div className="flex items-center justify-between gap-2">
                   {/* Timer display */}
                   <div className="flex items-center gap-2">
-                    <Timer className="w-6 sm:w-5 h-6 sm:h-5 text-primary flex-shrink-0" />
-                    <div className="text-4xl sm:text-3xl font-bold text-primary tabular-nums">
+                    <Timer className="w-6 sm:w-5 h-6 sm:h-5 text-primary flex-shrink-0 dark:text-white" />
+                    <div className="text-4xl sm:text-3xl font-bold tabular-nums text-primary dark:text-white">
                       {Math.floor(restTimer.timeLeft / 60)}:
                       {String(restTimer.timeLeft % 60).padStart(2, "0")}
                     </div>
@@ -1204,7 +1234,10 @@ export default function ActiveWorkoutPage() {
                       variant="outline"
                       size="icon"
                       className="h-9 w-9"
-                      onClick={() => adjustRestTimer(-15)}
+                      onClick={() => {
+                        unlock();
+                        adjustRestTimer(-15);
+                      }}
                     >
                       <Minus className="w-4 h-4" />
                     </Button>
@@ -1212,7 +1245,10 @@ export default function ActiveWorkoutPage() {
                       variant="outline"
                       size="icon"
                       className="h-9 w-9"
-                      onClick={() => adjustRestTimer(15)}
+                      onClick={() => {
+                        unlock();
+                        adjustRestTimer(15);
+                      }}
                     >
                       <Plus className="w-4 h-4" />
                     </Button>
@@ -1220,7 +1256,10 @@ export default function ActiveWorkoutPage() {
                       variant="outline"
                       size="icon"
                       className="h-9 w-9"
-                      onClick={toggleRestTimer}
+                      onClick={() => {
+                        unlock();
+                        toggleRestTimer();
+                      }}
                     >
                       {restTimer.isPaused ? (
                         <Play className="w-4 h-4" />
@@ -1232,7 +1271,10 @@ export default function ActiveWorkoutPage() {
                       variant="outline"
                       size="icon"
                       className="h-9 w-9"
-                      onClick={cancelRestTimer}
+                      onClick={() => {
+                        unlock();
+                        cancelRestTimer();
+                      }}
                     >
                       <X className="w-4 h-4" />
                     </Button>
