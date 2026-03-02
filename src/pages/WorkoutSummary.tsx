@@ -197,7 +197,7 @@ export default function WorkoutSummaryPage() {
                 <Card className="p-3">
                   <div className="flex items-start gap-3 mb-3">
                     <div
-                      className="w-12 h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                      className="w-12 h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity select-none"
                       onClick={() => {
                         setDetailExercise(data);
                         setDetailSheetOpen(true);
@@ -207,8 +207,9 @@ export default function WorkoutSummaryPage() {
                         <img
                           src={data.imageUrl}
                           alt={data.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover pointer-events-none"
                           loading="lazy"
+                          draggable={false}
                         />
                       ) : (
                         <span className="text-sm text-muted-foreground">

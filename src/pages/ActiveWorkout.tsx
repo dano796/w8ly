@@ -720,7 +720,7 @@ export default function ActiveWorkoutPage() {
                   <Card className="p-4" onClick={() => setRevealedSet(null)}>
                     <div className="flex items-center gap-3 mb-3">
                       <div
-                        className="w-12 h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                        className="w-12 h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity select-none"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDetailExercise(data);
@@ -731,8 +731,9 @@ export default function ActiveWorkoutPage() {
                           <img
                             src={data.imageUrl}
                             alt={data.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover pointer-events-none"
                             loading="lazy"
+                            draggable={false}
                           />
                         ) : (
                           <span className="text-sm text-muted-foreground">
@@ -1144,7 +1145,7 @@ export default function ActiveWorkoutPage() {
             exit={{ opacity: 0, y: 100 }}
             className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none"
           >
-            <div className="max-w-2xl mx-auto px-4 pb-4 pointer-events-auto">
+            <div className="max-w-2xl mx-auto px-4 pb-8 sm:pb-10 pointer-events-auto">
               <Card className="p-3 bg-primary/20 border-primary shadow-lg backdrop-blur-sm">
                 <div className="flex items-center justify-between gap-2">
                   {/* Timer display */}

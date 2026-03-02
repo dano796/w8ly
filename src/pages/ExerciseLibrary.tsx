@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Plus, Check, Search, Dumbbell } from "lucide-react";
+import { ArrowLeft, Plus, Check, Search, Dumbbell, Trash2 } from "lucide-react";
 import ExerciseDetailSheet from "@/components/ExerciseDetailSheet";
 import {
   Sheet,
@@ -25,6 +25,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
@@ -61,7 +71,8 @@ export default function ExerciseLibraryPage() {
 
   const { plan, addExerciseToDay, updateDayExercises } = useWeeklyPlan();
   const { settings } = useSettings();
-  const { customExercises, addCustomExercise } = useCustomExercises();
+  const { customExercises, addCustomExercise, removeCustomExercise } =
+    useCustomExercises();
   const [activeFilter, setActiveFilter] = useState<MuscleGroup | "Todos">(
     "Todos",
   );
@@ -79,6 +90,10 @@ export default function ExerciseLibraryPage() {
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(15);
   const observerRef = useRef<HTMLDivElement>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [exerciseToDelete, setExerciseToDelete] = useState<Exercise | null>(
+    null,
+  );
 
   // Get currently added exercises if coming from active workout
   const state = location.state as {
@@ -315,6 +330,21 @@ export default function ExerciseLibraryPage() {
     setCreateDialogOpen(false);
   };
 
+  const handleDeleteExercise = (exercise: Exercise, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setExerciseToDelete(exercise);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteExercise = () => {
+    if (exerciseToDelete) {
+      removeCustomExercise(exerciseToDelete.id);
+      toast.success(`Ejercicio "${exerciseToDelete.name}" eliminado`);
+      setDeleteDialogOpen(false);
+      setExerciseToDelete(null);
+    }
+  };
+
   return (
     <motion.div
       className="px-4 pt-6 max-w-lg mx-auto"
@@ -388,7 +418,7 @@ export default function ExerciseLibraryPage() {
             <motion.div key={ex.id} variants={listItemVariants}>
               <Card
                 className={cn(
-                  "flex items-center gap-3 p-4 transition-colors",
+                  "flex items-center gap-3 p-4 transition-colors select-none",
                   (fromWorkout || preselectedDay) &&
                     !isAlreadyAdded &&
                     "cursor-pointer hover:bg-accent/50",
@@ -415,8 +445,9 @@ export default function ExerciseLibraryPage() {
                     <img
                       src={ex.imageUrl}
                       alt={ex.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover pointer-events-none"
                       loading="lazy"
+                      draggable={false}
                     />
                   ) : (
                     <Dumbbell className="w-6 h-6 text-muted-foreground" />
@@ -424,8 +455,8 @@ export default function ExerciseLibraryPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-semibold truncate">{ex.name}</p>
-                  <div className="flex gap-1.5 items-center mt-0.5">
-                    <Badge variant="secondary" className="text-xs">
+                  <div className="flex gap-1.5 items-center mt-1">
+                    <Badge variant="secondary" className="text-sm">
                       {ex.muscleGroup}
                     </Badge>
                     {isAlreadyAdded && (
@@ -456,14 +487,26 @@ export default function ExerciseLibraryPage() {
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8"
-                    onClick={(e) => handleAdd(ex.id, e)}
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-1">
+                    {ex.id.startsWith("custom-") && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={(e) => handleDeleteExercise(ex, e)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      onClick={(e) => handleAdd(ex.id, e)}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
                 )}
               </Card>
             </motion.div>
@@ -615,7 +658,32 @@ export default function ExerciseLibraryPage() {
         exercise={detailExercise}
         open={detailSheetOpen}
         onOpenChange={setDetailSheetOpen}
+        onDelete={handleDeleteExercise}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="max-w-[425px] w-[calc(100%-2rem)]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar ejercicio?</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que deseas eliminar "{exerciseToDelete?.name}"?
+              Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-col gap-2">
+            <AlertDialogAction
+              onClick={confirmDeleteExercise}
+              className="w-full m-0 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+            <AlertDialogCancel className="w-full m-0">
+              Cancelar
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 }

@@ -575,7 +575,7 @@ export default function WeeklyPlannerPage() {
                         }}
                       >
                         <div
-                          className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                          className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity select-none"
                           onClick={(e) => {
                             e.stopPropagation();
                             setDetailExercise(data);
@@ -586,8 +586,9 @@ export default function WeeklyPlannerPage() {
                             <img
                               src={data.imageUrl}
                               alt={data.name}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover pointer-events-none"
                               loading="lazy"
+                              draggable={false}
                             />
                           ) : (
                             <span className="text-xs text-muted-foreground">
@@ -722,7 +723,7 @@ export default function WeeklyPlannerPage() {
                         }}
                       >
                         <div
-                          className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                          className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity select-none"
                           onClick={(e) => {
                             e.stopPropagation();
                             setDetailExercise(
@@ -737,8 +738,9 @@ export default function WeeklyPlannerPage() {
                             <img
                               src={ex.imageUrl}
                               alt={ex.name}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover pointer-events-none"
                               loading="lazy"
+                              draggable={false}
                             />
                           ) : (
                             <span className="text-xs text-muted-foreground">
@@ -865,14 +867,15 @@ export default function WeeklyPlannerPage() {
               top: touchCurrentPos.y - 70,
             }}
           >
-            <Card className="p-3 w-36 shadow-2xl border-2 border-primary bg-background/95 backdrop-blur-sm">
+            <Card className="p-3 w-36 shadow-2xl border-2 border-primary bg-background/95 backdrop-blur-sm select-none">
               <div className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2 overflow-hidden">
                 {exerciseMap[draggedExercise.exerciseId]?.imageUrl ? (
                   <img
                     src={exerciseMap[draggedExercise.exerciseId].imageUrl}
                     alt={exerciseMap[draggedExercise.exerciseId]?.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover pointer-events-none"
                     loading="lazy"
+                    draggable={false}
                   />
                 ) : (
                   <span className="text-xs text-muted-foreground">IMG</span>
