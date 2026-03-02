@@ -411,22 +411,28 @@ export default function WeeklyPlannerPage() {
 
   return (
     <motion.div
-      className="pt-6 pb-4 flex flex-col h-[calc(100vh-4rem)]"
+      className="fixed inset-0 flex flex-col"
       variants={pageVariants}
       initial="initial"
       animate="animate"
       exit="exit"
+      style={{
+        paddingBottom: "calc(5rem + max(env(safe-area-inset-bottom), 0px))",
+      }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4 px-4">
-        <h1 className="text-2xl font-bold">Mi rutina semanal</h1>
+      {/* Header - Fixed at top */}
+      <div className="flex-shrink-0 bg-background border-b pt-6 pb-4 px-4 z-20">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Mi rutina semanal</h1>
+        </div>
       </div>
 
       {/* Day columns — horizontal Trello-style scroll */}
       <div
         ref={scrollContainerRef}
-        className={`flex gap-3 overflow-x-auto scrollbar-hide pb-4 flex-1 px-4 ${draggedExercise ? "" : "snap-x snap-mandatory"
-          }`}
+        className={`flex gap-3 overflow-x-auto overflow-y-hidden scrollbar-hide py-4 flex-1 px-4 min-h-0 ${
+          draggedExercise ? "" : "snap-x snap-mandatory"
+        }`}
         style={{
           scrollPaddingLeft: "1rem",
           WebkitOverflowScrolling: "touch",
@@ -439,18 +445,19 @@ export default function WeeklyPlannerPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.05, duration: 0.3 }}
-            className="flex-shrink-0 w-[80vw] max-w-[320px] snap-start"
+            className="flex-shrink-0 w-[80vw] max-w-[320px] snap-start h-full"
           >
             <Card
               data-day={dayPlan.day}
-              className={`p-4 flex flex-col h-fit max-h-[65vh] transition-all ${hoveredDay === dayPlan.day
+              className={`p-4 flex flex-col h-full transition-all ${
+                hoveredDay === dayPlan.day
                   ? "ring-4 ring-primary bg-primary/10 scale-[1.02]"
                   : draggedExercise &&
-                    (draggedExercise.isFromCarousel ||
-                      draggedExercise.sourceDay !== dayPlan.day)
+                      (draggedExercise.isFromCarousel ||
+                        draggedExercise.sourceDay !== dayPlan.day)
                     ? "ring-2 ring-primary/30"
                     : ""
-                }`}
+              }`}
               onDragOver={(e) => {
                 if (
                   draggedExercise?.isFromCarousel ||
@@ -538,10 +545,11 @@ export default function WeeklyPlannerPage() {
                         }
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
-                        className={`flex items-start gap-3 p-2.5 bg-card rounded-lg border hover:bg-accent/50 transition-colors touch-draggable ${draggedExercise?.sourceExId === ex.id
+                        className={`flex items-start gap-3 p-2.5 bg-card rounded-lg border hover:bg-accent/50 transition-colors touch-draggable ${
+                          draggedExercise?.sourceExId === ex.id
                             ? "opacity-50"
                             : ""
-                          }`}
+                        }`}
                         style={{ touchAction: "none" }}
                       >
                         <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
@@ -603,8 +611,8 @@ export default function WeeklyPlannerPage() {
         ))}
       </div>
 
-      {/* Recent exercises carousel at bottom */}
-      <div className="border-t mt-auto bg-background">
+      {/* Recent exercises carousel at bottom - Fixed above navigation */}
+      <div className="flex-shrink-0 border-t bg-background shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-20">
         <div className="px-4 pt-4 pb-2">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -656,10 +664,11 @@ export default function WeeklyPlannerPage() {
                         onTouchStart={(e) => handleTouchStart(e, ex.exerciseId)}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
-                        className={`p-3 w-36 hover:bg-accent transition-all touch-draggable ${draggedExercise?.exerciseId === ex.exerciseId
+                        className={`p-3 w-36 hover:bg-accent transition-all touch-draggable ${
+                          draggedExercise?.exerciseId === ex.exerciseId
                             ? "opacity-50 scale-95 shadow-lg"
                             : "cursor-grab active:cursor-grabbing"
-                          }`}
+                        }`}
                         style={{
                           touchAction:
                             draggedExercise?.exerciseId === ex.exerciseId
