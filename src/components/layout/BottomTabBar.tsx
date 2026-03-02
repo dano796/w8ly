@@ -16,10 +16,14 @@ export default function BottomTabBar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Hide on workout/summary pages
+  // Hide on workout/summary pages and when adding exercises from active workout
+  const searchParams = new URLSearchParams(location.search);
+  const fromWorkout = searchParams.get("fromWorkout");
+
   if (
     location.pathname.startsWith("/workout") ||
-    location.pathname.startsWith("/summary")
+    location.pathname.startsWith("/summary") ||
+    (location.pathname === "/exercises" && fromWorkout)
   ) {
     return null;
   }
