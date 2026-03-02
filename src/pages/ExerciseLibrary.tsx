@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { defaultExercises } from "@/utils/exerciseData";
-import { DayName, DAYS, MuscleGroup } from "@/utils/types";
+import { DayName, DAYS, MuscleGroup, Exercise } from "@/utils/types";
 import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Plus, Check, Search, Dumbbell } from "lucide-react";
+import ExerciseDetailSheet from "@/components/ExerciseDetailSheet";
 import {
   Sheet,
   SheetContent,
@@ -74,6 +75,9 @@ export default function ExerciseLibraryPage() {
   const [newExerciseName, setNewExerciseName] = useState("");
   const [newExerciseMuscleGroup, setNewExerciseMuscleGroup] =
     useState<MuscleGroup>("Pecho");
+  const [detailExercise, setDetailExercise] = useState<Exercise | null>(null);
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(15);
 
   // Get currently added exercises if coming from active workout
   const state = location.state as {
@@ -87,19 +91,42 @@ export default function ExerciseLibraryPage() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, []);
 
-  // Combine default and custom exercises
-  const allExercises = [...defaultExercises, ...customExercises];
+  // Combine default and custom exercises - memoized for performance
+  const allExercises = useMemo(
+    () => [...defaultExercises, ...customExercises],
+    [customExercises],
+  );
 
-  const filtered =
-    activeFilter === "Todos"
-      ? allExercises
-      : allExercises.filter((e) => e.muscleGroup === activeFilter);
+  const filtered = useMemo(
+    () =>
+      activeFilter === "Todos"
+        ? allExercises
+        : allExercises.filter((e) => e.muscleGroup === activeFilter),
+    [activeFilter, allExercises],
+  );
 
-  const searchFiltered = searchTerm.trim()
-    ? filtered.filter((e) =>
-        e.name.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-    : filtered;
+  const searchFiltered = useMemo(
+    () =>
+      searchTerm.trim()
+        ? filtered.filter((e) =>
+            e.name.toLowerCase().includes(searchTerm.toLowerCase()),
+          )
+        : filtered,
+    [searchTerm, filtered],
+  );
+
+  // Limit visible exercises for performance
+  const visibleExercises = searchFiltered.slice(0, visibleCount);
+  const hasMore = searchFiltered.length > visibleCount;
+
+  const loadMore = () => {
+    setVisibleCount((prev) => Math.min(prev + 15, searchFiltered.length));
+  };
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(15);
+  }, [activeFilter, searchTerm]);
 
   const toggleSelection = (exerciseId: string) => {
     // Don't allow selection of exercises already in the workout
@@ -334,7 +361,7 @@ export default function ExerciseLibraryPage() {
         initial="hidden"
         animate="visible"
       >
-        {searchFiltered.map((ex) => {
+        {visibleExercises.map((ex) => {
           const isSelected = selectedExercises.includes(ex.id);
           const isAlreadyAdded = currentExercises.has(ex.id);
 
@@ -346,17 +373,35 @@ export default function ExerciseLibraryPage() {
                   (fromWorkout || preselectedDay) &&
                     !isAlreadyAdded &&
                     "cursor-pointer hover:bg-accent/50",
+                  !fromWorkout &&
+                    !preselectedDay &&
+                    "cursor-pointer hover:bg-accent/50",
                   isSelected && "bg-primary/10 border-primary",
                   isAlreadyAdded && "opacity-60 cursor-not-allowed",
                 )}
-                onClick={() =>
-                  (fromWorkout || preselectedDay) && !isAlreadyAdded
-                    ? toggleSelection(ex.id)
-                    : null
-                }
+                onClick={() => {
+                  if (fromWorkout || preselectedDay) {
+                    if (!isAlreadyAdded) {
+                      toggleSelection(ex.id);
+                    }
+                  } else {
+                    // View exercise detail
+                    setDetailExercise(ex);
+                    setDetailSheetOpen(true);
+                  }
+                }}
               >
-                <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm text-muted-foreground">IMG</span>
+                <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {ex.imageUrl ? (
+                    <img
+                      src={ex.imageUrl}
+                      alt={ex.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <Dumbbell className="w-6 h-6 text-muted-foreground" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-semibold truncate">{ex.name}</p>
@@ -405,6 +450,23 @@ export default function ExerciseLibraryPage() {
             </motion.div>
           );
         })}
+
+        {/* Load More Button */}
+        {hasMore && (
+          <motion.div
+            variants={listItemVariants}
+            className="flex justify-center py-4"
+          >
+            <Button
+              variant="outline"
+              onClick={loadMore}
+              className="w-full max-w-xs"
+            >
+              Cargar más ejercicios ({searchFiltered.length - visibleCount}{" "}
+              restantes)
+            </Button>
+          </motion.div>
+        )}
       </motion.div>
 
       {/* Floating button for multi-select */}
@@ -533,6 +595,13 @@ export default function ExerciseLibraryPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Exercise Detail Sheet */}
+      <ExerciseDetailSheet
+        exercise={detailExercise}
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+      />
     </motion.div>
   );
 }

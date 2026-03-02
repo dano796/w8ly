@@ -1,4 +1,5 @@
 const CACHE_NAME = "w8ly-v2"; // Increment version to force update
+const IMAGES_CACHE = "w8ly-images-v1";
 const urlsToCache = ["/", "/index.html"];
 
 // Install service worker and cache assets
@@ -12,9 +13,34 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// Stale-While-Revalidate strategy:
-// Serve from cache immediately, but update cache in background
+// Optimized fetch strategy: Different strategies for different content types
 self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Special handling for exercise GIFs - Cache First with expiration
+  if (url.pathname.startsWith("/exercises/") && url.pathname.endsWith(".gif")) {
+    event.respondWith(
+      caches.open(IMAGES_CACHE).then((cache) => {
+        return cache.match(request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // Not in cache, fetch and cache it
+          return fetch(request).then((networkResponse) => {
+            // Only cache successful responses
+            if (networkResponse && networkResponse.status === 200) {
+              cache.put(request, networkResponse.clone());
+            }
+            return networkResponse;
+          });
+        });
+      }),
+    );
+    return;
+  }
+
+  // Stale-While-Revalidate strategy for other resources
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.match(event.request).then((cachedResponse) => {
@@ -22,7 +48,9 @@ self.addEventListener("fetch", (event) => {
         const fetchPromise = fetch(event.request)
           .then((networkResponse) => {
             // Update cache with new version
-            cache.put(event.request, networkResponse.clone());
+            if (networkResponse && networkResponse.status === 200) {
+              cache.put(event.request, networkResponse.clone());
+            }
             return networkResponse;
           })
           .catch(() => {
@@ -43,7 +71,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName !== CACHE_NAME && cacheName !== IMAGES_CACHE) {
             return caches.delete(cacheName);
           }
         }),

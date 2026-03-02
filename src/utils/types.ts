@@ -11,6 +11,15 @@ export interface Exercise {
   name: string;
   muscleGroup: MuscleGroup;
   imageUrl?: string;
+  // Extended exercise data
+  bodyPart?: string;
+  equipment?: string;
+  target?: string;
+  secondaryMuscles?: string[];
+  instructions?: string[];
+  description?: string;
+  difficulty?: string;
+  category?: string;
 }
 
 export type DayName =
@@ -27,7 +36,7 @@ export interface PlannedExercise {
   exerciseId: string;
   sets: number;
   reps: number;
-  restTime?: number;
+  restTime?: number; // rest time in seconds (optional, defaults to settings)
 }
 
 export interface DayPlan {
@@ -49,7 +58,7 @@ export interface WorkoutSet {
 export interface WorkoutExercise {
   exerciseId: string;
   sets: WorkoutSet[];
-  unit?: "lbs" | "kg";
+  unit?: "lbs" | "kg"; // Unit preference for this exercise
 }
 
 export interface ActiveWorkout {
@@ -61,7 +70,7 @@ export interface ActiveWorkout {
 export interface CompletedWorkout {
   id: string;
   day: DayName;
-  label?: string;
+  label?: string; // custom title for the routine
   date: string; // ISO
   durationSeconds: number;
   exercises: WorkoutExercise[];

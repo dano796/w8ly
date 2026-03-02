@@ -12,7 +12,9 @@ import {
   WorkoutSet,
   PlannedExercise,
   CompletedWorkout,
+  Exercise,
 } from "@/utils/types";
+import ExerciseDetailSheet from "@/components/ExerciseDetailSheet";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -97,6 +99,8 @@ export default function ActiveWorkoutPage() {
   const [unitChangeDialogExIdx, setUnitChangeDialogExIdx] = useState<
     number | null
   >(null);
+  const [detailExercise, setDetailExercise] = useState<Exercise | null>(null);
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
 
   // Rest timer state
   const [restTimer, setRestTimer] = useState<{
@@ -500,6 +504,18 @@ export default function ActiveWorkoutPage() {
   };
 
   const handleFinishClick = () => {
+    // Check if at least one set is completed
+    const hasCompletedSets = exercises.some((ex) =>
+      ex.sets.some((s) => s.completed),
+    );
+
+    if (!hasCompletedSets) {
+      toast.error(
+        "Completa al menos una serie para finalizar el entrenamiento",
+      );
+      return;
+    }
+
     setShowFinishDialog(true);
   };
 
@@ -564,6 +580,19 @@ export default function ActiveWorkoutPage() {
   };
 
   const handleSaveAndExit = () => {
+    // Check if at least one set is completed
+    const hasCompletedSets = exercises.some((ex) =>
+      ex.sets.some((s) => s.completed),
+    );
+
+    if (!hasCompletedSets) {
+      toast.error(
+        "Debes completar al menos una serie para guardar el entrenamiento",
+      );
+      setShowExitDialog(false);
+      return;
+    }
+
     const workout = {
       id: `w-${Date.now()}`,
       day: day as DayName,
@@ -690,13 +719,36 @@ export default function ActiveWorkoutPage() {
                 >
                   <Card className="p-4" onClick={() => setRevealedSet(null)}>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                        <span className="text-sm text-muted-foreground">
-                          IMG
-                        </span>
+                      <div
+                        className="w-12 h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDetailExercise(data);
+                          setDetailSheetOpen(true);
+                        }}
+                      >
+                        {data?.imageUrl ? (
+                          <img
+                            src={data.imageUrl}
+                            alt={data.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <span className="text-sm text-muted-foreground">
+                            IMG
+                          </span>
+                        )}
                       </div>
-                      <div className="flex-1">
-                        <p className="text-base sm:text-sm font-semibold">
+                      <div
+                        className="flex-1 cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDetailExercise(data);
+                          setDetailSheetOpen(true);
+                        }}
+                      >
+                        <p className="text-base sm:text-sm font-semibold hover:text-primary transition-colors">
                           {data.name}
                         </p>
                         <Badge
@@ -1149,6 +1201,13 @@ export default function ActiveWorkoutPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Exercise Detail Sheet */}
+      <ExerciseDetailSheet
+        exercise={detailExercise}
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+      />
     </motion.div>
   );
 }

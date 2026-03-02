@@ -4,12 +4,13 @@ import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { defaultExercises } from "@/utils/exerciseData";
-import { DayName, DAYS } from "@/utils/types";
+import { DayName, DAYS, Exercise } from "@/utils/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import ExerciseDetailSheet from "@/components/ExerciseDetailSheet";
 import {
   Plus,
   MoreVertical,
@@ -94,6 +95,8 @@ export default function WeeklyPlannerPage() {
     day: DayName | null;
     currentLabel: string;
   }>({ isOpen: false, day: null, currentLabel: "" });
+  const [detailExercise, setDetailExercise] = useState<Exercise | null>(null);
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -155,11 +158,15 @@ export default function WeeklyPlannerPage() {
     };
   }, []);
 
-  // Recent exercises from plan
+  // Recent exercises from plan - limited to 5 for performance
   const recentExercises = useMemo(() => {
     const seen = new Set<string>();
-    const result: { exerciseId: string; name: string; muscleGroup: string }[] =
-      [];
+    const result: {
+      exerciseId: string;
+      name: string;
+      muscleGroup: string;
+      imageUrl?: string;
+    }[] = [];
     for (const day of plan) {
       for (const ex of day.exercises) {
         if (!seen.has(ex.exerciseId)) {
@@ -170,11 +177,12 @@ export default function WeeklyPlannerPage() {
               exerciseId: ex.exerciseId,
               name: data.name,
               muscleGroup: data.muscleGroup,
+              imageUrl: data.imageUrl,
             });
         }
-        if (result.length >= 8) break;
+        if (result.length >= 5) break;
       }
-      if (result.length >= 8) break;
+      if (result.length >= 5) break;
     }
     return result;
   }, [plan, exerciseMap]);
@@ -566,13 +574,36 @@ export default function WeeklyPlannerPage() {
                               : "pan-y",
                         }}
                       >
-                        <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs text-muted-foreground">
-                            IMG
-                          </span>
+                        <div
+                          className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDetailExercise(data);
+                            setDetailSheetOpen(true);
+                          }}
+                        >
+                          {data?.imageUrl ? (
+                            <img
+                              src={data.imageUrl}
+                              alt={data.name}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              IMG
+                            </span>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-base font-semibold mb-1">
+                          <p
+                            className="text-base font-semibold mb-1 cursor-pointer hover:text-primary transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDetailExercise(data);
+                              setDetailSheetOpen(true);
+                            }}
+                          >
                             {data.name}
                           </p>
                           <p className="text-sm text-muted-foreground mb-1.5">
@@ -690,12 +721,43 @@ export default function WeeklyPlannerPage() {
                               : "pan-x",
                         }}
                       >
-                        <div className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2">
-                          <span className="text-xs text-muted-foreground">
-                            IMG
-                          </span>
+                        <div
+                          className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDetailExercise(
+                              allExercises.find(
+                                (exercise) => exercise.id === ex.exerciseId,
+                              ) || null,
+                            );
+                            setDetailSheetOpen(true);
+                          }}
+                        >
+                          {ex.imageUrl ? (
+                            <img
+                              src={ex.imageUrl}
+                              alt={ex.name}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              IMG
+                            </span>
+                          )}
                         </div>
-                        <p className="text-base font-semibold truncate mb-1">
+                        <p
+                          className="text-base font-semibold truncate mb-1 cursor-pointer hover:text-primary transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDetailExercise(
+                              allExercises.find(
+                                (exercise) => exercise.id === ex.exerciseId,
+                              ) || null,
+                            );
+                            setDetailSheetOpen(true);
+                          }}
+                        >
                           {ex.name}
                         </p>
                         <Badge variant="secondary" className="text-sm">
@@ -804,8 +866,17 @@ export default function WeeklyPlannerPage() {
             }}
           >
             <Card className="p-3 w-36 shadow-2xl border-2 border-primary bg-background/95 backdrop-blur-sm">
-              <div className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2">
-                <span className="text-xs text-muted-foreground">IMG</span>
+              <div className="w-full h-20 bg-muted rounded-md flex items-center justify-center mb-2 overflow-hidden">
+                {exerciseMap[draggedExercise.exerciseId]?.imageUrl ? (
+                  <img
+                    src={exerciseMap[draggedExercise.exerciseId].imageUrl}
+                    alt={exerciseMap[draggedExercise.exerciseId]?.name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <span className="text-xs text-muted-foreground">IMG</span>
+                )}
               </div>
               <p className="text-sm font-semibold truncate mb-1">
                 {exerciseMap[draggedExercise.exerciseId]?.name}
@@ -817,6 +888,13 @@ export default function WeeklyPlannerPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Exercise Detail Sheet */}
+      <ExerciseDetailSheet
+        exercise={detailExercise}
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+      />
     </motion.div>
   );
 }

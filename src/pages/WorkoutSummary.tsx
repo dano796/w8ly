@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { defaultExercises } from "@/utils/exerciseData";
-import { CompletedWorkout } from "@/utils/types";
+import { CompletedWorkout, Exercise } from "@/utils/types";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
@@ -8,6 +9,7 @@ import { convertWeight } from "@/utils/unitConversion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import ExerciseDetailSheet from "@/components/ExerciseDetailSheet";
 import {
   ArrowLeft,
   CheckCircle,
@@ -32,6 +34,8 @@ export default function WorkoutSummaryPage() {
   const { customExercises } = useCustomExercises();
   const { getPersonalRecord } = useWorkoutHistory();
   const workout = location.state as CompletedWorkout | undefined;
+  const [detailExercise, setDetailExercise] = useState<Exercise | null>(null);
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
 
   // Combine default and custom exercises
   const allExercises = [...defaultExercises, ...customExercises];
@@ -171,101 +175,133 @@ export default function WorkoutSummaryPage() {
         initial="hidden"
         animate="visible"
       >
-        {workout.exercises.map((ex, i) => {
-          const data = exerciseMap[ex.exerciseId];
-          if (!data) return null;
-          const completedSets = ex.sets.filter((s) => s.completed);
-          const totalSetsForExercise = ex.sets.length;
-          const allCompleted = completedSets.length === totalSetsForExercise;
-          const exerciseUnit = ex.unit || settings.defaultUnit;
-          const volume = completedSets.reduce((v, s) => {
-            const weightInDefaultUnit = convertWeight(
-              s.weight,
-              exerciseUnit,
-              settings.defaultUnit,
-            );
-            return v + weightInDefaultUnit * s.reps;
-          }, 0);
-          return (
-            <motion.div key={i} variants={listItemVariants}>
-              <Card className="p-3">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm text-muted-foreground">IMG</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-base font-semibold truncate">
-                      {data.name}
-                    </p>
-                    <Badge variant="secondary" className="text-xs mt-1">
-                      {data.muscleGroup}
-                    </Badge>
-                  </div>
-                  {!allCompleted && (
-                    <Badge
-                      variant="outline"
-                      className="text-xs text-amber-600 border-amber-600"
+        {workout.exercises
+          .filter((ex) => ex.sets.some((s) => s.completed))
+          .map((ex, i) => {
+            const data = exerciseMap[ex.exerciseId];
+            if (!data) return null;
+            const completedSets = ex.sets.filter((s) => s.completed);
+            const totalSetsForExercise = ex.sets.length;
+            const allCompleted = completedSets.length === totalSetsForExercise;
+            const exerciseUnit = ex.unit || settings.defaultUnit;
+            const volume = completedSets.reduce((v, s) => {
+              const weightInDefaultUnit = convertWeight(
+                s.weight,
+                exerciseUnit,
+                settings.defaultUnit,
+              );
+              return v + weightInDefaultUnit * s.reps;
+            }, 0);
+            return (
+              <motion.div key={i} variants={listItemVariants}>
+                <Card className="p-3">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div
+                      className="w-12 h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => {
+                        setDetailExercise(data);
+                        setDetailSheetOpen(true);
+                      }}
                     >
-                      Incompleto
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Series</p>
-                    <p className="text-sm font-medium mt-1">
-                      {completedSets.length} de {totalSetsForExercise}{" "}
-                      completadas
-                    </p>
+                      {data?.imageUrl ? (
+                        <img
+                          src={data.imageUrl}
+                          alt={data.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="text-sm text-muted-foreground">
+                          IMG
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      className="flex-1 min-w-0 cursor-pointer"
+                      onClick={() => {
+                        setDetailExercise(data);
+                        setDetailSheetOpen(true);
+                      }}
+                    >
+                      <p className="text-base font-semibold truncate hover:text-primary transition-colors">
+                        {data.name}
+                      </p>
+                      <Badge variant="secondary" className="text-xs mt-1">
+                        {data.muscleGroup}
+                      </Badge>
+                    </div>
+                    {!allCompleted && (
+                      <Badge
+                        variant="outline"
+                        className="text-xs text-amber-600 border-amber-600"
+                      >
+                        Incompleto
+                      </Badge>
+                    )}
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-muted-foreground">Volumen</p>
-                    <p className="text-sm font-medium mt-1">
-                      {volume.toLocaleString()} {settings.defaultUnit}
-                    </p>
-                  </div>
-                </div>
 
-                {/* Detalles de cada serie */}
-                {completedSets.length > 0 && (
-                  <div className="mt-3 pt-3 border-t">
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Detalle
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {completedSets.map((set, idx) => {
-                        const isRecord = isPersonalRecord(
-                          ex.exerciseId,
-                          set.weight,
-                          exerciseUnit,
-                        );
-                        return (
-                          <Badge
-                            key={idx}
-                            variant="outline"
-                            className={`text-xs ${isRecord ? "text-primary border-primary font-semibold" : ""}`}
-                          >
-                            {isRecord && (
-                              <Trophy className="w-3 h-3 mr-1 inline" />
-                            )}
-                            {set.weight}
-                            {exerciseUnit} × {set.reps} reps
-                          </Badge>
-                        );
-                      })}
+                  <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Series</p>
+                      <p className="text-sm font-medium mt-1">
+                        {completedSets.length} de {totalSetsForExercise}{" "}
+                        completadas
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Volumen</p>
+                      <p className="text-sm font-medium mt-1">
+                        {volume.toLocaleString()} {settings.defaultUnit}
+                      </p>
                     </div>
                   </div>
-                )}
-              </Card>
-            </motion.div>
-          );
-        })}
+
+                  {/* Detalles de cada serie */}
+                  {completedSets.length > 0 && (
+                    <div className="mt-3 pt-3 border-t">
+                      <p className="text-sm text-muted-foreground mb-1">
+                        Detalle
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {completedSets.map((set, idx) => {
+                          const isRecord = isPersonalRecord(
+                            ex.exerciseId,
+                            set.weight,
+                            exerciseUnit,
+                          );
+                          return (
+                            <Badge
+                              key={idx}
+                              variant="outline"
+                              className={`text-xs ${isRecord ? "text-primary border-primary font-semibold" : ""}`}
+                            >
+                              {isRecord && (
+                                <Trophy className="w-3 h-3 mr-1 inline" />
+                              )}
+                              {set.weight}
+                              {exerciseUnit} × {set.reps} reps
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              </motion.div>
+            );
+          })}
       </motion.div>
 
       <Button className="w-full mt-6" onClick={() => navigate("/")}>
         Volver al planificador
       </Button>
+
+      {/* Exercise Detail Sheet */}
+      <ExerciseDetailSheet
+        exercise={detailExercise}
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+      />
     </motion.div>
   );
 }
