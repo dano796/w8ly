@@ -4,6 +4,7 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { useSettings } from "@/hooks/useSettings";
 import WorkoutCalendar from "@/components/WorkoutCalendar";
+import WeeklyStatsChart from "@/components/WeeklyStatsChart";
 import { formatWorkoutDate } from "@/utils/formatWorkoutDate";
 import { Profile, CompletedWorkout } from "@/utils/types";
 import { Card } from "@/components/ui/card";
@@ -381,6 +382,7 @@ export default function ProfilePage() {
         </Card>
       )}
 
+      <WeeklyStatsChart history={localHistory} />
       <WorkoutCalendar history={localHistory} />
 
       <div className="mb-4">
