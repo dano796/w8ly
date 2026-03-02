@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle, Clock, Layers } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  pageVariants,
+  scaleInVariants,
+  listContainerVariants,
+  listItemVariants,
+} from "@/utils/animations";
 
 const exerciseMap = Object.fromEntries(defaultExercises.map((e) => [e.id, e]));
 
@@ -38,7 +45,13 @@ export default function WorkoutSummaryPage() {
   );
 
   return (
-    <div className="px-4 pt-6 pb-8 max-w-lg mx-auto">
+    <motion.div
+      className="px-4 pt-6 pb-8 max-w-lg mx-auto"
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <div className="flex items-center gap-3 mb-6">
         <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
           <ArrowLeft className="w-5 h-5" />
@@ -47,10 +60,15 @@ export default function WorkoutSummaryPage() {
       </div>
 
       {/* Success banner */}
-      <div className="flex flex-col items-center py-8">
+      <motion.div
+        className="flex flex-col items-center py-8"
+        variants={scaleInVariants}
+        initial="initial"
+        animate="animate"
+      >
         <CheckCircle className="w-16 h-16 text-accent mb-3" />
         <h2 className="text-xl font-bold">¡Excelente trabajo!</h2>
-      </div>
+      </motion.div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 mb-6">
@@ -76,7 +94,12 @@ export default function WorkoutSummaryPage() {
       <h3 className="text-sm font-semibold text-muted-foreground mb-3">
         Ejercicios completados
       </h3>
-      <div className="space-y-2">
+      <motion.div
+        className="space-y-2"
+        variants={listContainerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {workout.exercises.map((ex, i) => {
           const data = exerciseMap[ex.exerciseId];
           if (!data) return null;
@@ -86,32 +109,34 @@ export default function WorkoutSummaryPage() {
             0,
           );
           return (
-            <Card key={i} className="flex items-center gap-3 p-3">
-              <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                <span className="text-xs text-muted-foreground">IMG</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold truncate">{data.name}</p>
-                <Badge variant="secondary" className="text-[10px]">
-                  {data.muscleGroup}
-                </Badge>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground">
-                  {completedSets.length} series
-                </p>
-                <p className="text-xs font-semibold">
-                  {volume} {settings.defaultUnit}
-                </p>
-              </div>
-            </Card>
+            <motion.div key={i} variants={listItemVariants}>
+              <Card className="flex items-center gap-3 p-3">
+                <div className="w-10 h-10 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs text-muted-foreground">IMG</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold truncate">{data.name}</p>
+                  <Badge variant="secondary" className="text-[10px]">
+                    {data.muscleGroup}
+                  </Badge>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">
+                    {completedSets.length} series
+                  </p>
+                  <p className="text-xs font-semibold">
+                    {volume} {settings.defaultUnit}
+                  </p>
+                </div>
+              </Card>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
 
       <Button className="w-full mt-6" onClick={() => navigate("/")}>
         Volver al planificador
       </Button>
-    </div>
+    </motion.div>
   );
 }

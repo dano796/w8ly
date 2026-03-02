@@ -1,6 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { LayoutList, Dumbbell, User, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { tapAnimation, logoVariants } from "@/utils/animations";
 
 const tabs = [
   { path: "/", icon: LayoutList, label: "Planner" },
@@ -31,13 +33,16 @@ export default function BottomTabBar() {
         {tabs.map((tab) => {
           if (tab.path === "/__logo__") {
             return (
-              <button
+              <motion.button
                 key="logo"
                 onClick={() => navigate("/")}
-                className="w-14 h-14 bg-primary text-primary-foreground font-bold -mt-4 shadow-lg text-sm text-center flex items-center justify-center rounded-full active:scale-95 transition-transform"
+                className="w-14 h-14 bg-primary text-primary-foreground font-bold -mt-4 shadow-lg text-sm text-center flex items-center justify-center rounded-full"
+                variants={logoVariants}
+                whileTap="tap"
+                whileHover="hover"
               >
                 w8ly
-              </button>
+              </motion.button>
             );
           }
 
@@ -45,17 +50,27 @@ export default function BottomTabBar() {
           const Icon = tab.icon!;
 
           return (
-            <button
+            <motion.button
               key={tab.path}
               onClick={() => navigate(tab.path)}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 py-2 px-4 min-w-[44px] min-h-[44px] transition-colors active:scale-95",
+                "flex flex-col items-center justify-center gap-0.5 py-2 px-4 min-w-[44px] min-h-[44px] transition-colors relative",
                 isActive ? "text-primary" : "text-muted-foreground",
               )}
+              whileTap={tapAnimation}
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-[10px] font-medium">{tab.label}</span>
-            </button>
+              {isActive && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute inset-0 bg-primary/10 rounded-lg"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+              <Icon className="w-5 h-5 relative z-10" />
+              <span className="text-[10px] font-medium relative z-10">
+                {tab.label}
+              </span>
+            </motion.button>
           );
         })}
       </div>
