@@ -32,6 +32,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -58,6 +59,7 @@ import {
 } from "@/utils/animations";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
 interface EditExDialog {
   isOpen: boolean;
   day: DayName | null;
@@ -67,6 +69,7 @@ interface EditExDialog {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
+
 export default function WeeklyPlannerPage() {
   const navigate = useNavigate();
   const { customExercises } = useCustomExercises();
@@ -228,9 +231,14 @@ export default function WeeklyPlannerPage() {
   const lastTouchXRef = useRef<number>(0);
 
   // ── Tour ────────────────────────────────────────────────────────────────────
+  const lunesExercises = plan.find((d) => d.day === "Lunes")?.exercises ?? [];
   const { startTour } = usePlannerTour({
     ready: plan.length > 0,
     setCarouselCollapsed: setIsCarouselCollapsed,
+    lundayExercises: lunesExercises,
+    addExerciseToLunes: (exercise) => addExerciseToDay("Lunes", exercise),
+    removeSeedFromLunes: (instanceId) =>
+      removeExerciseFromDay("Lunes", instanceId),
   });
 
   // ── Auto-scroll ─────────────────────────────────────────────────────────────

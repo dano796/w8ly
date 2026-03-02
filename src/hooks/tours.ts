@@ -485,6 +485,18 @@ const ADD_BTN_STEP_INDEX = plannerSteps.findIndex(
   (s) => s.element === "#tour-planner-add-0",
 );
 
+// Ejercicio seed insertado temporalmente cuando Lunes está vacío al iniciar el tour.
+// Debe existir en defaultExercises. Se elimina automáticamente al cerrar el tour.
+const TOUR_SEED_INSTANCE_ID = "__tour_seed__";
+const TOUR_SEED_EXERCISE_ID = "cable-lateral-raise";
+
+interface PlannedExerciseLike {
+  id: string;
+  exerciseId: string;
+  sets: number;
+  reps: number;
+}
+
 interface UsePlannerTourOptions {
   /** true cuando el plan está cargado y al menos un día está renderizado */
   ready: boolean;
@@ -493,50 +505,104 @@ interface UsePlannerTourOptions {
    * El hook lo usa para colapsar/restaurar el carrusel en el paso del botón +.
    */
   setCarouselCollapsed: (collapsed: boolean) => void;
+  /** Ejercicios actuales del primer día (Lunes). */
+  lundayExercises: PlannedExerciseLike[];
+  /** Agrega el ejercicio seed a Lunes antes de lanzar el tour. */
+  addExerciseToLunes: (exercise: PlannedExerciseLike) => void;
+  /** Elimina el ejercicio seed de Lunes al cerrar el tour. */
+  removeSeedFromLunes: (instanceId: string) => void;
   forceShow?: boolean;
 }
 
 export function usePlannerTour({
   ready,
   setCarouselCollapsed,
+  lundayExercises,
+  addExerciseToLunes,
+  removeSeedFromLunes,
   forceShow = false,
 }: UsePlannerTourOptions) {
   const driverRef = useRef<ReturnType<typeof driver> | null>(null);
   const hasStartedRef = useRef(false);
-  // Guarda el estado original del carrusel para restaurarlo al salir del paso
   const carouselWasCollapsedRef = useRef(false);
+  // true si este hook insertó el seed (para limpiarlo al terminar)
+  const insertedSeedRef = useRef(false);
 
-  const startTour = () => {
-    driverRef.current?.destroy();
+  const launchDriver = () => {
     driverRef.current = driver({
       ...sharedConfig,
       steps: plannerSteps,
       onHighlightStarted: (_element, step, { state }) => {
         if (state.activeIndex === ADD_BTN_STEP_INDEX) {
-          // Detecta si el carrusel está colapsado antes de tocarlo
           const carouselCard = document.querySelector("#tour-carousel-card-0");
           carouselWasCollapsedRef.current = !carouselCard;
-          // Colapsa el carrusel para que el botón + quede visible
           setCarouselCollapsed(true);
+          // Scroll después de que el colapso del carrusel haya re-renderizado
+          // (el cambio de layout afecta la posición del botón).
+          setTimeout(() => {
+            const addBtn = document.querySelector("#tour-planner-add-0");
+            if (addBtn) {
+              addBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+          }, 100);
         }
-        // Al avanzar a los pasos del carrusel, lo vuelve a abrir
         if (state.activeIndex > ADD_BTN_STEP_INDEX) {
           setCarouselCollapsed(false);
         }
       },
-      onDeselected: (_element, step, { state }) => {
-        // Si retrocede desde el paso del carrusel al del botón +, vuelve a colapsar
+      onDeselected: (_element, _step, { state }) => {
         if (state.activeIndex === ADD_BTN_STEP_INDEX + 1) {
           setCarouselCollapsed(true);
         }
       },
+      onNextClick: (_element, _step, { state }) => {
+        // Scroll al elemento del paso siguiente antes de avanzar
+        const nextStep = plannerSteps[state.activeIndex + 1];
+        if (nextStep?.element) {
+          const el = document.querySelector(nextStep.element as string);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        driverRef.current?.moveNext();
+      },
+      onPrevClick: (_element, _step, { state }) => {
+        // Scroll al elemento del paso anterior antes de retroceder
+        const prevStep = plannerSteps[state.activeIndex - 1];
+        if (prevStep?.element) {
+          const el = document.querySelector(prevStep.element as string);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        driverRef.current?.movePrevious();
+      },
       onDestroyed: () => {
-        // Restaura el estado original del carrusel al cerrar el tour
         setCarouselCollapsed(carouselWasCollapsedRef.current);
+        if (insertedSeedRef.current) {
+          removeSeedFromLunes(TOUR_SEED_INSTANCE_ID);
+          insertedSeedRef.current = false;
+        }
         markTourCompleted("tour_planner");
       },
     });
     driverRef.current.drive();
+  };
+
+  const startTour = () => {
+    driverRef.current?.destroy();
+
+    if (lundayExercises.length === 0) {
+      // Lunes vacío — insertar ejercicio de ejemplo y esperar un tick
+      // para que React lo renderice antes de que Driver.js busque los IDs.
+      insertedSeedRef.current = true;
+      addExerciseToLunes({
+        id: TOUR_SEED_INSTANCE_ID,
+        exerciseId: TOUR_SEED_EXERCISE_ID,
+        sets: 3,
+        reps: 10,
+      });
+      setTimeout(launchDriver, 200);
+    } else {
+      insertedSeedRef.current = false;
+      launchDriver();
+    }
   };
 
   useEffect(() => {
