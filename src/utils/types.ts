@@ -27,6 +27,7 @@ export interface PlannedExercise {
   exerciseId: string;
   sets: number;
   reps: number;
+  restTime?: number;
 }
 
 export interface DayPlan {
