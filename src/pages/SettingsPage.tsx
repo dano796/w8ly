@@ -1,9 +1,14 @@
 import { useSettings } from "@/hooks/useSettings";
 import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
+import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
+import { useCustomExercises } from "@/hooks/useCustomExercises";
+import { defaultExercises } from "@/utils/exerciseData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { Download } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,6 +65,85 @@ function ChipSelector<T extends string | number>({
 export default function SettingsPage() {
   const { settings, updateSetting } = useSettings();
   const { resetPlan } = useWeeklyPlan();
+  const { history } = useWorkoutHistory();
+  const { customExercises } = useCustomExercises();
+
+  // Combine default and custom exercises
+  const allExercises = [...defaultExercises, ...customExercises];
+  const exerciseMap = Object.fromEntries(allExercises.map((e) => [e.id, e]));
+
+  const exportToCSV = () => {
+    if (history.length === 0) {
+      toast.error("No hay entrenamientos para exportar");
+      return;
+    }
+
+    // CSV headers
+    const headers = [
+      "Fecha",
+      "Día",
+      "Etiqueta",
+      "Duración (min)",
+      "Ejercicio",
+      "Grupo Muscular",
+      "Serie",
+      "Peso",
+      "Unidad",
+      "Repeticiones",
+      "Completado",
+    ];
+
+    const rows: string[][] = [headers];
+
+    // Process each workout
+    history.forEach((workout) => {
+      const workoutDate = new Date(workout.date).toLocaleDateString("es-ES");
+      const durationMin = Math.floor(workout.durationSeconds / 60);
+
+      workout.exercises.forEach((exercise) => {
+        const exerciseData = exerciseMap[exercise.exerciseId];
+        const exerciseName = exerciseData?.name || "Desconocido";
+        const muscleGroup = exerciseData?.muscleGroup || "N/A";
+        const unit = exercise.unit || settings.defaultUnit;
+
+        exercise.sets.forEach((set, idx) => {
+          rows.push([
+            workoutDate,
+            workout.day,
+            workout.label || "",
+            durationMin.toString(),
+            exerciseName,
+            muscleGroup,
+            (idx + 1).toString(),
+            set.weight.toString(),
+            unit,
+            set.reps.toString(),
+            set.completed ? "Sí" : "No",
+          ]);
+        });
+      });
+    });
+
+    // Convert to CSV string
+    const csvContent = rows
+      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .join("\n");
+
+    // Create and download file
+    const dataBlob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `w8ly-entrenamientos-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success("Datos exportados exitosamente");
+  };
 
   return (
     <motion.div
@@ -132,6 +216,23 @@ export default function SettingsPage() {
               checked={settings.confirmOnFinish}
               onCheckedChange={(v) => updateSetting("confirmOnFinish", v)}
             />
+          </CardContent>
+        </Card>
+
+        {/* Export data */}
+        <Card>
+          <CardContent className="flex items-center justify-between p-4">
+            <span className="text-base font-medium">
+              Exportar entrenamientos
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={exportToCSV}
+              disabled={history.length === 0}
+            >
+              <Download className="w-5 h-5" />
+            </Button>
           </CardContent>
         </Card>
 
