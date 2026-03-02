@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { useSettings } from "@/hooks/useSettings";
+import WorkoutCalendar from "@/components/WorkoutCalendar";
+import { formatWorkoutDate } from "@/utils/formatWorkoutDate";
 import { Profile, CompletedWorkout } from "@/utils/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -378,6 +380,8 @@ export default function ProfilePage() {
         </Card>
       )}
 
+      <WorkoutCalendar history={localHistory} />
+
       <div className="mb-4">
         <h2 className="text-lg font-semibold mb-3">Entrenamientos recientes</h2>
       </div>
@@ -398,6 +402,9 @@ export default function ProfilePage() {
               0,
             );
 
+            // Formato compacto
+            const formattedDay = formatWorkoutDate(workout.date, "compact");
+
             return (
               <motion.div
                 key={workout.id}
@@ -408,8 +415,8 @@ export default function ProfilePage() {
               >
                 <Card className="p-4 cursor-pointer hover:bg-accent/50 transition-colors">
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <h3 className="text-base font-medium truncate max-w-[60%]">
-                      {workout.day}
+                    <h3 className="text-base font-semibold truncate max-w-[60%]">
+                      {formattedDay}
                       {workout.label && (
                         <span className="text-primary"> - {workout.label}</span>
                       )}
@@ -427,12 +434,37 @@ export default function ProfilePage() {
 
                   <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
                     <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {formatDate(workout.date)}
-                    </div>
-                    <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {formatDuration(workout.durationSeconds)}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      {(() => {
+                        // Reuse volume calculation from WorkoutSummary
+                        const settingsUnit = settings?.defaultUnit || "kg";
+                        const volume = workout.exercises.reduce((vol, ex) => {
+                          const completedSets = ex.sets.filter(
+                            (s) => s.completed,
+                          );
+                          const exerciseUnit = ex.unit || settingsUnit;
+                          return (
+                            vol +
+                            completedSets.reduce((v, s) => {
+                              // If convertWeight is available, use it, else assume same unit
+                              if (typeof s.weight === "number") {
+                                if (exerciseUnit === settingsUnit) {
+                                  return v + s.weight * s.reps;
+                                } else {
+                                  // fallback: no conversion
+                                  return v + s.weight * s.reps;
+                                }
+                              }
+                              return v;
+                            }, 0)
+                          );
+                        }, 0);
+                        return `${volume.toLocaleString()} ${settingsUnit}`;
+                      })()}
                     </div>
                   </div>
 

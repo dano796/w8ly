@@ -18,6 +18,7 @@ import {
   Dumbbell,
   Trash2,
   HelpCircle,
+  X,
 } from "lucide-react";
 import { useExerciseTour } from "@/hooks/tours";
 import ExerciseDetailSheet from "@/components/ExerciseDetailSheet";
@@ -68,7 +69,6 @@ const filters: (MuscleGroup | "Todos")[] = [
   "Pierna",
   "Brazos",
   "Hombros",
-  "Core",
 ];
 
 export default function ExerciseLibraryPage() {
@@ -414,8 +414,18 @@ export default function ExerciseLibraryPage() {
           placeholder="Buscar ejercicio..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-9"
+          className="pl-9 pr-9"
         />
+        {searchTerm && (
+          <button
+            type="button"
+            aria-label="Limpiar búsqueda"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground focus:outline-none"
+            onClick={() => setSearchTerm("")}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Filter chips */}

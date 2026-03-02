@@ -26,6 +26,7 @@ import {
   listContainerVariants,
   listItemVariants,
 } from "@/utils/animations";
+import { formatWorkoutDate } from "@/utils/formatWorkoutDate";
 
 export default function WorkoutSummaryPage() {
   const navigate = useNavigate();
@@ -119,8 +120,8 @@ export default function WorkoutSummaryPage() {
       >
         <CheckCircle className="w-16 h-16 text-accent mb-3" />
         <h2 className="text-xl font-bold">¡Excelente trabajo!</h2>
-        <p className="text-base text-muted-foreground mt-1">
-          {workout.day}
+        <p className="text-base font-medium text-muted-foreground mt-2">
+          {formatWorkoutDate(workout.date, "full")}
           {workout.label && (
             <span className="text-primary"> - {workout.label}</span>
           )}
