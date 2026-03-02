@@ -75,6 +75,13 @@ export default function ExerciseLibraryPage() {
   const [newExerciseMuscleGroup, setNewExerciseMuscleGroup] =
     useState<MuscleGroup>("Pecho");
 
+  // Get currently added exercises if coming from active workout
+  const state = location.state as {
+    currentExercises?: string[];
+    startTime?: number;
+  } | null;
+  const currentExercises = new Set(state?.currentExercises || []);
+
   // Combine default and custom exercises
   const allExercises = [...defaultExercises, ...customExercises];
 
@@ -90,6 +97,12 @@ export default function ExerciseLibraryPage() {
     : filtered;
 
   const toggleSelection = (exerciseId: string) => {
+    // Don't allow selection of exercises already in the workout
+    if (currentExercises.has(exerciseId)) {
+      toast.error("Este ejercicio ya está en el entrenamiento");
+      return;
+    }
+
     setSelectedExercises((prev) =>
       prev.includes(exerciseId)
         ? prev.filter((id) => id !== exerciseId)
@@ -99,7 +112,23 @@ export default function ExerciseLibraryPage() {
 
   const handleAdd = (exerciseId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (preselectedDay) {
+
+    // Check if exercise is already in the workout
+    if (currentExercises.has(exerciseId)) {
+      toast.error("Este ejercicio ya está en el entrenamiento");
+      return;
+    }
+
+    if (fromWorkout) {
+      // Add to active workout and go back immediately
+      const state = location.state as { startTime?: number } | null;
+      navigate(`/workout/${fromWorkout}`, {
+        state: {
+          addExercises: [exerciseId],
+          startTime: state?.startTime,
+        },
+      });
+    } else if (preselectedDay) {
       doAdd(exerciseId, preselectedDay);
       // Small delay to ensure state is saved to localStorage before navigation
       setTimeout(() => {
@@ -113,10 +142,32 @@ export default function ExerciseLibraryPage() {
 
   const handleAddSelected = () => {
     if (fromWorkout && selectedExercises.length > 0) {
+      // Filter out exercises that are already in the workout
+      const exercisesToAdd = selectedExercises.filter(
+        (exerciseId) => !currentExercises.has(exerciseId),
+      );
+
+      if (exercisesToAdd.length === 0) {
+        toast.error(
+          "Todos los ejercicios seleccionados ya están en el entrenamiento",
+        );
+        setSelectedExercises([]);
+        return;
+      }
+
+      if (exercisesToAdd.length < selectedExercises.length) {
+        const duplicateCount = selectedExercises.length - exercisesToAdd.length;
+        toast.warning(
+          duplicateCount === 1
+            ? "1 ejercicio ya está en el entrenamiento"
+            : `${duplicateCount} ejercicios ya están en el entrenamiento`,
+        );
+      }
+
       const state = location.state as { startTime?: number } | null;
       navigate(`/workout/${fromWorkout}`, {
         state: {
-          addExercises: selectedExercises,
+          addExercises: exercisesToAdd,
           startTime: state?.startTime,
         },
       });
@@ -280,16 +331,23 @@ export default function ExerciseLibraryPage() {
       >
         {searchFiltered.map((ex) => {
           const isSelected = selectedExercises.includes(ex.id);
+          const isAlreadyAdded = currentExercises.has(ex.id);
+
           return (
             <motion.div key={ex.id} variants={listItemVariants}>
               <Card
                 className={cn(
-                  "flex items-center gap-3 p-4 cursor-pointer transition-colors",
-                  (fromWorkout || preselectedDay) && "hover:bg-accent/50",
+                  "flex items-center gap-3 p-4 transition-colors",
+                  (fromWorkout || preselectedDay) &&
+                  !isAlreadyAdded &&
+                  "cursor-pointer hover:bg-accent/50",
                   isSelected && "bg-primary/10 border-primary",
+                  isAlreadyAdded && "opacity-60 cursor-not-allowed",
                 )}
                 onClick={() =>
-                  fromWorkout || preselectedDay ? toggleSelection(ex.id) : null
+                  (fromWorkout || preselectedDay) && !isAlreadyAdded
+                    ? toggleSelection(ex.id)
+                    : null
                 }
               >
                 <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
@@ -297,9 +355,19 @@ export default function ExerciseLibraryPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-semibold truncate">{ex.name}</p>
-                  <Badge variant="secondary" className="text-xs mt-0.5">
-                    {ex.muscleGroup}
-                  </Badge>
+                  <div className="flex gap-1.5 items-center mt-0.5">
+                    <Badge variant="secondary" className="text-xs">
+                      {ex.muscleGroup}
+                    </Badge>
+                    {isAlreadyAdded && (
+                      <Badge
+                        variant="outline"
+                        className="text-xs bg-primary/10 text-primary border-primary"
+                      >
+                        Ya agregado
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 {fromWorkout || preselectedDay ? (
                   <>
@@ -313,6 +381,7 @@ export default function ExerciseLibraryPage() {
                       variant="ghost"
                       className="h-8 w-8"
                       onClick={(e) => handleAdd(ex.id, e)}
+                      disabled={isAlreadyAdded}
                     >
                       <Plus className="w-4 h-4" />
                     </Button>

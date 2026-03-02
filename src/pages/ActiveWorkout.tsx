@@ -141,39 +141,61 @@ export default function ActiveWorkoutPage() {
   useEffect(() => {
     const state = location.state as { addExercises?: string[] } | null;
     if (state?.addExercises && state.addExercises.length > 0) {
-      const newExercises: WorkoutExercise[] = state.addExercises.map(
-        (exerciseId) => {
-          const prevExercise = getLastPerformance(exerciseId);
-          const prevSets = prevExercise?.sets;
-          const prevUnit = prevExercise?.unit || settings.defaultUnit;
+      // Get existing exercise IDs
+      const existingExerciseIds = new Set(exercises.map((ex) => ex.exerciseId));
 
-          const sets: WorkoutSet[] = Array.from(
-            { length: settings.defaultSets },
-            (_, i) => ({
-              setNumber: i + 1,
-              previous: prevSets?.[i]
-                ? { weight: prevSets[i].weight, reps: prevSets[i].reps }
-                : undefined,
-              weight: prevSets?.[i]?.weight ?? 0,
-              reps: prevSets?.[i]?.reps ?? 10,
-              completed: false,
-            }),
-          );
-          return {
-            exerciseId,
-            sets,
-            unit: prevUnit, // Use unit from last performance, or default if new
-          };
-        },
+      // Filter out exercises that already exist
+      const exercisesToAdd = state.addExercises.filter(
+        (exerciseId) => !existingExerciseIds.has(exerciseId),
       );
 
-      setExercises((prev) => [...prev, ...newExercises]);
+      // Show warning if some exercises were already in the workout
+      if (exercisesToAdd.length < state.addExercises.length) {
+        const duplicateCount =
+          state.addExercises.length - exercisesToAdd.length;
+        toast.error(
+          duplicateCount === 1
+            ? "Este ejercicio ya está en el entrenamiento"
+            : `${duplicateCount} ejercicio(s) ya están en el entrenamiento`,
+        );
+      }
 
-      // Add default rest times for new exercises
-      setExerciseRestTimes((prev) => [
-        ...prev,
-        ...new Array(newExercises.length).fill(settings.defaultRestTime * 60),
-      ]);
+      // Only add new exercises
+      if (exercisesToAdd.length > 0) {
+        const newExercises: WorkoutExercise[] = exercisesToAdd.map(
+          (exerciseId) => {
+            const prevExercise = getLastPerformance(exerciseId);
+            const prevSets = prevExercise?.sets;
+            const prevUnit = prevExercise?.unit || settings.defaultUnit;
+
+            const sets: WorkoutSet[] = Array.from(
+              { length: settings.defaultSets },
+              (_, i) => ({
+                setNumber: i + 1,
+                previous: prevSets?.[i]
+                  ? { weight: prevSets[i].weight, reps: prevSets[i].reps }
+                  : undefined,
+                weight: prevSets?.[i]?.weight ?? 0,
+                reps: prevSets?.[i]?.reps ?? 10,
+                completed: false,
+              }),
+            );
+            return {
+              exerciseId,
+              sets,
+              unit: prevUnit, // Use unit from last performance, or default if new
+            };
+          },
+        );
+
+        setExercises((prev) => [...prev, ...newExercises]);
+
+        // Add default rest times for new exercises
+        setExerciseRestTimes((prev) => [
+          ...prev,
+          ...new Array(newExercises.length).fill(settings.defaultRestTime * 60),
+        ]);
+      }
 
       // Clear the state
       navigate(location.pathname, { replace: true, state: {} });
@@ -186,6 +208,7 @@ export default function ActiveWorkoutPage() {
     settings.defaultSets,
     settings.defaultRestTime,
     settings.defaultUnit,
+    exercises,
   ]);
 
   // Timer
@@ -842,7 +865,10 @@ export default function ActiveWorkoutPage() {
           onClick={() => {
             setRevealedSet(null);
             navigate(`/exercises?fromWorkout=${day}`, {
-              state: { startTime },
+              state: {
+                startTime,
+                currentExercises: exercises.map((ex) => ex.exerciseId),
+              },
             });
           }}
         >
