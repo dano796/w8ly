@@ -73,5 +73,54 @@ export function useWorkoutHistory() {
     return maxWeight;
   };
 
-  return { history, addWorkout, getLastPerformance, getPersonalRecord };
+  const getMaxRepsAtWeight = (
+    exerciseId: string,
+    weight: number,
+    unit: "kg" | "lbs" = "kg",
+    excludeWorkoutId?: string,
+  ) => {
+    let maxReps = 0;
+
+    for (const w of history) {
+      // Skip the workout if it should be excluded
+      if (excludeWorkoutId && w.id === excludeWorkoutId) {
+        continue;
+      }
+
+      const ex = w.exercises.find((e) => e.exerciseId === exerciseId);
+      if (ex) {
+        const completedSets = ex.sets.filter((s) => s.completed);
+        const exerciseUnit = ex.unit || unit;
+
+        for (const set of completedSets) {
+          // Convert to the target unit for comparison
+          let setWeight = set.weight;
+          if (exerciseUnit !== unit) {
+            // Simple conversion: 1 kg = 2.20462 lbs
+            setWeight =
+              exerciseUnit === "kg"
+                ? setWeight * 2.20462 // kg to lbs
+                : setWeight / 2.20462; // lbs to kg
+          }
+
+          // Check if this set has the same weight (with small tolerance for floating point)
+          if (Math.abs(setWeight - weight) < 0.01) {
+            if (set.reps > maxReps) {
+              maxReps = set.reps;
+            }
+          }
+        }
+      }
+    }
+
+    return maxReps;
+  };
+
+  return {
+    history,
+    addWorkout,
+    getLastPerformance,
+    getPersonalRecord,
+    getMaxRepsAtWeight,
+  };
 }

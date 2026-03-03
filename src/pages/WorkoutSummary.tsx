@@ -1,10 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { defaultExercises } from "@/utils/exerciseData";
 import { CompletedWorkout, Exercise } from "@/utils/types";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
-import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { convertWeight } from "@/utils/unitConversion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -33,7 +32,6 @@ export default function WorkoutSummaryPage() {
   const location = useLocation();
   const { settings } = useSettings();
   const { customExercises } = useCustomExercises();
-  const { getPersonalRecord } = useWorkoutHistory();
   const workout = location.state as CompletedWorkout | undefined;
   const [detailExercise, setDetailExercise] = useState<Exercise | null>(null);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
@@ -44,20 +42,6 @@ export default function WorkoutSummaryPage() {
   // Combine default and custom exercises
   const allExercises = [...defaultExercises, ...customExercises];
   const exerciseMap = Object.fromEntries(allExercises.map((e) => [e.id, e]));
-
-  // Precompute the max completed set weight per exercise for this session
-  const sessionMaxByExercise = useMemo(() => {
-    if (!workout) return {};
-    const map: Record<string, number> = {};
-    workout.exercises.forEach((ex) => {
-      const maxWeight = Math.max(
-        0,
-        ...ex.sets.filter((s) => s.completed).map((s) => s.weight),
-      );
-      map[ex.exerciseId] = maxWeight;
-    });
-    return map;
-  }, [workout]);
 
   if (!workout) {
     return (
@@ -281,24 +265,34 @@ export default function WorkoutSummaryPage() {
                       </p>
                       <div className="flex flex-wrap gap-1">
                         {completedSets.map((set, idx) => {
-                          const sessionMax =
-                            sessionMaxByExercise[ex.exerciseId] ?? 0;
-                          const historicRecord = getPersonalRecord(
-                            ex.exerciseId,
-                            exerciseUnit,
-                            workout?.id,
-                          );
-                          const isRecord =
-                            set.weight === sessionMax &&
-                            set.weight > historicRecord;
+                          const hasRecord = !!set.recordType;
+                          const isWeightRecord = set.recordType === "weight";
+                          const isVolumeRecord = set.recordType === "volume";
+
                           return (
                             <Badge
                               key={idx}
                               variant="outline"
-                              className={`text-xs ${isRecord ? "text-primary border-primary font-semibold" : ""}`}
+                              className={`text-xs ${
+                                isWeightRecord
+                                  ? "text-amber-600 border-amber-600 dark:text-amber-400 dark:border-amber-400 font-semibold"
+                                  : isVolumeRecord
+                                    ? "text-blue-600 border-blue-600 dark:text-blue-400 dark:border-blue-400 font-semibold"
+                                    : ""
+                              }`}
+                              title={
+                                isWeightRecord
+                                  ? "Récord de peso máximo"
+                                  : isVolumeRecord
+                                    ? "Récord de volumen (más reps)"
+                                    : undefined
+                              }
                             >
-                              {isRecord && (
+                              {isWeightRecord && (
                                 <Trophy className="w-3 h-3 mr-1 inline" />
+                              )}
+                              {isVolumeRecord && (
+                                <TrendingUp className="w-3 h-3 mr-1 inline" />
                               )}
                               {set.weight}
                               {exerciseUnit} × {set.reps} reps

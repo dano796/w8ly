@@ -75,8 +75,12 @@ export default function ActiveWorkoutPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { plan, updateDayExercises } = useWeeklyPlan();
-  const { addWorkout, getLastPerformance, getPersonalRecord } =
-    useWorkoutHistory();
+  const {
+    addWorkout,
+    getLastPerformance,
+    getPersonalRecord,
+    getMaxRepsAtWeight,
+  } = useWorkoutHistory();
   const { settings } = useSettings();
   const { customExercises } = useCustomExercises();
 
@@ -342,38 +346,143 @@ export default function ActiveWorkoutPage() {
           : ex,
       );
 
-      // Check for personal record when completing a set
-      if (field === "completed" && value === true) {
-        const exercise = newExercises[exIdx];
-        const set = exercise.sets[setIdx];
-        const exerciseUnit = exercise.unit || settings.defaultUnit;
-        const exerciseName =
-          exerciseMap[exercise.exerciseId]?.name || "Ejercicio";
+      // Handle completion/uncompletion of sets
+      if (field === "completed") {
+        if (value === false) {
+          const wasWeightRecord =
+            newExercises[exIdx].sets[setIdx].recordType === "weight";
+          // Clear record type when uncompleting
+          newExercises[exIdx].sets[setIdx].recordType = undefined;
 
-        const historicRecord = getPersonalRecord(
-          exercise.exerciseId,
-          exerciseUnit,
-        );
-        const sessionMax = sessionMaxWeight[exercise.exerciseId] ?? 0;
+          // Recalculate session max for this exercise after uncompleting
+          const exercise = newExercises[exIdx];
+          const completedSets = exercise.sets.filter((s) => s.completed);
+          if (completedSets.length > 0) {
+            const newSessionMax = Math.max(
+              ...completedSets.map((s) => s.weight),
+            );
+            setSessionMaxWeight((prev) => ({
+              ...prev,
+              [exercise.exerciseId]: newSessionMax,
+            }));
 
-        const isNewHistoricRecord = set.weight > historicRecord;
-        const isNewSessionMax = set.weight > sessionMax;
+            // If we removed a weight record, check if another set should now have it
+            if (wasWeightRecord) {
+              const exerciseUnit = exercise.unit || settings.defaultUnit;
+              const historicMaxWeight = getPersonalRecord(
+                exercise.exerciseId,
+                exerciseUnit,
+              );
 
-        if (isNewHistoricRecord && isNewSessionMax) {
-          // Beat all-time record AND session max — show PR toast
-          toast.success("¡Nuevo récord personal!", {
-            description: `${exerciseName}: ${set.weight} ${exerciseUnit} × ${set.reps} reps`,
-            duration: 5000,
-            icon: <Trophy className="w-5 h-5" />,
-          });
+              // Find the set with the new session max that beats the historic record
+              exercise.sets.forEach((s, idx) => {
+                if (
+                  s.completed &&
+                  s.weight === newSessionMax &&
+                  s.weight > historicMaxWeight
+                ) {
+                  newExercises[exIdx].sets[idx].recordType = "weight";
+                }
+              });
+            }
+          } else {
+            // No completed sets left, remove from sessionMax
+            setSessionMaxWeight((prev) => {
+              const updated = { ...prev };
+              delete updated[exercise.exerciseId];
+              return updated;
+            });
+          }
+        } else if (value === true) {
+          // Clear any previous record type before evaluating
+          newExercises[exIdx].sets[setIdx].recordType = undefined;
+
+          const exercise = newExercises[exIdx];
+          const set = exercise.sets[setIdx];
+          const exerciseUnit = exercise.unit || settings.defaultUnit;
+          const exerciseName =
+            exerciseMap[exercise.exerciseId]?.name || "Ejercicio";
+
+          const historicMaxWeight = getPersonalRecord(
+            exercise.exerciseId,
+            exerciseUnit,
+          );
+          const historicMaxRepsAtWeight = getMaxRepsAtWeight(
+            exercise.exerciseId,
+            set.weight,
+            exerciseUnit,
+          );
+          const sessionMax = sessionMaxWeight[exercise.exerciseId] ?? 0;
+
+          const isWeightRecord = set.weight > historicMaxWeight;
+          const isVolumeRecord =
+            set.weight <= historicMaxWeight &&
+            set.weight > 0 &&
+            set.reps > historicMaxRepsAtWeight;
+          const isNewSessionMax = set.weight > sessionMax;
+
+          // Weight record: new max weight lifted (only show for the heaviest in session)
+          if (isWeightRecord && isNewSessionMax) {
+            // Clear any previous weight records for this exercise
+            newExercises[exIdx].sets.forEach((s, idx) => {
+              if (s.recordType === "weight" && idx !== setIdx) {
+                newExercises[exIdx].sets[idx].recordType = undefined;
+              }
+            });
+
+            // Mark this set as a weight record
+            newExercises[exIdx].sets[setIdx].recordType = "weight";
+
+            toast.success("¡Nuevo récord de peso!", {
+              description: `${exerciseName}: ${set.weight} ${exerciseUnit} × ${set.reps} reps`,
+              duration: 5000,
+              icon: <Trophy className="w-5 h-5" />,
+            });
+
+            // Update session max
+            setSessionMaxWeight((prev) => ({
+              ...prev,
+              [exercise.exerciseId]: set.weight,
+            }));
+          }
+          // Volume record: more reps at a weight previously lifted
+          else if (isVolumeRecord) {
+            // Mark this set as a volume record
+            newExercises[exIdx].sets[setIdx].recordType = "volume";
+
+            const volumeIncrease =
+              (set.reps - historicMaxRepsAtWeight) * set.weight;
+            toast.success("¡Nuevo récord de volumen!", {
+              description: `${exerciseName}: ${set.weight} ${exerciseUnit} × ${set.reps} reps (+${volumeIncrease} ${exerciseUnit})`,
+              duration: 5000,
+              icon: <Trophy className="w-5 h-5" />,
+            });
+          }
         }
+      }
 
-        // Always update session max if this is the heaviest set so far this session
-        if (isNewSessionMax) {
-          setSessionMaxWeight((prev) => ({
-            ...prev,
-            [exercise.exerciseId]: set.weight,
-          }));
+      // If weight or reps change on a completed set, clear recordType and recalculate sessionMax
+      if (
+        (field === "weight" || field === "reps") &&
+        newExercises[exIdx].sets[setIdx].completed
+      ) {
+        const hadWeightRecord =
+          newExercises[exIdx].sets[setIdx].recordType === "weight";
+        newExercises[exIdx].sets[setIdx].recordType = undefined;
+
+        // If this set had a weight record, recalculate session max
+        if (hadWeightRecord) {
+          const exercise = newExercises[exIdx];
+          const completedSets = exercise.sets.filter((s) => s.completed);
+          if (completedSets.length > 0) {
+            const newSessionMax = Math.max(
+              ...completedSets.map((s) => s.weight),
+            );
+            setSessionMaxWeight((prev) => ({
+              ...prev,
+              [exercise.exerciseId]: newSessionMax,
+            }));
+          }
         }
       }
 

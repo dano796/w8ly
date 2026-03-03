@@ -53,6 +53,7 @@ export interface WorkoutSet {
   weight: number;
   reps: number;
   completed: boolean;
+  recordType?: "weight" | "volume"; // Type of personal record achieved
 }
 
 export interface WorkoutExercise {
