@@ -308,6 +308,18 @@ export default function WorkoutSummaryPage() {
                       </div>
                     </div>
                   )}
+
+                  {/* Exercise notes */}
+                  {ex.notes && ex.notes.trim() && (
+                    <div className="mt-3 pt-3 border-t">
+                      <p className="text-sm text-muted-foreground mb-1">
+                        Notas
+                      </p>
+                      <p className="text-sm whitespace-pre-wrap break-words">
+                        {ex.notes}
+                      </p>
+                    </div>
+                  )}
                 </Card>
               </motion.div>
             );

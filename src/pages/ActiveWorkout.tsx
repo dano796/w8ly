@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -122,6 +123,7 @@ export default function ActiveWorkoutPage() {
     isPaused: boolean;
   } | null>(null);
   const [exerciseRestTimes, setExerciseRestTimes] = useState<number[]>([]);
+  const [previousNotes, setPreviousNotes] = useState<string[]>([]);
 
   // Workout tour hook
   const { startTour } = useWorkoutTour({
@@ -143,6 +145,14 @@ export default function ActiveWorkoutPage() {
         const parsed = JSON.parse(savedState);
         setExercises(parsed.exercises);
         setExerciseRestTimes(parsed.restTimes);
+
+        // Recalculate previous notes for restored exercises
+        const prevNotes = parsed.exercises.map((ex: WorkoutExercise) => {
+          const prevExercise = getLastPerformance(ex.exerciseId);
+          return prevExercise?.notes || "";
+        });
+        setPreviousNotes(prevNotes);
+
         // Clear the saved state after restoring
         sessionStorage.removeItem(savedStateKey);
         return;
@@ -169,15 +179,22 @@ export default function ActiveWorkoutPage() {
         exerciseId: pe.exerciseId,
         sets,
         unit: prevUnit, // Use unit from last performance, or default if new
+        notes: "", // Initialize empty notes
       };
     });
     setExercises(init);
 
-    // Initialize rest times for each exercise
+    // Initialize rest times and previous notes for each exercise
     const restTimes = dayPlan.exercises.map(
       (pe) => pe.restTime ?? settings.defaultRestTime * 60,
     );
     setExerciseRestTimes(restTimes);
+
+    const prevNotes = dayPlan.exercises.map((pe) => {
+      const prevExercise = getLastPerformance(pe.exerciseId);
+      return prevExercise?.notes || "";
+    });
+    setPreviousNotes(prevNotes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -228,17 +245,24 @@ export default function ActiveWorkoutPage() {
               exerciseId,
               sets,
               unit: prevUnit, // Use unit from last performance, or default if new
+              notes: "", // Initialize empty notes
             };
           },
         );
 
         setExercises((prev) => [...prev, ...newExercises]);
 
-        // Add default rest times for new exercises
+        // Add default rest times and previous notes for new exercises
         setExerciseRestTimes((prev) => [
           ...prev,
           ...new Array(newExercises.length).fill(settings.defaultRestTime * 60),
         ]);
+
+        const newPrevNotes = exercisesToAdd.map((exerciseId) => {
+          const prevExercise = getLastPerformance(exerciseId);
+          return prevExercise?.notes || "";
+        });
+        setPreviousNotes((prev) => [...prev, ...newPrevNotes]);
       }
 
       // Clear the state
@@ -483,11 +507,18 @@ export default function ActiveWorkoutPage() {
   const deleteExercise = (exIdx: number) => {
     setExercises((prev) => prev.filter((_, i) => i !== exIdx));
     setExerciseRestTimes((prev) => prev.filter((_, i) => i !== exIdx));
+    setPreviousNotes((prev) => prev.filter((_, i) => i !== exIdx));
 
     // Cancel rest timer if it's active for this exercise
     if (restTimer?.exIdx === exIdx) {
       setRestTimer(null);
     }
+  };
+
+  const updateNotes = (exIdx: number, notes: string) => {
+    setExercises((prev) =>
+      prev.map((ex, i) => (i === exIdx ? { ...ex, notes } : ex)),
+    );
   };
 
   // Check if structure has changed (different exercises or different number of sets)
@@ -877,6 +908,21 @@ export default function ActiveWorkoutPage() {
                           <SelectItem value="300">5min</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    {/* Notes section */}
+                    <div className="mb-3">
+                      <Textarea
+                        placeholder={
+                          previousNotes[exIdx]
+                            ? previousNotes[exIdx]
+                            : "Agregar notas..."
+                        }
+                        value={ex.notes || ""}
+                        onChange={(e) => updateNotes(exIdx, e.target.value)}
+                        className="text-sm sm:text-xs min-h-[60px] resize-none"
+                        onClick={(e) => e.stopPropagation()}
+                      />
                     </div>
 
                     {/* Sets table */}
