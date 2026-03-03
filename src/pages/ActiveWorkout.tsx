@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useRestTimerSound } from "@/hooks/useRestTimerSound";
 import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
-import { useWorkoutTour, resetWorkoutTour } from "@/hooks/tours";
+import { useWorkoutTour } from "@/hooks/tours";
 import { HelpCircle } from "lucide-react";
 import { defaultExercises } from "@/utils/exerciseData";
 import { convertWeight } from "@/utils/unitConversion";

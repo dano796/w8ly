@@ -33,7 +33,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -53,11 +52,7 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  pageVariants,
-  listItemVariants,
-  tapAnimation,
-} from "@/utils/animations";
+import { pageVariants, listItemVariants } from "@/utils/animations";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -107,6 +102,7 @@ export default function WeeklyPlannerPage() {
     sourceDay?: DayName;
     sourceIdx?: number;
     sourceExId?: string;
+    generatedId?: string;
   } | null>(null);
   const [touchStartPos, setTouchStartPos] = useState<{
     x: number;
@@ -117,9 +113,9 @@ export default function WeeklyPlannerPage() {
     y: number;
   } | null>(null);
   const [hoveredDay, setHoveredDay] = useState<DayName | null>(null);
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
-    null,
-  );
+  const [longPressTimer, setLongPressTimer] = useState<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
   // ── UI state ────────────────────────────────────────────────────────────────
   const [isCarouselCollapsed, setIsCarouselCollapsed] = useState(false);
@@ -322,30 +318,6 @@ export default function WeeklyPlannerPage() {
     }[];
   }, [recentIds, exerciseMap]);
 
-  // ── Drag handlers ───────────────────────────────────────────────────────────
-  const handleDragStart = (day: DayName, idx: number, exerciseId: string) => {
-    setDragItem({ day, idx, exerciseId });
-    setDraggedExercise(null);
-  };
-
-  const handleCarouselDragStart = (exerciseId: string) => {
-    setDraggedExercise({ exerciseId, isFromCarousel: true });
-    setDragItem(null);
-  };
-
-  const handleDrop = (targetDay: DayName, targetIdx: number) => {
-    if (dragItem?.day === targetDay) {
-      const dayPlan = plan.find((d) => d.day === targetDay);
-      if (!dayPlan) return;
-      const exercises = [...dayPlan.exercises];
-      const [moved] = exercises.splice(dragItem.idx, 1);
-      exercises.splice(targetIdx, 0, moved);
-      reorderExercises(targetDay, exercises);
-    }
-    setDragItem(null);
-    setDraggedExercise(null);
-  };
-
   const handleDayDrop = (targetDay: DayName): boolean => {
     if (draggedExercise?.isFromCarousel) {
       const targetDayPlan = plan.find((d) => d.day === targetDay);
@@ -359,12 +331,23 @@ export default function WeeklyPlannerPage() {
         setDragItem(null);
         return false;
       }
-      addExerciseToDay(targetDay, {
-        id: `${targetDay}-${draggedExercise.exerciseId}-${Date.now()}`,
-        exerciseId: draggedExercise.exerciseId,
-        sets: settings.defaultSets,
-        reps: 8,
-      });
+      // Generate id in a safe way: pass a generated id from the event handler
+      if (!draggedExercise.generatedId) {
+        // Should never happen, fallback to exerciseId
+        addExerciseToDay(targetDay, {
+          id: `${targetDay}-${draggedExercise.exerciseId}`,
+          exerciseId: draggedExercise.exerciseId,
+          sets: settings.defaultSets,
+          reps: 8,
+        });
+      } else {
+        addExerciseToDay(targetDay, {
+          id: draggedExercise.generatedId,
+          exerciseId: draggedExercise.exerciseId,
+          sets: settings.defaultSets,
+          reps: 8,
+        });
+      }
       setDraggedExercise(null);
       setDragItem(null);
       return true;
@@ -387,7 +370,8 @@ export default function WeeklyPlannerPage() {
     setTouchStartPos({ x: touch.clientX, y: touch.clientY });
     lastTouchXRef.current = touch.clientX;
     const timer = setTimeout(() => {
-      setDraggedExercise({ exerciseId, isFromCarousel: true });
+      const generatedId = `${Math.random().toString(36).slice(2, 10)}-${Date.now()}`;
+      setDraggedExercise({ exerciseId, isFromCarousel: true, generatedId });
       if (navigator.vibrate) navigator.vibrate(50);
     }, 400);
     setLongPressTimer(timer);
@@ -441,7 +425,7 @@ export default function WeeklyPlannerPage() {
     }
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleTouchEnd = () => {
     if (longPressTimer) {
       clearTimeout(longPressTimer);
       setLongPressTimer(null);
@@ -1065,8 +1049,9 @@ export default function WeeklyPlannerPage() {
                         if (moved) toast.success(`Movido a ${targetDay}`);
                         else toast.error("Ya existe en ese día");
                       } else {
+                        const exerciseId = `${targetDay}-${dayPickerDialog.exerciseId}-${Date.now()}`;
                         addExerciseToDay(targetDay, {
-                          id: `${targetDay}-${dayPickerDialog.exerciseId}-${Date.now()}`,
+                          id: exerciseId,
                           exerciseId: dayPickerDialog.exerciseId!,
                           sets: dayPickerDialog.sets,
                           reps: dayPickerDialog.reps,

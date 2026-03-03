@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   pageVariants,
   listContainerVariants,
@@ -96,25 +96,6 @@ export default function ProfilePage() {
   const handleOpenDialog = () => {
     setTempName(profile.name || "");
     setIsDialogOpen(true);
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return "Hoy";
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return "Ayer";
-    } else {
-      return date.toLocaleDateString("es-ES", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-    }
   };
 
   const formatDuration = (seconds: number) => {
@@ -369,7 +350,7 @@ export default function ProfilePage() {
           initial="hidden"
           animate="visible"
         >
-          {recentWorkouts.map((workout, idx) => {
+          {recentWorkouts.map((workout) => {
             const completedExercises = workout.exercises.filter((ex) =>
               ex.sets.some((s) => s.completed),
             ).length;

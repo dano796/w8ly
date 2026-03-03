@@ -510,7 +510,6 @@ export function usePlannerTour({
   setCarouselCollapsed,
   lundayExercises,
   addExerciseToLunes,
-  removeSeedFromLunes,
   trackRecentExercise,
   forceShow = false,
 }: UsePlannerTourOptions) {

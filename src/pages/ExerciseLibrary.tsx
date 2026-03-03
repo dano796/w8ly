@@ -167,10 +167,16 @@ export default function ExerciseLibraryPage() {
     setVisibleCount((prev) => Math.min(prev + 15, searchFiltered.length));
   }, [searchFiltered.length]);
 
-  // Reset visible count when filters change
-  useEffect(() => {
+  // Reset visible count when filters change (move logic to setters)
+  const handleSetActiveFilter = (filter: MuscleGroup | "Todos") => {
+    setActiveFilter(filter);
     setVisibleCount(15);
-  }, [activeFilter, searchTerm]);
+  };
+
+  const handleSetSearchTerm = (term: string) => {
+    setSearchTerm(term);
+    setVisibleCount(15);
+  };
 
   // Infinite scroll observer
   useEffect(() => {
@@ -333,14 +339,18 @@ export default function ExerciseLibraryPage() {
       return;
     }
 
-    addExerciseToDay(day, {
-      id: `${day}-${exerciseId}-${Date.now()}`,
-      exerciseId,
-      sets: settings.defaultSets,
-      reps: 10,
-    });
-    setSheetOpen(false);
-    setSelectedExerciseId(null);
+    // Genera el id único en el momento del evento, no en render
+    setTimeout(() => {
+      const uniqueId = `${day}-${exerciseId}-${Math.random().toString(36).slice(2, 10)}`;
+      addExerciseToDay(day, {
+        id: uniqueId,
+        exerciseId,
+        sets: settings.defaultSets,
+        reps: 10,
+      });
+      setSheetOpen(false);
+      setSelectedExerciseId(null);
+    }, 0);
   };
 
   const handleCreateExercise = () => {
@@ -414,7 +424,7 @@ export default function ExerciseLibraryPage() {
           type="text"
           placeholder="Buscar ejercicio..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => handleSetSearchTerm(e.target.value)}
           className="pl-9 pr-9"
         />
         {searchTerm && (
@@ -437,7 +447,7 @@ export default function ExerciseLibraryPage() {
         {filters.map((f, idx) => (
           <motion.button
             key={f}
-            onClick={() => setActiveFilter(f)}
+            onClick={() => handleSetActiveFilter(f)}
             className={cn(
               "px-3 py-1.5 rounded-2xl text-sm font-medium whitespace-nowrap transition-colors border",
               activeFilter === f

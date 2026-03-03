@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Dumbbell, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CompletedWorkout } from "@/utils/types";
 import { useSettings } from "@/hooks/useSettings";
@@ -52,23 +52,16 @@ export default function WeeklyStatsChart({ history }: WeeklyStatsChartProps) {
   // null = show month total; number = index of selected week bucket
   const [selectedBucket, setSelectedBucket] = useState<number | null>(null);
 
-  const today = new Date();
-
-  const viewYear = useMemo(() => {
-    return new Date(
-      today.getFullYear(),
-      today.getMonth() + monthOffset,
-      1,
-    ).getFullYear();
+  // Calculate the first day of the viewed month based on offset
+  const viewDate = useMemo(() => {
+    const d = new Date();
+    d.setDate(1);
+    d.setMonth(d.getMonth() + monthOffset);
+    return d;
   }, [monthOffset]);
 
-  const viewMonth = useMemo(() => {
-    return new Date(
-      today.getFullYear(),
-      today.getMonth() + monthOffset,
-      1,
-    ).getMonth();
-  }, [monthOffset]);
+  const viewYear = viewDate.getFullYear();
+  const viewMonth = viewDate.getMonth();
 
   const isCurrentMonth = monthOffset === 0;
 
@@ -177,6 +170,7 @@ export default function WeeklyStatsChart({ history }: WeeklyStatsChartProps) {
     return daySet.size;
   }, [weekBuckets, volumeByDay, secondsByDay]);
 
+  const today = new Date();
   const currentWeekStart = getWeekStart(today);
 
   // The value shown in the header: selected week or month total

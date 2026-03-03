@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Exercise } from "@/utils/types";
 import {
   Sheet,
@@ -32,12 +32,13 @@ export default function ExerciseDetailSheet({
     "details",
   );
 
-  // Reset to details tab when sheet opens
-  useEffect(() => {
-    if (open) {
+  // Reset to details tab when sheet opens (move logic to onOpenChange handler)
+  const handleOpenChange = (openValue: boolean) => {
+    if (openValue) {
       setActiveTab("details");
     }
-  }, [open]);
+    onOpenChange(openValue);
+  };
 
   if (!exercise) return null;
 
@@ -54,7 +55,7 @@ export default function ExerciseDetailSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className="w-full sm:max-w-lg p-0 flex flex-col gap-0 [&>button]:hidden">
         {/* Header */}
         <div className="px-6 py-4 border-b">

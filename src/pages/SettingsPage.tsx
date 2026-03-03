@@ -21,11 +21,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { motion } from "framer-motion";
-import {
-  pageVariants,
-  tapAnimation,
-  listItemVariants,
-} from "@/utils/animations";
+import { pageVariants, tapAnimation } from "@/utils/animations";
 
 function ChipSelector<T extends string | number>({
   options,
