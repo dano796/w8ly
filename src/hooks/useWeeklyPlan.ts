@@ -99,6 +99,91 @@ export function useWeeklyPlan() {
 
   const resetPlan = () => setPlan(createEmptyPlan());
 
+  const exportDay = (day: DayName): string => {
+    const dayPlan = plan.find((d) => d.day === day);
+    if (!dayPlan) throw new Error("Day not found");
+
+    return JSON.stringify(dayPlan, null, 2);
+  };
+
+  const importDay = (
+    day: DayName,
+    jsonData: string,
+    mode: "replace" | "merge" = "replace",
+  ): boolean => {
+    try {
+      const importedDay = JSON.parse(jsonData);
+
+      // Validate structure
+      if (
+        !importedDay ||
+        typeof importedDay !== "object" ||
+        !Array.isArray(importedDay.exercises)
+      ) {
+        return false;
+      }
+
+      setPlan((prev) =>
+        prev.map((d) => {
+          if (d.day !== day) return d;
+
+          if (mode === "replace") {
+            // Replace all exercises
+            return {
+              ...d,
+              label: importedDay.label || "",
+              exercises: importedDay.exercises.map((ex: PlannedExercise) => ({
+                ...ex,
+                id: crypto.randomUUID(),
+              })),
+            };
+          } else {
+            // Merge: add only non-duplicate exercises
+            const existingExerciseIds = new Set(
+              d.exercises.map((ex) => ex.exerciseId),
+            );
+            const newExercises = importedDay.exercises
+              .filter(
+                (ex: PlannedExercise) =>
+                  !existingExerciseIds.has(ex.exerciseId),
+              )
+              .map((ex: PlannedExercise) => ({
+                ...ex,
+                id: crypto.randomUUID(),
+              }));
+
+            return {
+              ...d,
+              exercises: [...d.exercises, ...newExercises],
+            };
+          }
+        }),
+      );
+
+      // Track newly added exercises
+      importedDay.exercises.forEach((ex: PlannedExercise) => {
+        trackAdded(ex.exerciseId);
+      });
+
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const clearDayExercises = (day: DayName) => {
+    setPlan((prev) =>
+      prev.map((d) =>
+        d.day === day
+          ? {
+              ...d,
+              exercises: [],
+            }
+          : d,
+      ),
+    );
+  };
+
   return {
     plan,
     addExerciseToDay,
@@ -108,5 +193,8 @@ export function useWeeklyPlan() {
     moveExercise,
     updateDayExercises,
     resetPlan,
+    exportDay,
+    importDay,
+    clearDayExercises,
   };
 }

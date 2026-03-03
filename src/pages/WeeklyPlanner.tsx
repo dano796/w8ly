@@ -27,6 +27,8 @@ import {
   Copy,
   Trash2,
   Minus,
+  Download,
+  Upload,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -43,6 +45,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Sheet,
   SheetContent,
@@ -86,6 +98,9 @@ export default function WeeklyPlannerPage() {
     addExerciseToDay,
     updateDayLabel,
     moveExercise,
+    exportDay,
+    importDay,
+    clearDayExercises,
   } = useWeeklyPlan();
   const { settings } = useSettings();
   const { recentIds, trackAdded } = useRecentlyAddedExercises();
@@ -134,6 +149,33 @@ export default function WeeklyPlannerPage() {
     exId: null,
     exName: "",
     sets: 3,
+  });
+
+  // ── File input ref ──────────────────────────────────────────────────────────
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ── Import confirmation dialog ──────────────────────────────────────────────
+  const [importConfirmDialog, setImportConfirmDialog] = useState<{
+    isOpen: boolean;
+    day: DayName | null;
+    jsonData: string;
+    existingCount: number;
+  }>({
+    isOpen: false,
+    day: null,
+    jsonData: "",
+    existingCount: 0,
+  });
+
+  // ── Clear day confirmation dialog ───────────────────────────────────────────
+  const [clearDayDialog, setClearDayDialog] = useState<{
+    isOpen: boolean;
+    day: DayName | null;
+    exerciseCount: number;
+  }>({
+    isOpen: false,
+    day: null,
+    exerciseCount: 0,
   });
 
   // ── Move/copy day picker dialog ─────────────────────────────────────────────
@@ -485,6 +527,119 @@ export default function WeeklyPlannerPage() {
     }
   };
 
+  // ── Export/Import handlers ──────────────────────────────────────────────────
+  const handleExportDay = (day: DayName) => {
+    try {
+      const jsonData = exportDay(day);
+      const blob = new Blob([jsonData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `w8ly-${day.toLowerCase()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("Rutina exportada");
+    } catch (error) {
+      toast.error("Error al exportar la rutina");
+    }
+  };
+
+  const handleImportFromFile = (day: DayName) => {
+    if (fileInputRef.current) {
+      // Reset the input value to allow selecting the same file again
+      fileInputRef.current.value = "";
+
+      fileInputRef.current.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const jsonData = event.target?.result as string;
+
+            // Check if the day already has exercises
+            const dayPlan = plan.find((d) => d.day === day);
+            const existingCount = dayPlan?.exercises.length || 0;
+
+            if (existingCount > 0) {
+              // Show confirmation dialog
+              setImportConfirmDialog({
+                isOpen: true,
+                day,
+                jsonData,
+                existingCount,
+              });
+            } else {
+              // No exercises, import directly
+              const success = importDay(day, jsonData, "replace");
+              if (success) {
+                toast.success("Rutina importada");
+              } else {
+                toast.error("Error: formato inválido");
+              }
+            }
+
+            // Reset input value after processing
+            if (fileInputRef.current) {
+              fileInputRef.current.value = "";
+            }
+          };
+          reader.readAsText(file);
+        }
+      };
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleConfirmImport = (mode: "replace" | "merge") => {
+    const { day, jsonData } = importConfirmDialog;
+    if (!day || !jsonData) return;
+
+    const success = importDay(day, jsonData, mode);
+    if (success) {
+      if (mode === "replace") {
+        toast.success("Rutina reemplazada");
+      } else {
+        toast.success("Ejercicios agregados");
+      }
+    } else {
+      toast.error("Error: formato inválido");
+    }
+
+    setImportConfirmDialog({
+      isOpen: false,
+      day: null,
+      jsonData: "",
+      existingCount: 0,
+    });
+  };
+
+  const handleOpenClearDayDialog = (day: DayName) => {
+    const dayPlan = plan.find((d) => d.day === day);
+    const exerciseCount = dayPlan?.exercises.length || 0;
+
+    setClearDayDialog({
+      isOpen: true,
+      day,
+      exerciseCount,
+    });
+  };
+
+  const handleConfirmClearDay = () => {
+    const { day } = clearDayDialog;
+    if (!day) return;
+
+    clearDayExercises(day);
+    toast.success("Ejercicios eliminados");
+
+    setClearDayDialog({
+      isOpen: false,
+      day: null,
+      exerciseCount: 0,
+    });
+  };
+
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <motion.div
@@ -594,17 +749,54 @@ export default function WeeklyPlannerPage() {
                     {dayPlan.exercises.length !== 1 ? "s" : ""}
                   </p>
                 </div>
-                {dayPlan.exercises.length > 0 && (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-10 w-10 flex-shrink-0 min-w-[44px] min-h-[44px]"
-                    id={index === 0 ? "tour-planner-play-0" : undefined}
-                    onClick={() => navigate(`/workout/${dayPlan.day}`)}
-                  >
-                    <Play className="w-5 h-5" />
-                  </Button>
-                )}
+                <div className="flex items-center gap-1">
+                  {dayPlan.exercises.length > 0 && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-10 w-10 flex-shrink-0 min-w-[44px] min-h-[44px]"
+                      id={index === 0 ? "tour-planner-play-0" : undefined}
+                      onClick={() => navigate(`/workout/${dayPlan.day}`)}
+                    >
+                      <Play className="w-5 h-5" />
+                    </Button>
+                  )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-10 w-10 flex-shrink-0"
+                      >
+                        <MoreVertical className="w-5 h-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem
+                        onClick={() => handleExportDay(dayPlan.day)}
+                        disabled={dayPlan.exercises.length === 0}
+                      >
+                        <Download className="w-4 h-4 mr-2 text-muted-foreground" />
+                        Exportar rutina
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleImportFromFile(dayPlan.day)}
+                      >
+                        <Upload className="w-4 h-4 mr-2 text-muted-foreground" />
+                        Importar rutina
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => handleOpenClearDayDialog(dayPlan.day)}
+                        disabled={dayPlan.exercises.length === 0}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Limpiar ejercicios
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
 
               {/* Exercise list */}
@@ -1140,6 +1332,79 @@ export default function WeeklyPlannerPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Import confirmation dialog */}
+      <AlertDialog
+        open={importConfirmDialog.isOpen}
+        onOpenChange={(open) =>
+          !open &&
+          setImportConfirmDialog({
+            isOpen: false,
+            day: null,
+            jsonData: "",
+            existingCount: 0,
+          })
+        }
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>El día ya tiene ejercicios</AlertDialogTitle>
+            <AlertDialogDescription>
+              Este día tiene {importConfirmDialog.existingCount} ejercicio
+              {importConfirmDialog.existingCount !== 1 ? "s" : ""}. ¿Qué deseas
+              hacer?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={() => handleConfirmImport("merge")}
+            >
+              Agregar ejercicios
+            </Button>
+            <AlertDialogAction onClick={() => handleConfirmImport("replace")}>
+              Reemplazar todo
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear day confirmation dialog */}
+      <AlertDialog
+        open={clearDayDialog.isOpen}
+        onOpenChange={(open) =>
+          !open &&
+          setClearDayDialog({
+            isOpen: false,
+            day: null,
+            exerciseCount: 0,
+          })
+        }
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Limpiar todos los ejercicios?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminarán {clearDayDialog.exerciseCount} ejercicio
+              {clearDayDialog.exerciseCount !== 1 ? "s" : ""} de{" "}
+              {clearDayDialog.day}. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmClearDay}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Limpiar ejercicios
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Hidden file input */}
+      <input ref={fileInputRef} type="file" accept=".json" className="hidden" />
 
       {/* Drag ghost */}
       <AnimatePresence>

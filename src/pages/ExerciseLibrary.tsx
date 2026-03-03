@@ -107,12 +107,29 @@ export default function ExerciseLibraryPage() {
     null,
   );
 
-  // Get currently added exercises if coming from active workout
+  // Get currently added exercises
   const state = location.state as {
     currentExercises?: string[];
     startTime?: number;
   } | null;
-  const currentExercises = new Set(state?.currentExercises || []);
+
+  // Build set of current exercises from either:
+  // 1. Active workout state (fromWorkout)
+  // 2. Day plan (preselectedDay)
+  const currentExercises = useMemo(() => {
+    // If coming from active workout, use passed state
+    if (state?.currentExercises) {
+      return new Set(state.currentExercises);
+    }
+
+    // If preselected day, get exercises from that day's plan
+    if (preselectedDay) {
+      const dayPlan = plan.find((d) => d.day === preselectedDay);
+      return new Set(dayPlan?.exercises.map((ex) => ex.exerciseId) || []);
+    }
+
+    return new Set<string>();
+  }, [state?.currentExercises, preselectedDay, plan]);
 
   // Scroll to top on mount
   useEffect(() => {
