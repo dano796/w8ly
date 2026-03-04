@@ -1,5 +1,5 @@
 import { useSettings } from "@/hooks/useSettings";
-import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
+import { useWeekDecks } from "@/hooks/useWeekDecks";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { defaultExercises } from "@/utils/exerciseData";
@@ -60,7 +60,7 @@ function ChipSelector<T extends string | number>({
 
 export default function SettingsPage() {
   const { settings, updateSetting } = useSettings();
-  const { resetPlan } = useWeeklyPlan();
+  const { resetPlan } = useWeekDecks();
   const { history } = useWorkoutHistory();
   const { customExercises } = useCustomExercises();
 

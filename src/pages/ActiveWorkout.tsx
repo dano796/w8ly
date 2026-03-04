@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useRestTimerSound } from "@/hooks/useRestTimerSound";
-import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
+import { useWeekDecks } from "@/hooks/useWeekDecks";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
@@ -74,7 +74,7 @@ export default function ActiveWorkoutPage() {
   const { day } = useParams<{ day: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { plan, updateDayExercises } = useWeeklyPlan();
+  const { plan, updateDayExercises } = useWeekDecks();
   const {
     addWorkout,
     getLastPerformance,
