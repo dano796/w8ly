@@ -401,7 +401,7 @@ const plannerSteps: DriveStep[] = [
     popover: {
       title: "Tu rutina semanal",
       description:
-        "¡Bienvenido! Esta es la vista principal donde organizarás tu semana de entrenamiento.",
+        "¡Bienvenido! Esta es la vista principal donde organizarás tu semana de entrenamiento. Toca el nombre de tu rutina para cambiar entre diferentes planes.",
       side: "bottom",
       align: "start",
     },
@@ -473,6 +473,16 @@ const plannerSteps: DriveStep[] = [
       description:
         "Explora el catálogo completo de ejercicios disponibles para construir o ampliar tu rutina.",
       side: "top",
+      align: "end",
+    },
+  },
+  {
+    element: "[data-tour='planner-library-btn']",
+    popover: {
+      title: "Biblioteca de plantillas",
+      description:
+        "Usa este botón para crear nuevas rutinas desde plantillas predefinidas (PPL, Upper/Lower, Full Body, etc.). Puedes tener hasta 3 rutinas diferentes.",
+      side: "bottom",
       align: "end",
     },
   },
