@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { defaultExercises } from "@/utils/exerciseData";
 import { DayName, DAYS, MuscleGroup, Exercise } from "@/utils/types";
-import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
+import { useWeekDecks } from "@/hooks/useWeekDecks";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
 import { Badge } from "@/components/ui/badge";
@@ -81,7 +81,7 @@ export default function ExerciseLibraryPage() {
   // Detecta el modo: "add" si viene de un workout o día, "browse" si navega la biblioteca
   const mode = fromWorkout || preselectedDay ? "add" : "browse";
 
-  const { plan, addExerciseToDay, updateDayExercises } = useWeeklyPlan();
+  const { plan, addExerciseToDay, updateDayExercises } = useWeekDecks();
   const { settings } = useSettings();
   const { customExercises, addCustomExercise, removeCustomExercise } =
     useCustomExercises();

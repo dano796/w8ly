@@ -2,7 +2,7 @@ import { usePlannerTour } from "@/hooks/tours";
 import { HelpCircle } from "lucide-react";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useWeeklyPlan } from "@/hooks/useWeeklyPlan";
+import { useWeekDecks } from "@/hooks/useWeekDecks";
 import { useRecentlyAddedExercises } from "@/hooks/useRecentlyAddedExercises";
 import { useSettings } from "@/hooks/useSettings";
 import { useCustomExercises } from "@/hooks/useCustomExercises";
@@ -14,6 +14,8 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ExerciseDetailSheet from "@/components/ExerciseDetailSheet";
+import { TEMPLATE_CATALOG } from "@/utils/weekTemplates";
+import { WeekDeck } from "@/utils/types";
 import {
   Plus,
   MoreVertical,
@@ -29,6 +31,8 @@ import {
   Minus,
   Download,
   Upload,
+  FolderOpen,
+  Library,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -93,6 +97,9 @@ export default function WeeklyPlannerPage() {
 
   const {
     plan,
+    decks,
+    activeDeck,
+    activeDeckId,
     removeExerciseFromDay,
     reorderExercises,
     addExerciseToDay,
@@ -101,7 +108,14 @@ export default function WeeklyPlannerPage() {
     exportDay,
     importDay,
     clearDayExercises,
-  } = useWeeklyPlan();
+    createDeck,
+    duplicateDeck,
+    updateDeck,
+    deleteDeck,
+    switchDeck,
+    exportDeck,
+    importDeck,
+  } = useWeekDecks();
   const { settings } = useSettings();
   const { recentIds, trackAdded } = useRecentlyAddedExercises();
 
@@ -197,6 +211,29 @@ export default function WeeklyPlannerPage() {
     exName: "",
     sets: 3,
     reps: 10,
+  });
+
+  // ── Deck management dialogs ─────────────────────────────────────────────────
+  const [deckSelectorOpen, setDeckSelectorOpen] = useState(false);
+  const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false);
+  const [deckNameDialog, setDeckNameDialog] = useState<{
+    isOpen: boolean;
+    mode: "create" | "rename" | "duplicate";
+    deckId?: string;
+    currentName: string;
+  }>({
+    isOpen: false,
+    mode: "create",
+    currentName: "",
+  });
+  const [deleteDeckDialog, setDeleteDeckDialog] = useState<{
+    isOpen: boolean;
+    deckId: string | null;
+    deckName: string;
+  }>({
+    isOpen: false,
+    deckId: null,
+    deckName: "",
   });
 
   const openDayPicker = (
@@ -640,6 +677,184 @@ export default function WeeklyPlannerPage() {
     });
   };
 
+  // ── Deck management handlers ────────────────────────────────────────────────
+  const handleCreateDeckFromTemplate = (
+    templateKey: keyof typeof TEMPLATE_CATALOG,
+  ) => {
+    if (decks.length >= 3) {
+      toast.error("Máximo 3 rutinas permitidas. Elimina una para crear otra.");
+      return;
+    }
+    const template = TEMPLATE_CATALOG[templateKey];
+    const newDeck = template.create();
+    const deckId = createDeck(newDeck);
+    if (deckId) {
+      toast.success(`Rutina "${newDeck.name}" creada`);
+      setTemplateSelectorOpen(false);
+    } else {
+      toast.error("No se pudo crear la rutina");
+    }
+  };
+
+  const handleCreateEmptyDeck = () => {
+    if (decks.length >= 3) {
+      toast.error("Máximo 3 rutinas permitidas. Elimina una para crear otra.");
+      return;
+    }
+    setDeckNameDialog({
+      isOpen: true,
+      mode: "create",
+      currentName: "Mi Rutina Nueva",
+    });
+  };
+
+  const handleSaveDeckName = () => {
+    const { mode, currentName, deckId } = deckNameDialog;
+
+    if (!currentName.trim()) {
+      toast.error("El nombre no puede estar vacío");
+      return;
+    }
+
+    if (mode === "create") {
+      if (decks.length >= 3) {
+        toast.error(
+          "Máximo 3 rutinas permitidas. Elimina una para crear otra.",
+        );
+        setDeckNameDialog({ isOpen: false, mode: "create", currentName: "" });
+        return;
+      }
+      const template = TEMPLATE_CATALOG.custom;
+      const newDeck = template.create(currentName.trim());
+      const id = createDeck(newDeck);
+      if (id) {
+        toast.success("Rutina creada");
+      } else {
+        toast.error("No se pudo crear la rutina");
+      }
+    } else if (mode === "rename" && deckId) {
+      updateDeck(deckId, { name: currentName.trim() });
+      toast.success("Rutina renombrada");
+    } else if (mode === "duplicate" && deckId) {
+      const newId = duplicateDeck(deckId, currentName.trim());
+      if (newId) {
+        toast.success("Rutina duplicada");
+      }
+    }
+
+    setDeckNameDialog({ isOpen: false, mode: "create", currentName: "" });
+  };
+
+  const handleDuplicateDeck = (deckId: string) => {
+    if (decks.length >= 3) {
+      toast.error("Máximo 3 rutinas permitidas. Elimina una para duplicar.");
+      return;
+    }
+    const deck = decks.find((d) => d.id === deckId);
+    if (!deck) return;
+
+    setDeckNameDialog({
+      isOpen: true,
+      mode: "duplicate",
+      deckId,
+      currentName: `${deck.name} (Copia)`,
+    });
+  };
+
+  const handleRenameDeck = (deckId: string) => {
+    const deck = decks.find((d) => d.id === deckId);
+    if (!deck) return;
+
+    setDeckNameDialog({
+      isOpen: true,
+      mode: "rename",
+      deckId,
+      currentName: deck.name,
+    });
+  };
+
+  const handleDeleteDeck = (deckId: string) => {
+    const deck = decks.find((d) => d.id === deckId);
+    if (!deck) return;
+
+    if (decks.length <= 1) {
+      toast.error("No puedes eliminar la única rutina");
+      return;
+    }
+
+    setDeleteDeckDialog({
+      isOpen: true,
+      deckId,
+      deckName: deck.name,
+    });
+  };
+
+  const handleConfirmDeleteDeck = () => {
+    const { deckId } = deleteDeckDialog;
+    if (!deckId) return;
+
+    const success = deleteDeck(deckId);
+    if (success) {
+      toast.success("Rutina eliminada");
+    } else {
+      toast.error("No puedes eliminar la única rutina");
+    }
+
+    setDeleteDeckDialog({
+      isOpen: false,
+      deckId: null,
+      deckName: "",
+    });
+  };
+
+  const handleExportDeck = () => {
+    try {
+      const jsonData = exportDeck();
+      const blob = new Blob([jsonData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `w8ly-${activeDeck?.name.toLowerCase().replace(/\s+/g, "-")}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("Rutina completa exportada");
+    } catch (error) {
+      toast.error("Error al exportar la rutina");
+    }
+  };
+
+  const handleImportDeck = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+
+      fileInputRef.current.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const jsonData = event.target?.result as string;
+            const success = importDeck(jsonData);
+
+            if (success) {
+              toast.success("Rutina importada");
+            } else {
+              toast.error("Error: formato inválido");
+            }
+
+            if (fileInputRef.current) {
+              fileInputRef.current.value = "";
+            }
+          };
+          reader.readAsText(file);
+        }
+      };
+
+      fileInputRef.current.click();
+    }
+  };
+
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <motion.div
@@ -658,15 +873,34 @@ export default function WeeklyPlannerPage() {
           className="flex items-center justify-between"
           data-tour="planner-header"
         >
-          <h1 className="text-2xl font-bold">Mi rutina semanal</h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={startTour}
-            title="Ver tutorial"
+          <button
+            onClick={() => setDeckSelectorOpen(true)}
+            className="flex items-center gap-2 flex-1 min-w-0 group -ml-1 p-1 rounded-lg hover:bg-accent/50 transition-colors"
           >
-            <HelpCircle className="w-4 h-4 text-muted-foreground" />
-          </Button>
+            <h1 className="text-2xl font-bold truncate">
+              {activeDeck?.name || "Mi Rutina"}
+            </h1>
+            <ChevronDown className="w-5 h-5 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
+          </button>
+          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTemplateSelectorOpen(true)}
+              title="Crear desde plantilla"
+              data-tour="planner-library-btn"
+            >
+              <Library className="w-4 h-4 text-muted-foreground" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={startTour}
+              title="Ver tutorial"
+            >
+              <HelpCircle className="w-4 h-4 text-muted-foreground" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -1398,6 +1632,292 @@ export default function WeeklyPlannerPage() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Limpiar ejercicios
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Deck selector sheet */}
+      <Sheet open={deckSelectorOpen} onOpenChange={setDeckSelectorOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh]">
+          <SheetHeader>
+            <SheetTitle>Mis Rutinas</SheetTitle>
+            <SheetDescription>
+              Selecciona una rutina o crea una nueva (máximo 3)
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-4 space-y-2 pb-4 overflow-y-auto max-h-[50vh]">
+            {decks.map((deck) => (
+              <Card
+                key={deck.id}
+                className={`p-4 cursor-pointer transition-all ${
+                  deck.id === activeDeckId
+                    ? "ring-2 ring-primary bg-primary/5"
+                    : "hover:bg-accent"
+                }`}
+                onClick={() => {
+                  switchDeck(deck.id);
+                  setDeckSelectorOpen(false);
+                  toast.success(`Cambiado a "${deck.name}"`);
+                }}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold truncate">{deck.name}</h3>
+                    {deck.description && (
+                      <p className="text-sm text-muted-foreground truncate">
+                        {deck.description}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="outline" className="text-xs">
+                        {deck.plan.reduce(
+                          (acc, d) => acc + d.exercises.length,
+                          0,
+                        )}{" "}
+                        ejercicios
+                      </Badge>
+                      {deck.level && (
+                        <Badge variant="secondary" className="text-xs">
+                          {deck.level === "beginner"
+                            ? "Principiante"
+                            : deck.level === "intermediate"
+                              ? "Intermedio"
+                              : "Avanzado"}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 flex-shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRenameDeck(deck.id);
+                          setDeckSelectorOpen(false);
+                        }}
+                      >
+                        <Edit2 className="w-4 h-4 mr-2" />
+                        Renombrar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDuplicateDeck(deck.id);
+                          setDeckSelectorOpen(false);
+                        }}
+                        disabled={decks.length >= 3}
+                      >
+                        <Copy className="w-4 h-4 mr-2" />
+                        Duplicar
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteDeck(deck.id);
+                        }}
+                        className="text-destructive"
+                        disabled={decks.length <= 1}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </Card>
+            ))}
+          </div>
+          <div className="space-y-2 pt-2 border-t">
+            <Button
+              variant="default"
+              className="w-full"
+              onClick={() => {
+                handleCreateEmptyDeck();
+                setDeckSelectorOpen(false);
+              }}
+              disabled={decks.length >= 3}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nueva Rutina Vacía {decks.length >= 3 && "(Máx. 3)"}
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  handleExportDeck();
+                }}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Exportar
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  handleImportDeck();
+                }}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Importar
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Template selector sheet */}
+      <Sheet open={templateSelectorOpen} onOpenChange={setTemplateSelectorOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh]">
+          <SheetHeader>
+            <SheetTitle>Plantillas de Rutinas</SheetTitle>
+            <SheetDescription>
+              Selecciona una plantilla para empezar. Puedes tener hasta 3
+              rutinas
+              {decks.length >= 3 && " (máximo alcanzado)"}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-4 space-y-3 pb-4 overflow-y-auto max-h-[60vh]">
+            {Object.entries(TEMPLATE_CATALOG).map(([key, template]) => (
+              <Card
+                key={key}
+                className={`p-4 transition-all ${
+                  decks.length >= 3
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer hover:bg-accent"
+                }`}
+                onClick={() => {
+                  if (decks.length < 3) {
+                    handleCreateDeckFromTemplate(
+                      key as keyof typeof TEMPLATE_CATALOG,
+                    );
+                  }
+                }}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold">{template.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {template.description}
+                    </p>
+                    <Badge variant="outline" className="mt-2 text-xs">
+                      {template.level === "beginner"
+                        ? "Principiante"
+                        : template.level === "intermediate"
+                          ? "Intermedio"
+                          : "Avanzado"}
+                    </Badge>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Deck name dialog (create/rename/duplicate) */}
+      <Dialog
+        open={deckNameDialog.isOpen}
+        onOpenChange={(open) =>
+          !open &&
+          setDeckNameDialog({ isOpen: false, mode: "create", currentName: "" })
+        }
+      >
+        <DialogContent className="max-w-[425px] w-[calc(100%-2rem)]">
+          <DialogHeader>
+            <DialogTitle>
+              {deckNameDialog.mode === "create"
+                ? "Nueva Rutina"
+                : deckNameDialog.mode === "rename"
+                  ? "Renombrar Rutina"
+                  : "Duplicar Rutina"}
+            </DialogTitle>
+            <DialogDescription>
+              {deckNameDialog.mode === "create"
+                ? "Dale un nombre a tu nueva rutina personalizada"
+                : deckNameDialog.mode === "rename"
+                  ? "Cambia el nombre de tu rutina"
+                  : "Dale un nombre a la copia"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-2 py-4">
+            <Label htmlFor="deck-name">Nombre</Label>
+            <Input
+              id="deck-name"
+              value={deckNameDialog.currentName}
+              onChange={(e) =>
+                setDeckNameDialog({
+                  ...deckNameDialog,
+                  currentName: e.target.value,
+                })
+              }
+              placeholder="Mi Rutina Personalizada"
+              maxLength={50}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSaveDeckName();
+              }}
+            />
+          </div>
+          <DialogFooter className="flex-col sm:flex-col gap-2">
+            <Button onClick={handleSaveDeckName} className="w-full m-0">
+              {deckNameDialog.mode === "create" ? "Crear" : "Guardar"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setDeckNameDialog({
+                  isOpen: false,
+                  mode: "create",
+                  currentName: "",
+                })
+              }
+              className="w-full m-0"
+            >
+              Cancelar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete deck confirmation */}
+      <AlertDialog
+        open={deleteDeckDialog.isOpen}
+        onOpenChange={(open) =>
+          !open &&
+          setDeleteDeckDialog({
+            isOpen: false,
+            deckId: null,
+            deckName: "",
+          })
+        }
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar rutina?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminará la rutina "{deleteDeckDialog.deckName}". Esta acción
+              no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteDeck}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar rutina
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
