@@ -8,8 +8,6 @@ export default function AppLayout() {
       style={{
         paddingTop: "max(env(safe-area-inset-top), 0px)",
         paddingBottom: "calc(5rem + max(env(safe-area-inset-bottom), 0px))",
-        paddingLeft: "env(safe-area-inset-left)",
-        paddingRight: "env(safe-area-inset-right)",
       }}
     >
       <Outlet />

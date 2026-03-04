@@ -205,3 +205,76 @@
 [data-sonner-toaster] {
   bottom: 2rem !important;
 }
+
+/* Orientation Lock Overlay - Bloquear orientación horizontal */
+#orientation-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: hsl(var(--background));
+  z-index: 99999;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.orientation-lock-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+  color: hsl(var(--foreground));
+  animation: bounce 2s ease-in-out infinite;
+}
+
+.orientation-lock-content svg {
+  color: hsl(var(--primary));
+  animation: rotate-phone 2s ease-in-out infinite;
+}
+
+.orientation-lock-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.orientation-lock-content p {
+  font-size: 1rem;
+  color: hsl(var(--muted-foreground));
+  margin: 0;
+}
+
+@keyframes rotate-phone {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-90deg);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Mostrar overlay solo en orientación landscape en dispositivos móviles */
+@media screen and (orientation: landscape) and (max-height: 600px) {
+  #orientation-overlay {
+    display: flex !important;
+  }
+
+  #root {
+    display: none !important;
+  }
+}

@@ -32,16 +32,20 @@ export default function BottomTabBar() {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border"
-      style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.5rem)" }}
+      style={{
+        paddingBottom: "max(env(safe-area-inset-bottom), 0.5rem)",
+        paddingLeft: "env(safe-area-inset-left)",
+        paddingRight: "env(safe-area-inset-right)",
+      }}
     >
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
+      <div className="flex items-center justify-around max-w-lg mx-auto h-16">
         {tabs.map((tab) => {
           if (tab.path === "/__logo__") {
             return (
               <motion.button
                 key="logo"
                 onClick={() => navigate("/")}
-                className="w-14 h-14 flex items-center justify-center"
+                className="flex items-center justify-center w-14 h-14"
                 variants={logoVariants}
                 whileTap="tap"
                 whileHover="hover"
@@ -63,7 +67,8 @@ export default function BottomTabBar() {
               key={tab.path}
               onClick={() => navigate(tab.path)}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 py-2 px-4 min-w-[44px] min-h-[44px] transition-colors relative",
+                "flex flex-col items-center justify-center transition-colors relative",
+                "gap-0.5 py-2 px-4 min-w-[44px] min-h-[44px]",
                 isActive ? "text-primary" : "text-muted-foreground",
               )}
               whileTap={tapAnimation}
@@ -75,8 +80,8 @@ export default function BottomTabBar() {
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-              <Icon className="w-5 h-5 relative z-10" />
-              <span className="text-[10px] font-medium relative z-10">
+              <Icon className="relative z-10 w-5 h-5" />
+              <span className="font-medium relative z-10 text-[10px]">
                 {tab.label}
               </span>
             </motion.button>
