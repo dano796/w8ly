@@ -47,6 +47,20 @@ export interface DayPlan {
 
 export type WeeklyPlan = DayPlan[];
 
+export type DifficultyLevel = "beginner" | "intermediate" | "advanced";
+export type SplitType = "custom" | "ppl" | "ul" | "fb" | "arnold" | "brosplit";
+
+export interface WeekDeck {
+  id: string;
+  name: string;
+  description?: string;
+  level?: DifficultyLevel;
+  splitType: SplitType;
+  plan: WeeklyPlan;
+  createdAt: number; // timestamp
+  updatedAt: number; // timestamp
+}
+
 export interface WorkoutSet {
   setNumber: number;
   previous?: { weight: number; reps: number };
