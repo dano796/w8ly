@@ -847,15 +847,23 @@ export default function ActiveWorkoutPage() {
           className="flex items-center justify-between mb-4"
           data-tour="workout-header"
         >
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={handleExitClick}>
+          <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleExitClick}
+              className="flex-shrink-0"
+            >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <div>
-              <h1 className="text-xl sm:text-lg font-bold">
-                {day}
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-lg font-bold flex items-center min-w-0">
+                <span className="flex-shrink-0">{day}</span>
                 {dayPlan?.label && (
-                  <span className="text-primary"> - {dayPlan.label}</span>
+                  <span className="text-primary truncate ml-1">
+                    {" "}
+                    - {dayPlan.label}
+                  </span>
                 )}
               </h1>
               <p className="text-sm sm:text-xs text-muted-foreground">
@@ -863,7 +871,7 @@ export default function ActiveWorkoutPage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Button
               variant="ghost"
               size="icon"
@@ -936,7 +944,7 @@ export default function ActiveWorkoutPage() {
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <div
-                        className="w-12 h-12 bg-muted rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                        className="w-16 h-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDetailExercise(data);
@@ -1029,7 +1037,7 @@ export default function ActiveWorkoutPage() {
                         }
                         value={ex.notes || ""}
                         onChange={(e) => updateNotes(exIdx, e.target.value)}
-                        className="text-sm sm:text-xs min-h-[60px] resize-none"
+                        className="text-sm sm:text-xs min-h-[60px] resize-none rounded-xl"
                         onClick={(e) => e.stopPropagation()}
                       />
                     </div>
@@ -1066,7 +1074,7 @@ export default function ActiveWorkoutPage() {
                             >
                               {/* Background red for delete */}
                               {ex.sets.length > 1 && (
-                                <div className="absolute inset-0 bg-destructive flex items-center justify-end pr-2">
+                                <div className="absolute inset-0 bg-destructive flex items-center justify-end pr-2 rounded-xl">
                                   <Button
                                     variant="ghost"
                                     size="sm"

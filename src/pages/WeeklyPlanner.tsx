@@ -959,40 +959,32 @@ export default function WeeklyPlannerPage() {
             >
               {/* Day header */}
               <div className="flex items-center justify-between mb-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="font-semibold text-lg truncate">
-                      {dayPlan.day}
-                      {dayPlan.label && (
-                        <span className="text-primary"> - {dayPlan.label}</span>
-                      )}
-                    </h3>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-7 w-7 flex-shrink-0"
-                      onClick={() =>
-                        handleOpenEditLabel(dayPlan.day, dayPlan.label)
-                      }
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
+                <div className="flex-1 min-w-0 mr-1">
+                  <h3 className="font-semibold text-lg flex items-center min-w-0">
+                    <span className="flex-shrink-0">{dayPlan.day}</span>
+                    {dayPlan.label && (
+                      <span className="text-primary truncate ml-1">
+                        {" "}
+                        - {dayPlan.label}
+                      </span>
+                    )}
+                  </h3>
                   <p className="text-base text-muted-foreground">
                     {dayPlan.exercises.length} ejercicio
                     {dayPlan.exercises.length !== 1 ? "s" : ""}
                   </p>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   {dayPlan.exercises.length > 0 && (
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-10 w-10 flex-shrink-0 min-w-[44px] min-h-[44px]"
+                      className="h-9 w-9"
                       id={index === 0 ? "tour-planner-play-0" : undefined}
                       onClick={() => navigate(`/workout/${dayPlan.day}`)}
+                      title="Iniciar rutina"
                     >
-                      <Play className="w-5 h-5" />
+                      <Play className="w-4 h-4" />
                     </Button>
                   )}
                   <DropdownMenu>
@@ -1000,12 +992,22 @@ export default function WeeklyPlannerPage() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-10 w-10 flex-shrink-0"
+                        className="h-9 w-9"
+                        title="Más opciones"
                       >
-                        <MoreVertical className="w-5 h-5" />
+                        <MoreVertical className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem
+                        onClick={() =>
+                          handleOpenEditLabel(dayPlan.day, dayPlan.label)
+                        }
+                      >
+                        <Edit2 className="w-4 h-4 mr-2 text-muted-foreground" />
+                        Editar etiqueta
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => handleExportDay(dayPlan.day)}
                         disabled={dayPlan.exercises.length === 0}
@@ -1646,7 +1648,7 @@ export default function WeeklyPlannerPage() {
               Selecciona una rutina o crea una nueva (máximo 3)
             </SheetDescription>
           </SheetHeader>
-          <div className="mt-4 space-y-2 pb-4 overflow-y-auto max-h-[50vh]">
+          <div className="mt-4 space-y-2 py-1 pb-4 overflow-y-auto max-h-[50vh] px-0.5">
             {decks.map((deck) => (
               <Card
                 key={deck.id}
@@ -1739,7 +1741,7 @@ export default function WeeklyPlannerPage() {
               </Card>
             ))}
           </div>
-          <div className="space-y-2 pt-2 border-t">
+          <div className="space-y-2 pt-4 border-t pb-[max(1rem,env(safe-area-inset-bottom))]">
             <Button
               variant="default"
               className="w-full"
@@ -1750,7 +1752,7 @@ export default function WeeklyPlannerPage() {
               disabled={decks.length >= 3}
             >
               <Plus className="w-4 h-4 mr-2" />
-              Nueva Rutina Vacía {decks.length >= 3 && "(Máx. 3)"}
+              Nueva rutina vacía {decks.length >= 3 && "(Máx. 3)"}
             </Button>
             <div className="flex gap-2">
               <Button

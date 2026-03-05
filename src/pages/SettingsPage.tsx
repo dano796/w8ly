@@ -143,118 +143,122 @@ export default function SettingsPage() {
 
   return (
     <motion.div
-      className="px-4 pt-6 max-w-lg mx-auto"
+      className="max-w-lg mx-auto"
       variants={pageVariants}
       initial="initial"
       animate="animate"
       exit="exit"
     >
-      <h1 className="text-2xl font-bold mb-6">Configuración</h1>
+      <div className="sticky top-0 z-10 bg-background px-4 pt-6 pb-4">
+        <h1 className="text-2xl font-bold">Configuración</h1>
+      </div>
 
-      <div className="space-y-4">
-        {/* Dark mode */}
-        <Card>
-          <CardContent className="flex items-center justify-between p-4">
-            <span className="text-base font-medium">Modo oscuro</span>
-            <Switch
-              checked={settings.darkMode}
-              onCheckedChange={(v) => updateSetting("darkMode", v)}
-            />
-          </CardContent>
-        </Card>
+      <div className="px-4">
+        <div className="space-y-4">
+          {/* Dark mode */}
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <span className="text-base font-medium">Modo oscuro</span>
+              <Switch
+                checked={settings.darkMode}
+                onCheckedChange={(v) => updateSetting("darkMode", v)}
+              />
+            </CardContent>
+          </Card>
 
-        {/* Default sets */}
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-base font-medium mb-3">Series por defecto</p>
-            <ChipSelector
-              options={[2, 3, 4, 5]}
-              value={settings.defaultSets}
-              onChange={(v) => updateSetting("defaultSets", v)}
-            />
-          </CardContent>
-        </Card>
+          {/* Default sets */}
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-base font-medium mb-3">Series por defecto</p>
+              <ChipSelector
+                options={[2, 3, 4, 5]}
+                value={settings.defaultSets}
+                onChange={(v) => updateSetting("defaultSets", v)}
+              />
+            </CardContent>
+          </Card>
 
-        {/* Default unit */}
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-base font-medium mb-3">Unidades por defecto</p>
-            <ChipSelector
-              options={["lbs" as const, "kg" as const]}
-              value={settings.defaultUnit}
-              onChange={(v) => updateSetting("defaultUnit", v)}
-            />
-          </CardContent>
-        </Card>
+          {/* Default unit */}
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-base font-medium mb-3">Unidades por defecto</p>
+              <ChipSelector
+                options={["lbs" as const, "kg" as const]}
+                value={settings.defaultUnit}
+                onChange={(v) => updateSetting("defaultUnit", v)}
+              />
+            </CardContent>
+          </Card>
 
-        {/* Default rest time */}
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-base font-medium mb-3">
-              Tiempo de descanso por defecto
-            </p>
-            <ChipSelector
-              options={[1, 2, 3]}
-              value={settings.defaultRestTime}
-              onChange={(v) => updateSetting("defaultRestTime", v)}
-              renderLabel={(v) => `${v}min`}
-            />
-          </CardContent>
-        </Card>
+          {/* Default rest time */}
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-base font-medium mb-3">
+                Tiempo de descanso por defecto
+              </p>
+              <ChipSelector
+                options={[1, 2, 3]}
+                value={settings.defaultRestTime}
+                onChange={(v) => updateSetting("defaultRestTime", v)}
+                renderLabel={(v) => `${v}min`}
+              />
+            </CardContent>
+          </Card>
 
-        {/* Confirm on finish */}
-        <Card>
-          <CardContent className="flex items-center justify-between p-4">
-            <span className="text-base font-medium">
-              Confirmar al finalizar
-            </span>
-            <Switch
-              checked={settings.confirmOnFinish}
-              onCheckedChange={(v) => updateSetting("confirmOnFinish", v)}
-            />
-          </CardContent>
-        </Card>
+          {/* Confirm on finish */}
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <span className="text-base font-medium">
+                Confirmar al finalizar
+              </span>
+              <Switch
+                checked={settings.confirmOnFinish}
+                onCheckedChange={(v) => updateSetting("confirmOnFinish", v)}
+              />
+            </CardContent>
+          </Card>
 
-        {/* Export data */}
-        <Card>
-          <CardContent className="flex items-center justify-between p-4">
-            <span className="text-base font-medium">
-              Exportar entrenamientos
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={exportToCSV}
-              disabled={history.length === 0}
-            >
-              <Download className="w-5 h-5" />
-            </Button>
-          </CardContent>
-        </Card>
+          {/* Export data */}
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <span className="text-base font-medium">
+                Exportar entrenamientos
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={exportToCSV}
+                disabled={history.length === 0}
+              >
+                <Download className="w-5 h-5" />
+              </Button>
+            </CardContent>
+          </Card>
 
-        {/* Reset */}
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="w-full">
-              Restablecer planificación
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esto eliminará todos los ejercicios de tu planificación semanal.
-                Esta acción no se puede deshacer.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={resetPlan}>
-                Restablecer
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          {/* Reset */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="w-full">
+                Restablecer planificación
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esto eliminará todos los ejercicios de tu planificación
+                  semanal. Esta acción no se puede deshacer.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={resetPlan}>
+                  Restablecer
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
     </motion.div>
   );
