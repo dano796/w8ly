@@ -1,51 +1,98 @@
 import { Exercise, MuscleGroup } from "./types";
-import exercisesDataJson from "./exercisesData.json";
+import exerciseDataJson from "./exerciseData.json";
 
-// Type for the raw exercise data from the JSON file (already translated to Spanish)
+// Type for the raw exercise data from the JSON file
 interface RawExerciseData {
   id: string;
   name: string;
-  bodyPart: string;
+  force: string; // ej: tracción, empuje
+  level: string; // ej: principiante, intermedio, experto
+  mechanic: string; // ej: aislamiento, compuesto
   equipment: string;
-  target: string;
+  primaryMuscles: string[];
   secondaryMuscles: string[];
   instructions: string[];
-  description: string;
-  difficulty: string;
   category: string;
+  images: string[];
 }
 
-// Map bodyPart from JSON to our MuscleGroup categories
-function mapBodyPartToMuscleGroup(bodyPart: string): MuscleGroup {
+// Map primaryMuscles from JSON to our MuscleGroup categories
+function mapPrimaryMusclesToMuscleGroup(primaryMuscles: string[]): MuscleGroup {
+  if (!primaryMuscles || primaryMuscles.length === 0) return "Core";
+
+  const firstMuscle = primaryMuscles[0].toLowerCase();
+
   const mapping: Record<string, MuscleGroup> = {
-    pecho: "Pecho",
-    espalda: "Espalda",
-    "piernas inferiores": "Pierna",
-    "piernas superiores": "Pierna",
-    hombros: "Hombros",
-    "brazos superiores": "Brazos",
+    // Core
+    abdominales: "Core",
+    "abdominales oblicuos": "Core",
+    "abdominales inferiores": "Core",
+    "espalda baja": "Core",
+
+    // Brazos
+    bíceps: "Brazos",
+    tríceps: "Brazos",
     antebrazos: "Brazos",
-    cintura: "Core",
-    cardio: "Core",
-    cuello: "Core",
+
+    // Hombros
+    hombros: "Hombros",
+    deltoides: "Hombros",
+
+    // Pecho
+    pecho: "Pecho",
+    pectorales: "Pecho",
+
+    // Espalda
+    espalda: "Espalda",
+    "espalda media": "Espalda",
+    dorsales: "Espalda",
+    trapecios: "Espalda",
+
+    // Pierna
+    cuádriceps: "Pierna",
+    glúteos: "Pierna",
+    isquiotibiales: "Pierna",
+    pantorrillas: "Pierna",
+    aductores: "Pierna",
+    abductores: "Pierna",
+    "pierna completa": "Pierna",
   };
-  return mapping[bodyPart.toLowerCase()] || "Core";
+
+  return mapping[firstMuscle] || "Core";
 }
 
-// Load exercises (already translated in JSON)
+// Map level to difficulty
+function mapLevelToDifficulty(level: string): string {
+  const mapping: Record<string, string> = {
+    principiante: "beginner",
+    intermedio: "intermediate",
+    avanzado: "advanced",
+    experto: "advanced",
+  };
+  return mapping[level.toLowerCase()] || "intermediate";
+}
+
+// Capitalize only first letter of the entire string
+function capitalizeFirstOnly(text: string): string {
+  if (!text) return text;
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+// Load exercises from exerciseData.json
 export const defaultExercises: Exercise[] = (
-  exercisesDataJson as RawExerciseData[]
+  exerciseDataJson as RawExerciseData[]
 ).map((exercise) => ({
   id: exercise.id,
-  name: exercise.name,
-  muscleGroup: mapBodyPartToMuscleGroup(exercise.bodyPart),
+  name: capitalizeFirstOnly(exercise.name),
+  muscleGroup: mapPrimaryMusclesToMuscleGroup(exercise.primaryMuscles),
   imageUrl: `/exercises/${exercise.id}.gif`,
-  bodyPart: exercise.bodyPart,
+  force: exercise.force,
+  level: exercise.level,
+  mechanic: exercise.mechanic,
   equipment: exercise.equipment,
-  target: exercise.target,
+  primaryMuscles: exercise.primaryMuscles,
   secondaryMuscles: exercise.secondaryMuscles,
   instructions: exercise.instructions,
-  description: exercise.description,
-  difficulty: exercise.difficulty,
   category: exercise.category,
+  difficulty: mapLevelToDifficulty(exercise.level),
 }));

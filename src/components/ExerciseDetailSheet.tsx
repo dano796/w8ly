@@ -10,7 +10,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Dumbbell, Target, Zap, Info, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Dumbbell,
+  Target,
+  Zap,
+  Activity,
+  Wrench,
+  Trash2,
+} from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -58,17 +66,18 @@ export default function ExerciseDetailSheet({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className="w-full sm:max-w-lg p-0 flex flex-col gap-0 [&>button]:hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b">
-          <div className="flex items-center justify-between">
+        <div className="px-4 py-4 border-b">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => onOpenChange(false)}
+              className="flex-shrink-0"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <SheetHeader className="p-0 space-y-0 absolute left-1/2 -translate-x-1/2">
-              <SheetTitle className="text-lg font-bold">
+            <SheetHeader className="p-0 space-y-0 flex-1 min-w-0">
+              <SheetTitle className="text-lg font-bold leading-tight text-left pr-2">
                 {exercise.name}
               </SheetTitle>
               <SheetDescription className="sr-only">
@@ -83,7 +92,7 @@ export default function ExerciseDetailSheet({
                   onDelete(exercise);
                   onOpenChange(false);
                 }}
-                className="text-destructive hover:text-destructive"
+                className="text-destructive hover:text-destructive flex-shrink-0"
               >
                 <Trash2 className="w-5 h-5" />
               </Button>
@@ -142,12 +151,12 @@ export default function ExerciseDetailSheet({
                   className="px-6 py-4 space-y-6"
                 >
                   {/* Exercise Image/GIF */}
-                  <div className="w-full aspect-video bg-white rounded-xl flex items-center justify-center overflow-hidden border">
+                  <div className="w-full min-h-[240px] max-h-[320px] bg-muted/10 rounded-xl flex items-center justify-center overflow-hidden border border-border/30">
                     {exercise.imageUrl ? (
                       <img
                         src={exercise.imageUrl}
                         alt={exercise.name}
-                        className="w-full h-full object-contain pointer-events-none"
+                        className="w-full h-auto object-contain pointer-events-none"
                         loading="lazy"
                         draggable={false}
                       />
@@ -161,66 +170,61 @@ export default function ExerciseDetailSheet({
                     <Badge variant="secondary" className="text-sm px-3 py-1">
                       {exercise.muscleGroup}
                     </Badge>
-                    {exercise.difficulty && (
+                    {exercise.level && (
                       <Badge
                         variant="outline"
                         className={`text-sm px-3 py-1 capitalize ${
-                          exercise.difficulty.toLowerCase() === "principiante"
+                          exercise.level.toLowerCase() === "principiante"
                             ? "border-green-600 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950"
-                            : exercise.difficulty.toLowerCase() === "intermedio"
+                            : exercise.level.toLowerCase() === "intermedio"
                               ? "border-yellow-600 text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950"
                               : "border-red-600 text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950"
                         }`}
                       >
-                        {exercise.difficulty.charAt(0).toUpperCase() +
-                          exercise.difficulty.slice(1)}
+                        {exercise.level.charAt(0).toUpperCase() +
+                          exercise.level.slice(1)}
+                      </Badge>
+                    )}
+                    {exercise.category && (
+                      <Badge
+                        variant="outline"
+                        className="text-sm px-3 py-1 capitalize"
+                      >
+                        {exercise.category}
                       </Badge>
                     )}
                   </div>
 
-                  {/* Description */}
-                  {exercise.description && (
-                    <Card
-                      className="p-5 bg-muted/30 border shadow-sm"
-                      id="exercise-description"
-                    >
-                      <div>
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="flex-shrink-0 w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center">
-                            <Info className="w-5 h-5 text-primary" />
-                          </div>
-                          <h3 className="font-semibold text-base">
-                            Descripción
-                          </h3>
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed px-2 pb-2">
-                          {exercise.description}
-                        </p>
-                      </div>
-                    </Card>
-                  )}
-
-                  {/* Target and Secondary Muscles */}
+                  {/* Exercise Details */}
                   <div className="grid gap-4">
-                    {/* Target Muscle */}
-                    {exercise.target && (
-                      <Card className="p-5 bg-muted/30 border shadow-sm">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center mt-0.5">
-                            <Target className="w-5 h-5 text-primary" />
+                    {/* Primary Muscles */}
+                    {exercise.primaryMuscles &&
+                      exercise.primaryMuscles.length > 0 && (
+                        <Card className="p-5 bg-muted/30 border shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center mt-0.5">
+                              <Target className="w-5 h-5 text-primary" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-base mb-2">
+                                Músculos principales
+                              </h3>
+                              <div className="flex gap-2 flex-wrap">
+                                {exercise.primaryMuscles.map((muscle, idx) => (
+                                  <Badge
+                                    key={idx}
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    {muscle.charAt(0).toUpperCase() +
+                                      muscle.slice(1).toLowerCase()}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-base mb-1">
-                              Músculo principal
-                            </h3>
-                            <Badge variant="secondary" className="text-xs">
-                              {exercise.target.charAt(0).toUpperCase() +
-                                exercise.target.slice(1).toLowerCase()}
-                            </Badge>
-                          </div>
-                        </div>
-                      </Card>
-                    )}
+                        </Card>
+                      )}
 
                     {/* Secondary Muscles */}
                     {exercise.secondaryMuscles &&
@@ -231,7 +235,7 @@ export default function ExerciseDetailSheet({
                               <Zap className="w-5 h-5 text-primary" />
                             </div>
                             <div className="flex-1">
-                              <h3 className="font-semibold text-base mb-1">
+                              <h3 className="font-semibold text-base mb-2">
                                 Músculos secundarios
                               </h3>
                               <div className="flex gap-2 flex-wrap">
@@ -252,6 +256,56 @@ export default function ExerciseDetailSheet({
                           </div>
                         </Card>
                       )}
+
+                    {/* Force and Mechanic */}
+                    {(exercise.force || exercise.mechanic) && (
+                      <Card className="p-5 bg-muted/30 border shadow-sm">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center mt-0.5">
+                            <Activity className="w-5 h-5 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-base mb-2">
+                              Tipo de movimiento
+                            </h3>
+                            <div className="flex gap-2 flex-wrap">
+                              {exercise.force && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {exercise.force.charAt(0).toUpperCase() +
+                                    exercise.force.slice(1)}
+                                </Badge>
+                              )}
+                              {exercise.mechanic && (
+                                <Badge variant="outline" className="text-xs">
+                                  {exercise.mechanic.charAt(0).toUpperCase() +
+                                    exercise.mechanic.slice(1)}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* Equipment */}
+                    {exercise.equipment && (
+                      <Card className="p-5 bg-muted/30 border shadow-sm">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center mt-0.5">
+                            <Wrench className="w-5 h-5 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-base mb-2">
+                              Equipamiento
+                            </h3>
+                            <Badge variant="secondary" className="text-xs">
+                              {exercise.equipment.charAt(0).toUpperCase() +
+                                exercise.equipment.slice(1)}
+                            </Badge>
+                          </div>
+                        </div>
+                      </Card>
+                    )}
                   </div>
 
                   {/* Bottom padding for scroll */}

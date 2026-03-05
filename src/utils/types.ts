@@ -11,15 +11,16 @@ export interface Exercise {
   name: string;
   muscleGroup: MuscleGroup;
   imageUrl?: string;
-  // Extended exercise data
-  bodyPart?: string;
+  // Extended exercise data from exerciseData.json
+  force?: string; // tracción, empuje
+  level?: string; // principiante, intermedio, experto
+  mechanic?: string; // aislamiento, compuesto
   equipment?: string;
-  target?: string;
+  primaryMuscles?: string[];
   secondaryMuscles?: string[];
   instructions?: string[];
-  description?: string;
-  difficulty?: string;
   category?: string;
+  difficulty?: string; // beginner, intermediate, advanced
 }
 
 export type DayName =
