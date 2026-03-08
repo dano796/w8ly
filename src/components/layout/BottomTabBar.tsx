@@ -76,7 +76,7 @@ export default function BottomTabBar() {
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 bg-primary/10 rounded-lg"
+                  className="absolute inset-0 bg-primary/10 rounded-2xl"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}

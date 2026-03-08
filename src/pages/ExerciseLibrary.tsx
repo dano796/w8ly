@@ -69,6 +69,7 @@ const filters: (MuscleGroup | "Todos")[] = [
   "Pierna",
   "Brazos",
   "Hombros",
+  "Core",
 ];
 
 export default function ExerciseLibraryPage() {
@@ -247,7 +248,7 @@ export default function ExerciseLibraryPage() {
       });
     } else if (preselectedDay) {
       doAdd(exerciseId, preselectedDay);
-      // Small delay to ensure state is saved to localStorage before navigation
+      // Small delay to ensure React state and localStorage updates complete
       setTimeout(() => {
         navigate("/");
       }, 50);
@@ -306,6 +307,7 @@ export default function ExerciseLibraryPage() {
             "Todos los ejercicios seleccionados ya existen en este día",
           );
           setSelectedExercises([]);
+          // Small delay to ensure React state and localStorage updates complete
           setTimeout(() => {
             navigate("/");
           }, 50);
@@ -335,7 +337,7 @@ export default function ExerciseLibraryPage() {
       }
 
       setSelectedExercises([]);
-      // Small delay to ensure state is saved to localStorage before navigation
+      // Small delay to ensure React state and localStorage updates complete
       setTimeout(() => {
         navigate("/");
       }, 50);
@@ -356,18 +358,16 @@ export default function ExerciseLibraryPage() {
       return;
     }
 
-    // Genera el id único en el momento del evento, no en render
-    setTimeout(() => {
-      const uniqueId = `${day}-${exerciseId}-${Math.random().toString(36).slice(2, 10)}`;
-      addExerciseToDay(day, {
-        id: uniqueId,
-        exerciseId,
-        sets: settings.defaultSets,
-        reps: 10,
-      });
-      setSheetOpen(false);
-      setSelectedExerciseId(null);
-    }, 0);
+    // Genera el id único y agrega inmediatamente
+    const uniqueId = `${day}-${exerciseId}-${Date.now()}-${Math.random()}`;
+    addExerciseToDay(day, {
+      id: uniqueId,
+      exerciseId,
+      sets: settings.defaultSets,
+      reps: 10,
+    });
+    setSheetOpen(false);
+    setSelectedExerciseId(null);
   };
 
   const handleCreateExercise = () => {
@@ -437,7 +437,7 @@ export default function ExerciseLibraryPage() {
 
         {/* Search bar */}
         <div className="relative px-4 pb-4" data-tour="ex-search">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-7 top-1/2 -translate-y-4 w-4 h-4 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Buscar ejercicio..."
@@ -449,7 +449,7 @@ export default function ExerciseLibraryPage() {
             <button
               type="button"
               aria-label="Limpiar búsqueda"
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground focus:outline-none"
+              className="absolute right-7 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground focus:outline-none"
               onClick={() => setSearchTerm("")}
             >
               <X className="w-4 h-4" />
@@ -649,21 +649,32 @@ export default function ExerciseLibraryPage() {
               <SheetTitle>Agregar a un día</SheetTitle>
             </SheetHeader>
             <div className="grid grid-cols-2 gap-2 mt-4 pb-4">
-              {DAYS.map((day) => (
-                <Button
-                  key={day}
-                  variant="outline"
-                  onClick={() => {
-                    if (selectedExerciseId) {
-                      doAdd(selectedExerciseId, day);
-                      navigate("/");
-                    }
-                  }}
-                  className="h-11"
-                >
-                  {day}
-                </Button>
-              ))}
+              {DAYS.map((day) => {
+                const dayPlan = plan.find((d) => d.day === day);
+                const exerciseExists = dayPlan?.exercises.some(
+                  (ex) => ex.exerciseId === selectedExerciseId,
+                );
+
+                return (
+                  <Button
+                    key={day}
+                    variant="outline"
+                    onClick={() => {
+                      if (selectedExerciseId) {
+                        doAdd(selectedExerciseId, day);
+                        // Small delay to ensure React state and localStorage updates complete
+                        setTimeout(() => {
+                          navigate("/");
+                        }, 50);
+                      }
+                    }}
+                    className="h-11"
+                    disabled={exerciseExists}
+                  >
+                    {day}
+                  </Button>
+                );
+              })}
               <Button
                 variant="outline"
                 className="col-span-2 mt-2"

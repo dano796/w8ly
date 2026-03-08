@@ -950,7 +950,7 @@ export default function ActiveWorkoutPage() {
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <div
-                        className="w-16 h-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                        className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDetailExercise(data);
