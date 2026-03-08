@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useRestTimerSound } from "@/hooks/useRestTimerSound";
+import { useWorkoutSounds } from "@/hooks/useWorkoutSounds";
 import { useWeekDecks } from "@/hooks/useWeekDecks";
 import { useWorkoutHistory } from "@/hooks/useWorkoutHistory";
 import { useSettings } from "@/hooks/useSettings";
@@ -84,8 +84,8 @@ export default function ActiveWorkoutPage() {
   const { settings } = useSettings();
   const { customExercises } = useCustomExercises();
 
-  // Rest timer sound hook
-  const { playBeep, unlock } = useRestTimerSound();
+  // Workout sounds hook
+  const { playRestTimer, playAchievement, unlock } = useWorkoutSounds();
 
   // Combine default and custom exercises
   const allExercises = [...defaultExercises, ...customExercises];
@@ -303,7 +303,7 @@ export default function ActiveWorkoutPage() {
         if (prev.timeLeft <= 1) {
           // Schedule sound and toast outside updater
           setTimeout(() => {
-            playBeep();
+            playRestTimer();
             toast.success("¡Descanso terminado!", {
               duration: 3000,
               style: {
@@ -320,7 +320,7 @@ export default function ActiveWorkoutPage() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [restTimer, playBeep]);
+  }, [restTimer, playRestTimer]);
 
   const totalSets = exercises.reduce((s, e) => s + e.sets.length, 0);
   const completedSets = exercises.reduce(
@@ -439,6 +439,9 @@ export default function ActiveWorkoutPage() {
               icon: <Trophy className="w-5 h-5" />,
             });
 
+            // Play achievement sound
+            playAchievement();
+
             // Update session max
             setSessionMaxWeight((prev) => ({
               ...prev,
@@ -457,6 +460,9 @@ export default function ActiveWorkoutPage() {
               duration: 5000,
               icon: <Trophy className="w-5 h-5" />,
             });
+
+            // Play achievement sound
+            playAchievement();
           }
         }
       }
