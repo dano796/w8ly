@@ -307,17 +307,73 @@ export default function WeeklyPlannerPage() {
   const autoScrollFrameRef = useRef<number | null>(null);
   const lastTouchXRef = useRef<number>(0);
 
+  // ── Get current day ─────────────────────────────────────────────────────────
+  const getCurrentDayName = (): DayName => {
+    const dayIndex = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const dayNames: DayName[] = [
+      "Domingo", // 0
+      "Lunes", // 1
+      "Martes", // 2
+      "Miércoles", // 3
+      "Jueves", // 4
+      "Viernes", // 5
+      "Sábado", // 6
+    ];
+    return dayNames[dayIndex];
+  };
+
+  const currentDayName = getCurrentDayName();
+
   // ── Tour ────────────────────────────────────────────────────────────────────
-  const lunesExercises = plan.find((d) => d.day === "Lunes")?.exercises ?? [];
+  const currentDayExercises =
+    plan.find((d) => d.day === currentDayName)?.exercises ?? [];
   const { startTour } = usePlannerTour({
     ready: plan.length > 0,
     setCarouselCollapsed: setIsCarouselCollapsed,
-    lundayExercises: lunesExercises,
-    addExerciseToLunes: (exercise) => addExerciseToDay("Lunes", exercise),
-    removeSeedFromLunes: (instanceId) =>
-      removeExerciseFromDay("Lunes", instanceId),
+    currentDayExercises: currentDayExercises,
+    addExerciseToCurrentDay: (exercise) =>
+      addExerciseToDay(currentDayName, exercise),
+    removeSeedFromCurrentDay: (instanceId) =>
+      removeExerciseFromDay(currentDayName, instanceId),
     trackRecentExercise: trackAdded,
+    currentDayName: currentDayName,
   });
+
+  // ── Scroll to current day on mount ──────────────────────────────────────────
+  const hasScrolledToCurrentDay = useRef(false);
+
+  useEffect(() => {
+    // Only scroll once on initial mount
+    if (
+      hasScrolledToCurrentDay.current ||
+      !scrollContainerRef.current ||
+      plan.length === 0
+    ) {
+      return;
+    }
+
+    const dayIndex = plan.findIndex((d) => d.day === currentDayName);
+
+    if (dayIndex !== -1) {
+      hasScrolledToCurrentDay.current = true;
+      // Use setTimeout to ensure the DOM is fully rendered
+      setTimeout(() => {
+        const container = scrollContainerRef.current;
+        if (container) {
+          const dayCard = container.querySelector(
+            `[data-day="${currentDayName}"]`,
+          ) as HTMLElement;
+          if (dayCard) {
+            dayCard.scrollIntoView({
+              behavior: "smooth",
+              block: "nearest",
+              inline: "start",
+            });
+          }
+        }
+      }, 100);
+    }
+  }, [plan, currentDayName]); // Only run when plan changes (on initial load)
 
   // ── Auto-scroll ─────────────────────────────────────────────────────────────
   const handleAutoScroll = () => {
@@ -926,7 +982,11 @@ export default function WeeklyPlannerPage() {
           >
             <Card
               data-day={dayPlan.day}
-              id={index === 0 ? "tour-planner-day-0" : undefined}
+              id={
+                dayPlan.day === currentDayName
+                  ? "tour-planner-day-0"
+                  : undefined
+              }
               className={`p-4 flex flex-col h-full transition-all ${
                 hoveredDay === dayPlan.day
                   ? "ring-4 ring-primary bg-primary/10 scale-[1.02]"
@@ -980,7 +1040,11 @@ export default function WeeklyPlannerPage() {
                       size="icon"
                       variant="ghost"
                       className="h-9 w-9"
-                      id={index === 0 ? "tour-planner-play-0" : undefined}
+                      id={
+                        dayPlan.day === currentDayName
+                          ? "tour-planner-play-0"
+                          : undefined
+                      }
                       onClick={() => navigate(`/workout/${dayPlan.day}`)}
                       title="Iniciar rutina"
                     >
@@ -1053,7 +1117,7 @@ export default function WeeklyPlannerPage() {
                       <div
                         key={ex.id}
                         id={
-                          index === 0 && idx === 0
+                          dayPlan.day === currentDayName && idx === 0
                             ? "tour-planner-ex-0"
                             : undefined
                         }
@@ -1227,7 +1291,11 @@ export default function WeeklyPlannerPage() {
                     size="icon"
                     variant="outline"
                     className="h-12 w-12 rounded-full"
-                    id={index === 0 ? "tour-planner-add-0" : undefined}
+                    id={
+                      dayPlan.day === currentDayName
+                        ? "tour-planner-add-0"
+                        : undefined
+                    }
                     onClick={() => navigate(`/exercises?day=${dayPlan.day}`)}
                   >
                     <Plus className="w-5 h-5" />

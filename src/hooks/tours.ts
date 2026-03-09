@@ -508,19 +508,21 @@ interface PlannedExerciseLike {
 interface UsePlannerTourOptions {
   ready: boolean;
   setCarouselCollapsed: (collapsed: boolean) => void;
-  lundayExercises: PlannedExerciseLike[];
-  addExerciseToLunes: (exercise: PlannedExerciseLike) => void;
-  removeSeedFromLunes: (instanceId: string) => void;
+  currentDayExercises: PlannedExerciseLike[];
+  addExerciseToCurrentDay: (exercise: PlannedExerciseLike) => void;
+  removeSeedFromCurrentDay: (instanceId: string) => void;
   trackRecentExercise: (exerciseId: string) => void;
+  currentDayName: string; // e.g., "Lunes", "Martes", etc.
   forceShow?: boolean;
 }
 
 export function usePlannerTour({
   ready,
   setCarouselCollapsed,
-  lundayExercises,
-  addExerciseToLunes,
+  currentDayExercises,
+  addExerciseToCurrentDay,
   trackRecentExercise,
+  currentDayName,
   forceShow = false,
 }: UsePlannerTourOptions) {
   const driverRef = useRef<ReturnType<typeof driver> | null>(null);
@@ -593,13 +595,13 @@ export function usePlannerTour({
   const startTour = () => {
     driverRef.current?.destroy();
 
-    if (lundayExercises.length === 0) {
+    if (currentDayExercises.length === 0) {
       // Trackear primero para que recentIds se actualice en localStorage
       // antes de que React renderice el carrusel con el nuevo ejercicio.
       trackRecentExercise(TOUR_SEED_EXERCISE_ID);
       pendingLaunchRef.current = true;
-      addExerciseToLunes({
-        id: `Lunes-${TOUR_SEED_EXERCISE_ID}-${Date.now()}`,
+      addExerciseToCurrentDay({
+        id: `${currentDayName}-${TOUR_SEED_EXERCISE_ID}-${Date.now()}`,
         exerciseId: TOUR_SEED_EXERCISE_ID,
         sets: 3,
         reps: 10,
@@ -610,19 +612,19 @@ export function usePlannerTour({
     }
   };
 
-  // Observa lundayExercises: cuando el seed ya está renderizado en el DOM,
+  // Observa currentDayExercises: cuando el seed ya está renderizado en el DOM,
   // lanza el driver. Esto garantiza que #tour-planner-ex-0 y #tour-planner-play-0
   // existen antes de que Driver.js los busque.
   useEffect(() => {
     if (!pendingLaunchRef.current) return;
-    if (lundayExercises.length === 0) return;
+    if (currentDayExercises.length === 0) return;
 
     pendingLaunchRef.current = false;
     // Pequeño delay para que el DOM termine de pintar tras el re-render
     const timeout = setTimeout(launchDriver, 50);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lundayExercises]);
+  }, [currentDayExercises]);
 
   useEffect(() => {
     if (!ready) return;
