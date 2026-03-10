@@ -1,0 +1,154 @@
+/* Content Pages Styles (Terms, Privacy) */
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 30px;
+  min-height: 100vh;
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding-bottom: 40px;
+  margin-bottom: 50px;
+  border-bottom: 1px solid var(--border);
+}
+
+h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.subtitle strong {
+  font-size: 1.25rem;
+  color: var(--foreground);
+}
+
+/* Content */
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-top: 48px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-top: 32px;
+  margin-bottom: 12px;
+}
+
+p {
+  color: var(--muted-foreground);
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+
+strong {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+ul {
+  margin: 16px 0;
+  padding-left: 24px;
+  color: var(--muted-foreground);
+}
+
+li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+/* Footer */
+footer {
+  margin-top: 100px;
+  padding: 48px 0;
+  border-top: 2px solid var(--border);
+  text-align: center;
+}
+
+footer p {
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+footer p strong {
+  font-size: 1.25rem;
+  color: var(--foreground);
+}
+
+footer a {
+  color: var(--primary);
+  font-weight: 500;
+  font-size: 1rem;
+  transition: opacity 0.2s;
+}
+
+footer a:hover {
+  opacity: 0.8;
+}
+
+.footer-links {
+  margin-top: 24px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 40px 28px;
+  }
+
+  header {
+    padding-bottom: 30px;
+    margin-bottom: 40px;
+  }
+
+  h1 {
+    font-size: 1.875rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    margin-top: 36px;
+  }
+
+  h3 {
+    font-size: 1rem;
+    margin-top: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 30px 24px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.125rem;
+  }
+
+  ul {
+    padding-left: 20px;
+  }
+}
