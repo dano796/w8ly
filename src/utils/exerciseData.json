@@ -4184,7 +4184,7 @@
     ],
     "category": "halterofilia olímpica",
     "images": ["Kneeling_Jump_Squat/0.jpg", "Kneeling_Jump_Squat/1.jpg"],
-    "id": "02"
+    "id": "0200"
   },
   {
     "name": "Remo Unilateral en Polea Alta de Rodillas",
@@ -6340,7 +6340,7 @@
       "Reverse_Triceps_Bench_Press/0.jpg",
       "Reverse_Triceps_Bench_Press/1.jpg"
     ],
-    "id": "03"
+    "id": "0300"
   },
   {
     "name": "Elevación de Pantorrillas de Pie con Balanceo",
@@ -8541,7 +8541,7 @@
       "Standing_Low-Pulley_One-Arm_Triceps_Extension/0.jpg",
       "Standing_Low-Pulley_One-Arm_Triceps_Extension/1.jpg"
     ],
-    "id": "04"
+    "id": "0400"
   },
   {
     "name": "Prensa Militar de Pie",
