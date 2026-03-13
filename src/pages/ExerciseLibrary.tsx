@@ -436,9 +436,11 @@ export default function ExerciseLibraryPage() {
         </div>
 
         {/* Search bar */}
-        <div className="relative px-4 pb-4" data-tour="ex-search">
+        <div className="relative px-4 pb-4">
           <Search className="absolute left-7 top-1/2 -translate-y-4 w-4 h-4 text-muted-foreground" />
           <Input
+            id="tour-ex-search-input"
+            data-tour="ex-search"
             type="text"
             placeholder="Buscar ejercicio..."
             value={searchTerm}
@@ -449,7 +451,7 @@ export default function ExerciseLibraryPage() {
             <button
               type="button"
               aria-label="Limpiar búsqueda"
-              className="absolute right-7 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground focus:outline-none"
+              className="absolute right-7 top-1/2 -translate-y-4 w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground focus:outline-none"
               onClick={() => setSearchTerm("")}
             >
               <X className="w-4 h-4" />
@@ -460,28 +462,30 @@ export default function ExerciseLibraryPage() {
 
       <div className="px-4">
         {/* Filter chips */}
-        <div
-          className="flex gap-2 overflow-x-auto scrollbar-hide pb-3 mb-4"
-          data-tour="ex-filters"
-        >
-          {filters.map((f, idx) => (
-            <motion.button
-              key={f}
-              onClick={() => handleSetActiveFilter(f)}
-              className={cn(
-                "px-3 py-1.5 rounded-2xl text-sm font-medium whitespace-nowrap transition-colors border",
-                activeFilter === f
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-card text-foreground border-border",
-              )}
-              whileTap={tapAnimation}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
-            >
-              {f}
-            </motion.button>
-          ))}
+        <div className="pb-3 mb-2">
+          <div
+            className="flex gap-2 overflow-x-auto scrollbar-hide"
+            data-tour="ex-filters"
+          >
+            {filters.map((f, idx) => (
+              <motion.button
+                key={f}
+                onClick={() => handleSetActiveFilter(f)}
+                className={cn(
+                  "px-3 py-1.5 rounded-2xl text-sm font-medium whitespace-nowrap transition-colors border",
+                  activeFilter === f
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-card text-foreground border-border",
+                )}
+                whileTap={tapAnimation}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.05 }}
+              >
+                {f}
+              </motion.button>
+            ))}
+          </div>
         </div>
 
         {/* Exercise list */}

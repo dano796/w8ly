@@ -260,7 +260,7 @@ export function useWorkoutTour({
 
 const exerciseBrowseSteps: DriveStep[] = [
   {
-    element: "[data-tour='ex-search']",
+    element: "#tour-ex-search-input",
     popover: {
       title: "Busca tu ejercicio",
       description:
@@ -313,7 +313,7 @@ const exerciseBrowseSteps: DriveStep[] = [
 
 const exerciseAddSteps: DriveStep[] = [
   {
-    element: "[data-tour='ex-search']",
+    element: "#tour-ex-search-input",
     popover: {
       title: "Busca un ejercicio",
       description:
