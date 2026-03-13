@@ -360,15 +360,25 @@ export default function WeeklyPlannerPage() {
       setTimeout(() => {
         const container = scrollContainerRef.current;
         if (container) {
-          const dayCard = container.querySelector(
-            `[data-day="${currentDayName}"]`,
-          ) as HTMLElement;
-          if (dayCard) {
-            dayCard.scrollIntoView({
+          const leftGutter = 16;
+          // Scroll to the column's offsetLeft, let snap handle correction
+          const dayColumn = Array.from(container.children).find(
+            (el) =>
+              el.querySelector &&
+              el.querySelector(`[data-day="${currentDayName}"]`),
+          ) as HTMLElement | undefined;
+          if (dayColumn) {
+            container.scrollTo({
+              left: dayColumn.offsetLeft,
               behavior: "smooth",
-              block: "nearest",
-              inline: "start",
             });
+            setTimeout(() => {
+              dayColumn.scrollIntoView({
+                behavior: "auto",
+                block: "nearest",
+                inline: "start",
+              });
+            }, 350);
           }
         }
       }, 100);
@@ -505,7 +515,9 @@ export default function WeeklyPlannerPage() {
     setTouchStartPos({ x: touch.clientX, y: touch.clientY });
     lastTouchXRef.current = touch.clientX;
     const timer = setTimeout(() => {
-      const generatedId = `${Math.random().toString(36).slice(2, 10)}-${Date.now()}`;
+      const generatedId = `${Math.random()
+        .toString(36)
+        .slice(2, 10)}-${Date.now()}`;
       setDraggedExercise({ exerciseId, isFromCarousel: true, generatedId });
       if (navigator.vibrate) navigator.vibrate(50);
     }, 400);
@@ -870,7 +882,9 @@ export default function WeeklyPlannerPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `w8ly-${activeDeck?.name.toLowerCase().replace(/\s+/g, "-")}.json`;
+      a.download = `w8ly-${activeDeck?.name
+        .toLowerCase()
+        .replace(/\s+/g, "-")}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -991,10 +1005,10 @@ export default function WeeklyPlannerPage() {
                 hoveredDay === dayPlan.day
                   ? "ring-4 ring-primary bg-primary/10 scale-[1.02]"
                   : draggedExercise &&
-                      (draggedExercise.isFromCarousel ||
-                        draggedExercise.sourceDay !== dayPlan.day)
-                    ? "ring-2 ring-primary/30"
-                    : ""
+                    (draggedExercise.isFromCarousel ||
+                      draggedExercise.sourceDay !== dayPlan.day)
+                  ? "ring-2 ring-primary/30"
+                  : ""
               }`}
               onDragOver={(e) => {
                 if (
@@ -1545,7 +1559,9 @@ export default function WeeklyPlannerPage() {
                         if (moved) toast.success(`Movido a ${targetDay}`);
                         else toast.error("Ya existe en ese día");
                       } else {
-                        const exerciseId = `${targetDay}-${dayPickerDialog.exerciseId}-${Date.now()}`;
+                        const exerciseId = `${targetDay}-${
+                          dayPickerDialog.exerciseId
+                        }-${Date.now()}`;
                         addExerciseToDay(targetDay, {
                           id: exerciseId,
                           exerciseId: dayPickerDialog.exerciseId!,
@@ -1752,8 +1768,8 @@ export default function WeeklyPlannerPage() {
                           {deck.level === "beginner"
                             ? "Principiante"
                             : deck.level === "intermediate"
-                              ? "Intermedio"
-                              : "Avanzado"}
+                            ? "Intermedio"
+                            : "Avanzado"}
                         </Badge>
                       )}
                     </div>
@@ -1886,8 +1902,8 @@ export default function WeeklyPlannerPage() {
                       {template.level === "beginner"
                         ? "Principiante"
                         : template.level === "intermediate"
-                          ? "Intermedio"
-                          : "Avanzado"}
+                        ? "Intermedio"
+                        : "Avanzado"}
                     </Badge>
                   </div>
                 </div>
@@ -1911,15 +1927,15 @@ export default function WeeklyPlannerPage() {
               {deckNameDialog.mode === "create"
                 ? "Nueva Rutina"
                 : deckNameDialog.mode === "rename"
-                  ? "Renombrar Rutina"
-                  : "Duplicar Rutina"}
+                ? "Renombrar Rutina"
+                : "Duplicar Rutina"}
             </DialogTitle>
             <DialogDescription>
               {deckNameDialog.mode === "create"
                 ? "Dale un nombre a tu nueva rutina personalizada"
                 : deckNameDialog.mode === "rename"
-                  ? "Cambia el nombre de tu rutina"
-                  : "Dale un nombre a la copia"}
+                ? "Cambia el nombre de tu rutina"
+                : "Dale un nombre a la copia"}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
