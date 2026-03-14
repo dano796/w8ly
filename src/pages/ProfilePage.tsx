@@ -223,7 +223,7 @@ export default function ProfilePage() {
     <>
       {/* Fixed Header */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b">
-        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between mt-4 mb-2">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
               <span className="text-sm font-bold text-primary-foreground">
@@ -246,7 +246,7 @@ export default function ProfilePage() {
       </div>
 
       <motion.div
-        className="px-4 pt-20 pb-24 max-w-lg mx-auto"
+        className="px-4 pt-20 pb-24 max-w-lg mx-auto mt-4"
         variants={pageVariants}
         initial="initial"
         animate="animate"
@@ -313,13 +313,17 @@ export default function ProfilePage() {
           <Card className="p-4 mb-3">
             <div className="flex items-center gap-3">
               <Flame
-                className={`w-8 h-8 ${weeklyStreak > 0 ? "text-orange-500" : "text-muted-foreground"}`}
+                className={`w-8 h-8 ${
+                  weeklyStreak > 0 ? "text-orange-500" : "text-muted-foreground"
+                }`}
               />
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground">Racha semanal</p>
                 <p className="text-base font-semibold">
                   {weeklyStreak > 0
-                    ? `${weeklyStreak} ${weeklyStreak === 1 ? "semana" : "semanas"}`
+                    ? `${weeklyStreak} ${
+                        weeklyStreak === 1 ? "semana" : "semanas"
+                      }`
                     : "Sin racha activa"}
                 </p>
               </div>

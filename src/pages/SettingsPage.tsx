@@ -125,20 +125,52 @@ export default function SettingsPage() {
       .map((row) => row.map((cell) => `"${cell}"`).join(","))
       .join("\n");
 
-    // Create and download file
-    const dataBlob = new Blob([csvContent], {
-      type: "text/csv;charset=utf-8;",
-    });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `w8ly-entrenamientos-${new Date().toISOString().split("T")[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    // Detección de entorno
+    const fileName = `w8ly-entrenamientos-${
+      new Date().toISOString().split("T")[0]
+    }.csv`;
+    const isNative =
+      typeof window !== "undefined" && !!(window as any).Capacitor;
 
-    toast.success("Datos exportados exitosamente");
+    (async () => {
+      try {
+        if (isNative) {
+          // Exportar usando Filesystem y Share
+          const { Filesystem, Directory, Encoding } = await import(
+            "@capacitor/filesystem"
+          );
+          const { Share } = await import("@capacitor/share");
+          const result = await Filesystem.writeFile({
+            path: fileName,
+            data: csvContent,
+            directory: Directory.Cache,
+            encoding: Encoding.UTF8,
+          });
+          await Share.share({
+            title: "Exportar entrenamientos",
+            text: "Aquí tienes tus datos de entrenamiento",
+            url: result.uri,
+            dialogTitle: "Guardar o enviar CSV",
+          });
+        } else {
+          // Exportar usando Blob y descarga directa
+          const dataBlob = new Blob([csvContent], {
+            type: "text/csv;charset=utf-8;",
+          });
+          const url = URL.createObjectURL(dataBlob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }
+        toast.success("Datos exportados exitosamente");
+      } catch (error) {
+        toast.error("Error al exportar los datos");
+      }
+    })();
   };
 
   return (

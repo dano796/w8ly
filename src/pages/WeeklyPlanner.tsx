@@ -633,18 +633,44 @@ export default function WeeklyPlannerPage() {
   };
 
   // ── Export/Import handlers ──────────────────────────────────────────────────
-  const handleExportDay = (day: DayName) => {
+  const handleExportDay = async (day: DayName) => {
     try {
       const jsonData = exportDay(day);
-      const blob = new Blob([jsonData], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `w8ly-${day.toLowerCase()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const fileName = `w8ly-${day.toLowerCase()}.json`;
+      const isNative =
+        typeof window !== "undefined" && !!(window as any).Capacitor;
+      if (isNative) {
+        // Exportar usando Filesystem y Share
+        const { Filesystem, Directory, Encoding } = await import(
+          "@capacitor/filesystem"
+        );
+        const { Share } = await import("@capacitor/share");
+        const result = await Filesystem.writeFile({
+          path: fileName,
+          data: jsonData,
+          directory: Directory.Cache,
+          encoding: Encoding.UTF8,
+        });
+        await Share.share({
+          title: "Exportar Rutina",
+          text: "Aquí tienes tu rutina de entrenamiento",
+          url: result.uri,
+          dialogTitle: "Guardar o enviar rutina",
+        });
+      } else {
+        // Exportar usando Blob y descarga directa
+        const dataBlob = new Blob([jsonData], {
+          type: "application/json;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
       toast.success("Rutina exportada");
     } catch (error) {
       toast.error("Error al exportar la rutina");
@@ -875,20 +901,31 @@ export default function WeeklyPlannerPage() {
     });
   };
 
-  const handleExportDeck = () => {
+  const handleExportDeck = async () => {
     try {
       const jsonData = exportDeck();
-      const blob = new Blob([jsonData], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `w8ly-${activeDeck?.name
-        .toLowerCase()
-        .replace(/\s+/g, "-")}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const fileName = `w8ly-${
+        activeDeck?.name?.toLowerCase().replace(/\s+/g, "-") || "rutina"
+      }.json`;
+      // Importar Filesystem y Share dinámicamente
+      const { Filesystem, Directory } = await import("@capacitor/filesystem");
+      const { Share } = await import("@capacitor/share");
+      // Guardar el archivo en la caché
+      // Usar Encoding.UTF8 para evitar error de tipo
+      const { Encoding } = await import("@capacitor/filesystem");
+      const result = await Filesystem.writeFile({
+        path: fileName,
+        data: jsonData,
+        directory: Directory.Cache,
+        encoding: Encoding.UTF8,
+      });
+      // Compartir el archivo usando el menú del sistema
+      await Share.share({
+        title: "Exportar Rutina Completa",
+        text: "Aquí tienes tu rutina completa de entrenamiento",
+        url: result.uri,
+        dialogTitle: "Guardar o enviar rutina",
+      });
       toast.success("Rutina completa exportada");
     } catch (error) {
       toast.error("Error al exportar la rutina");
@@ -1090,13 +1127,13 @@ export default function WeeklyPlannerPage() {
                         onClick={() => handleExportDay(dayPlan.day)}
                         disabled={dayPlan.exercises.length === 0}
                       >
-                        <Download className="w-4 h-4 mr-2 text-muted-foreground" />
+                        <Upload className="w-4 h-4 mr-2 text-muted-foreground" />
                         Exportar rutina
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleImportFromFile(dayPlan.day)}
                       >
-                        <Upload className="w-4 h-4 mr-2 text-muted-foreground" />
+                        <Download className="w-4 h-4 mr-2 text-muted-foreground" />
                         Importar rutina
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
