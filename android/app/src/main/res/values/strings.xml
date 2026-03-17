@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">w8ly</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="app_name">W8ly</string>
+    <string name="title_activity_main">W8ly</string>
     <string name="custom_url_scheme">com.w8ly.fitness</string>
 </resources>
