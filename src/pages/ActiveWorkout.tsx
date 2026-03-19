@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useWorkoutSounds } from "@/hooks/useWorkoutSounds";
 import { useWeekDecks } from "@/hooks/useWeekDecks";
@@ -70,6 +70,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+type PersistedRestTimer = {
+  exIdx: number;
+  timeLeft: number;
+  isPaused: boolean;
+  targetEndTime?: number | null;
+};
+
+type PersistedWorkoutState = {
+  startTime: number;
+  exercises: WorkoutExercise[];
+  restTimes: number[];
+  restTimer: PersistedRestTimer | null;
+};
+
 export default function ActiveWorkoutPage() {
   const { day } = useParams<{ day: string }>();
   const navigate = useNavigate();
@@ -92,10 +106,13 @@ export default function ActiveWorkoutPage() {
   const exerciseMap = Object.fromEntries(allExercises.map((e) => [e.id, e]));
 
   const dayPlan = plan.find((d) => d.day === day);
+  const workoutStateKey = `activeWorkout_${day}`;
+  const restTimerTargetRef = useRef<number | null>(null);
+  const hasHydratedStateRef = useRef(false);
 
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
   const [originalPlan, setOriginalPlan] = useState<PlannedExercise[]>([]);
-  const [startTime] = useState(() => {
+  const [startTime, setStartTime] = useState(() => {
     const state = location.state as { startTime?: number } | null;
     return state?.startTime ?? Date.now();
   });
@@ -140,25 +157,58 @@ export default function ActiveWorkoutPage() {
     // Store original plan for comparison
     setOriginalPlan(JSON.parse(JSON.stringify(dayPlan.exercises)));
 
-    // Check if we have saved state in sessionStorage
-    const savedStateKey = `activeWorkout_${day}`;
-    const savedState = sessionStorage.getItem(savedStateKey);
+    // Restore active workout if app was paused/closed.
+    const savedState =
+      localStorage.getItem(workoutStateKey) ||
+      sessionStorage.getItem(workoutStateKey);
 
     if (savedState) {
       try {
-        const parsed = JSON.parse(savedState);
-        setExercises(parsed.exercises);
-        setExerciseRestTimes(parsed.restTimes);
+        const parsed = JSON.parse(savedState) as PersistedWorkoutState;
+
+        if (typeof parsed.startTime === "number") {
+          setStartTime(parsed.startTime);
+          setElapsed(Math.floor((Date.now() - parsed.startTime) / 1000));
+        }
+
+        setExercises(parsed.exercises || []);
+        setExerciseRestTimes(parsed.restTimes || []);
+
+        if (parsed.restTimer) {
+          if (!parsed.restTimer.isPaused && parsed.restTimer.targetEndTime) {
+            const nextTimeLeft = Math.max(
+              0,
+              Math.ceil((parsed.restTimer.targetEndTime - Date.now()) / 1000),
+            );
+
+            if (nextTimeLeft > 0) {
+              setRestTimer({
+                exIdx: parsed.restTimer.exIdx,
+                timeLeft: nextTimeLeft,
+                isPaused: false,
+              });
+              restTimerTargetRef.current = parsed.restTimer.targetEndTime;
+            } else {
+              setRestTimer(null);
+              restTimerTargetRef.current = null;
+            }
+          } else {
+            setRestTimer({
+              exIdx: parsed.restTimer.exIdx,
+              timeLeft: parsed.restTimer.timeLeft,
+              isPaused: true,
+            });
+            restTimerTargetRef.current = null;
+          }
+        }
 
         // Recalculate previous notes for restored exercises
-        const prevNotes = parsed.exercises.map((ex: WorkoutExercise) => {
+        const prevNotes = (parsed.exercises || []).map((ex: WorkoutExercise) => {
           const prevExercise = getLastPerformance(ex.exerciseId);
           return prevExercise?.notes || "";
         });
         setPreviousNotes(prevNotes);
-
-        // Clear the saved state after restoring
-        sessionStorage.removeItem(savedStateKey);
+        hasHydratedStateRef.current = true;
         return;
       } catch (e) {
         console.error("Error restoring workout state:", e);
@@ -199,6 +249,7 @@ export default function ActiveWorkoutPage() {
       return prevExercise?.notes || "";
     });
     setPreviousNotes(prevNotes);
+    hasHydratedStateRef.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -285,6 +336,8 @@ export default function ActiveWorkoutPage() {
 
   // Timer
   useEffect(() => {
+    setElapsed(Math.floor((Date.now() - startTime) / 1000));
+
     const interval = setInterval(
       () => setElapsed(Math.floor((Date.now() - startTime) / 1000)),
       1000,
@@ -300,7 +353,32 @@ export default function ActiveWorkoutPage() {
       setRestTimer((prev) => {
         if (!prev || prev.isPaused) return prev;
 
+        if (restTimerTargetRef.current) {
+          const nextTimeLeft = Math.max(
+            0,
+            Math.ceil((restTimerTargetRef.current - Date.now()) / 1000),
+          );
+
+          if (nextTimeLeft <= 0) {
+            restTimerTargetRef.current = null;
+            setTimeout(() => {
+              playRestTimer();
+              toast.success("¡Descanso terminado!", {
+                duration: 3000,
+                style: {
+                  fontSize: "16px",
+                  fontWeight: "600",
+                },
+              });
+            }, 0);
+            return null;
+          }
+
+          return { ...prev, timeLeft: nextTimeLeft };
+        }
+
         if (prev.timeLeft <= 1) {
+          restTimerTargetRef.current = null;
           // Schedule sound and toast outside updater
           setTimeout(() => {
             playRestTimer();
@@ -321,6 +399,42 @@ export default function ActiveWorkoutPage() {
 
     return () => clearInterval(interval);
   }, [restTimer, playRestTimer]);
+
+  // Persist active workout continuously so it can be restored after app pause/kill.
+  useEffect(() => {
+    if (!day) return;
+    if (!hasHydratedStateRef.current) return;
+
+    const payload: PersistedWorkoutState = {
+      startTime,
+      exercises,
+      restTimes: exerciseRestTimes,
+      restTimer: restTimer
+        ? {
+            ...restTimer,
+            targetEndTime: restTimer.isPaused
+              ? null
+              : restTimerTargetRef.current,
+          }
+        : null,
+    };
+
+    const serialized = JSON.stringify(payload);
+    localStorage.setItem(workoutStateKey, serialized);
+    sessionStorage.setItem(workoutStateKey, serialized);
+  }, [
+    day,
+    startTime,
+    exercises,
+    exerciseRestTimes,
+    restTimer,
+    workoutStateKey,
+  ]);
+
+  const clearPersistedWorkoutState = () => {
+    localStorage.removeItem(workoutStateKey);
+    sessionStorage.removeItem(workoutStateKey);
+  };
 
   const totalSets = exercises.reduce((s, e) => s + e.sets.length, 0);
   const completedSets = exercises.reduce(
@@ -507,6 +621,8 @@ export default function ActiveWorkoutPage() {
     // Don't start timer if rest time is 0
     if (restTime === 0) return;
 
+    restTimerTargetRef.current = Date.now() + restTime * 1000;
+
     setRestTimer({
       exIdx,
       timeLeft: restTime,
@@ -566,19 +682,30 @@ export default function ActiveWorkoutPage() {
 
   const toggleRestTimer = () => {
     if (restTimer) {
-      setRestTimer({ ...restTimer, isPaused: !restTimer.isPaused });
+      const nextPaused = !restTimer.isPaused;
+      if (nextPaused) {
+        restTimerTargetRef.current = null;
+      } else {
+        restTimerTargetRef.current = Date.now() + restTimer.timeLeft * 1000;
+      }
+      setRestTimer({ ...restTimer, isPaused: nextPaused });
     }
   };
 
   const cancelRestTimer = () => {
+    restTimerTargetRef.current = null;
     setRestTimer(null);
   };
 
   const adjustRestTimer = (seconds: number) => {
     if (restTimer) {
+      const nextTimeLeft = Math.max(0, restTimer.timeLeft + seconds);
+      if (!restTimer.isPaused) {
+        restTimerTargetRef.current = Date.now() + nextTimeLeft * 1000;
+      }
       setRestTimer({
         ...restTimer,
-        timeLeft: Math.max(0, restTimer.timeLeft + seconds),
+        timeLeft: nextTimeLeft,
       });
     }
   };
@@ -626,6 +753,7 @@ export default function ActiveWorkoutPage() {
 
     // Cancel rest timer if it's active for this exercise
     if (restTimer?.exIdx === exIdx) {
+      restTimerTargetRef.current = null;
       setRestTimer(null);
     }
   };
@@ -715,6 +843,7 @@ export default function ActiveWorkoutPage() {
       } else {
         applyRestTimesOnly();
         addWorkout(workout);
+        clearPersistedWorkoutState();
         setTimeout(() => {
           navigate(`/summary/${workout.id}`, { state: workout });
         }, 0);
@@ -741,6 +870,7 @@ export default function ActiveWorkoutPage() {
       // Only save rest times if no structural changes
       applyRestTimesOnly();
       addWorkout(workout);
+      clearPersistedWorkoutState();
 
       // Wait a tick to ensure localStorage is updated before navigating
       setTimeout(() => {
@@ -753,6 +883,7 @@ export default function ActiveWorkoutPage() {
     applyChangesToPlan();
     if (pendingWorkout) {
       addWorkout(pendingWorkout);
+      clearPersistedWorkoutState();
       // Wait a tick to ensure localStorage is updated before navigating
       setTimeout(() => {
         navigate(`/summary/${pendingWorkout.id}`, { state: pendingWorkout });
@@ -765,6 +896,7 @@ export default function ActiveWorkoutPage() {
     applyRestTimesOnly();
     if (pendingWorkout) {
       addWorkout(pendingWorkout);
+      clearPersistedWorkoutState();
       // Wait a tick to ensure localStorage is updated before navigating
       setTimeout(() => {
         navigate(`/summary/${pendingWorkout.id}`, { state: pendingWorkout });
@@ -778,6 +910,7 @@ export default function ActiveWorkoutPage() {
 
   const handleConfirmExit = () => {
     // Don't save anything when discarding
+    clearPersistedWorkoutState();
     setShowExitDialog(false);
     navigate("/");
   };
@@ -813,6 +946,7 @@ export default function ActiveWorkoutPage() {
     }
 
     addWorkout(workout);
+    clearPersistedWorkoutState();
     setShowExitDialog(false);
 
     // Wait a tick to ensure localStorage is updated before navigating
@@ -1225,15 +1359,23 @@ export default function ActiveWorkoutPage() {
           data-tour="add-exercise-btn"
           onClick={() => {
             setRevealedSet(null);
-            // Save current state to sessionStorage before navigating
-            const savedStateKey = `activeWorkout_${day}`;
-            sessionStorage.setItem(
-              savedStateKey,
-              JSON.stringify({
-                exercises,
-                restTimes: exerciseRestTimes,
-              }),
-            );
+            // Save current state before navigating to the exercise library.
+            const snapshot: PersistedWorkoutState = {
+              startTime,
+              exercises,
+              restTimes: exerciseRestTimes,
+              restTimer: restTimer
+                ? {
+                    ...restTimer,
+                    targetEndTime: restTimer.isPaused
+                      ? null
+                      : restTimerTargetRef.current,
+                  }
+                : null,
+            };
+            const serialized = JSON.stringify(snapshot);
+            localStorage.setItem(workoutStateKey, serialized);
+            sessionStorage.setItem(workoutStateKey, serialized);
             navigate(`/exercises?fromWorkout=${day}`, {
               state: {
                 startTime,
