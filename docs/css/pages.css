@@ -113,6 +113,8 @@ footer a:hover {
 @media (max-width: 768px) {
   .container {
     padding: 40px 28px;
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
   }
 
   header {
@@ -132,6 +134,18 @@ footer a:hover {
   h3 {
     font-size: 1rem;
     margin-top: 24px;
+  }
+
+  p {
+    font-size: 0.9rem;
+  }
+
+  footer p {
+    font-size: 0.9rem;
+  }
+
+  footer a {
+    font-size: 0.9rem;
   }
 }
 
