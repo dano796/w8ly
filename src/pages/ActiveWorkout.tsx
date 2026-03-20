@@ -43,6 +43,8 @@ import {
   Minus,
   X,
   Trophy,
+  GripVertical,
+  ArrowUpDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -70,6 +72,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+// dnd-kit imports
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverEvent,
+  DragOverlay,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+
 type PersistedRestTimer = {
   exIdx: number;
   timeLeft: number;
@@ -83,6 +107,188 @@ type PersistedWorkoutState = {
   restTimes: number[];
   restTimer: PersistedRestTimer | null;
 };
+
+// ─── Sortable Exercise Card ───────────────────────────────────────────────────
+
+interface SortableExerciseCardProps {
+  id: string;
+  ex: WorkoutExercise;
+  exIdx: number;
+  isSortMode: boolean;
+  justDropped: boolean;
+  // all the props the card needs when NOT in sort mode
+  children: React.ReactNode;
+  exerciseMap: Record<string, Exercise>;
+  onLongPress: (exIdx: number) => void;
+}
+
+function SortableExerciseCard({
+  id,
+  ex,
+  exIdx,
+  isSortMode,
+  justDropped,
+  children,
+  exerciseMap,
+  onLongPress,
+}: SortableExerciseCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id,
+    transition: {
+      duration: 320,
+      easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+    },
+  });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? "none" : transition,
+    // Hide the original slot completely while dragging — overlay handles the visual
+    opacity: isDragging ? 0 : 1,
+    touchAction: "none",
+  };
+
+  const data = exerciseMap[ex.exerciseId];
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressFired = useRef(false);
+
+  const handlePointerDown = () => {
+    if (isSortMode) return;
+    longPressFired.current = false;
+    longPressTimer.current = setTimeout(() => {
+      longPressFired.current = true;
+      onLongPress(exIdx);
+    }, 500);
+  };
+
+  const handlePointerUp = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  const handlePointerCancel = handlePointerUp;
+
+  if (isSortMode) {
+    // Compact sort-mode card — motion.div wraps for layout animation
+    return (
+      <motion.div
+        ref={setNodeRef}
+        style={style}
+        layout
+        layoutId={`sort-card-${id}`}
+        animate={justDropped ? { scale: [1, 1.04, 1] } : { scale: 1 }}
+        transition={
+          justDropped
+            ? { duration: 0.35, ease: [0.25, 1, 0.5, 1] }
+            : { type: "spring", stiffness: 500, damping: 40 }
+        }
+      >
+        <Card
+          className="p-3 flex items-center gap-3 cursor-grab active:cursor-grabbing select-none touch-none"
+          {...attributes}
+          {...listeners}
+        >
+          <div className="flex flex-col items-center flex-shrink-0 w-6 gap-0.5">
+            <GripVertical className="w-5 h-5 text-primary" />
+          </div>
+          <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {data?.imageUrl ? (
+              <img
+                src={data.imageUrl}
+                alt={data?.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                draggable={false}
+              />
+            ) : (
+              <span className="text-xs text-muted-foreground">IMG</span>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-base sm:text-sm font-semibold truncate">
+              {data?.name}
+            </p>
+            <Badge
+              variant="secondary"
+              className="text-xs sm:text-[10px] mt-0.5"
+            >
+              {data?.muscleGroup}
+            </Badge>
+          </div>
+        </Card>
+      </motion.div>
+    );
+  }
+
+  // Normal mode card
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ─── Drag Overlay Card (ghost while dragging) ─────────────────────────────────
+
+function DragOverlayCard({
+  ex,
+  exerciseMap,
+}: {
+  ex: WorkoutExercise;
+  exerciseMap: Record<string, Exercise>;
+}) {
+  const data = exerciseMap[ex.exerciseId];
+  return (
+    <motion.div
+      initial={{ scale: 1, boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }}
+      animate={{ scale: 1.03, boxShadow: "0 16px 40px rgba(0,0,0,0.22)" }}
+      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+    >
+      <Card className="p-3 flex items-center gap-3 select-none ring-2 ring-primary/40 bg-card">
+        <GripVertical className="w-5 h-5 text-primary flex-shrink-0" />
+        <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+          {data?.imageUrl ? (
+            <img
+              src={data.imageUrl}
+              alt={data?.name}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              draggable={false}
+            />
+          ) : (
+            <span className="text-xs text-muted-foreground">IMG</span>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-base sm:text-sm font-semibold truncate">
+            {data?.name}
+          </p>
+          <Badge variant="secondary" className="text-xs sm:text-[10px] mt-0.5">
+            {data?.muscleGroup}
+          </Badge>
+        </div>
+      </Card>
+    </motion.div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function ActiveWorkoutPage() {
   const { day } = useParams<{ day: string }>();
@@ -98,10 +304,8 @@ export default function ActiveWorkoutPage() {
   const { settings } = useSettings();
   const { customExercises } = useCustomExercises();
 
-  // Workout sounds hook
   const { playRestTimer, playAchievement, unlock } = useWorkoutSounds();
 
-  // Combine default and custom exercises
   const allExercises = [...defaultExercises, ...customExercises];
   const exerciseMap = Object.fromEntries(allExercises.map((e) => [e.id, e]));
 
@@ -131,13 +335,10 @@ export default function ActiveWorkoutPage() {
   const [detailExercise, setDetailExercise] = useState<Exercise | null>(null);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
 
-  // Tracks the highest weight completed per exercise THIS session.
-  // Key: exerciseId, Value: max weight completed so far this workout.
   const [sessionMaxWeight, setSessionMaxWeight] = useState<
     Record<string, number>
   >({});
 
-  // Rest timer state
   const [restTimer, setRestTimer] = useState<{
     exIdx: number;
     timeLeft: number;
@@ -146,18 +347,114 @@ export default function ActiveWorkoutPage() {
   const [exerciseRestTimes, setExerciseRestTimes] = useState<number[]>([]);
   const [previousNotes, setPreviousNotes] = useState<string[]>([]);
 
-  // Workout tour hook
-  const { startTour } = useWorkoutTour({
-    ready: exercises.length > 0,
-  });
+  // ── Sort mode state ──
+  const [isSortMode, setIsSortMode] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  // Tracks the sortable ID that was just dropped so we can play a landing animation
+  const [justDroppedId, setJustDroppedId] = useState<string | null>(null);
 
-  // Initialize exercises from plan
+  const { startTour } = useWorkoutTour({ ready: exercises.length > 0 });
+
+  // dnd-kit sensors — pointer with a distance constraint so taps still work
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 0, tolerance: 5 },
+    }),
+  );
+
+  // Ref to the node that received the drop — read after state update for correct position
+  const dropTargetNodeRef = useRef<HTMLElement | null>(null);
+
+  // Stable IDs for dnd-kit — use exerciseId directly (duplicates are prevented on add)
+  const sortableIds = exercises.map((ex) => ex.exerciseId);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id));
+    setJustDroppedId(null);
+    dropTargetNodeRef.current = null;
+  };
+
+  // Reorder live as the dragged card passes over others → items make room in real time
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = sortableIds.indexOf(String(active.id));
+    const newIndex = sortableIds.indexOf(String(over.id));
+    if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
+
+    setExercises((prev) => arrayMove(prev, oldIndex, newIndex));
+    setExerciseRestTimes((prev) => arrayMove(prev, oldIndex, newIndex));
+    setPreviousNotes((prev) => arrayMove(prev, oldIndex, newIndex));
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) {
+      setActiveId(null);
+      return;
+    }
+
+    // Reorder already happened live in handleDragOver — just trigger the landing animation
+    setJustDroppedId(String(active.id));
+    setTimeout(() => setJustDroppedId(null), 420);
+
+    // setActiveId(null) is called inside the custom dropAnimation below
+  };
+
+  // Custom dropAnimation: wait one rAF so the DOM has moved to its final position,
+  // then animate the overlay from current pos → target node's new bounding rect.
+  const customDropAnimation = {
+    duration: 300,
+    easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+    keyframes({
+      transform,
+      id,
+      activeNodeRect,
+      draggableNodes,
+      droppableContainers,
+      measuredDraggingNodeRect,
+    }: any) {
+      // Find the node that now holds the dragged item (it moved after state update)
+      const draggableNode = draggableNodes.get(id);
+      const node = draggableNode?.node?.current as HTMLElement | undefined;
+      if (!node || !measuredDraggingNodeRect) return [{}];
+
+      // Measure where it currently is in the DOM (post-reorder)
+      const finalRect = node.getBoundingClientRect();
+
+      const deltaX = finalRect.left - measuredDraggingNodeRect.left;
+      const deltaY = finalRect.top - measuredDraggingNodeRect.top;
+
+      return [
+        { transform: CSS.Transform.toString(transform.initial) },
+        { transform: `translate3d(${deltaX}px, ${deltaY}px, 0)` },
+      ];
+    },
+    sideEffects({ active }: any) {
+      // Once the drop animation completes, clear the active id
+      return () => {
+        setActiveId(null);
+      };
+    },
+  };
+
+  const handleLongPress = (exIdx: number) => {
+    setIsSortMode(true);
+    setRevealedSet(null);
+  };
+
+  const exitSortMode = () => setIsSortMode(false);
+
+  // ── Init exercises ──
   useEffect(() => {
     if (!dayPlan) return;
-    // Store original plan for comparison
     setOriginalPlan(JSON.parse(JSON.stringify(dayPlan.exercises)));
 
-    // Restore active workout if app was paused/closed.
     const savedState =
       localStorage.getItem(workoutStateKey) ||
       sessionStorage.getItem(workoutStateKey);
@@ -165,22 +462,18 @@ export default function ActiveWorkoutPage() {
     if (savedState) {
       try {
         const parsed = JSON.parse(savedState) as PersistedWorkoutState;
-
         if (typeof parsed.startTime === "number") {
           setStartTime(parsed.startTime);
           setElapsed(Math.floor((Date.now() - parsed.startTime) / 1000));
         }
-
         setExercises(parsed.exercises || []);
         setExerciseRestTimes(parsed.restTimes || []);
-
         if (parsed.restTimer) {
           if (!parsed.restTimer.isPaused && parsed.restTimer.targetEndTime) {
             const nextTimeLeft = Math.max(
               0,
               Math.ceil((parsed.restTimer.targetEndTime - Date.now()) / 1000),
             );
-
             if (nextTimeLeft > 0) {
               setRestTimer({
                 exIdx: parsed.restTimer.exIdx,
@@ -201,12 +494,12 @@ export default function ActiveWorkoutPage() {
             restTimerTargetRef.current = null;
           }
         }
-
-        // Recalculate previous notes for restored exercises
-        const prevNotes = (parsed.exercises || []).map((ex: WorkoutExercise) => {
-          const prevExercise = getLastPerformance(ex.exerciseId);
-          return prevExercise?.notes || "";
-        });
+        const prevNotes = (parsed.exercises || []).map(
+          (ex: WorkoutExercise) => {
+            const prevExercise = getLastPerformance(ex.exerciseId);
+            return prevExercise?.notes || "";
+          },
+        );
         setPreviousNotes(prevNotes);
         hasHydratedStateRef.current = true;
         return;
@@ -219,7 +512,6 @@ export default function ActiveWorkoutPage() {
       const prevExercise = getLastPerformance(pe.exerciseId);
       const prevSets = prevExercise?.sets;
       const prevUnit = prevExercise?.unit || settings.defaultUnit;
-
       const sets: WorkoutSet[] = Array.from({ length: pe.sets }, (_, i) => ({
         setNumber: i + 1,
         previous: prevSets?.[i]
@@ -229,16 +521,10 @@ export default function ActiveWorkoutPage() {
         reps: prevSets?.[i]?.reps ?? pe.reps,
         completed: false,
       }));
-      return {
-        exerciseId: pe.exerciseId,
-        sets,
-        unit: prevUnit, // Use unit from last performance, or default if new
-        notes: "", // Initialize empty notes
-      };
+      return { exerciseId: pe.exerciseId, sets, unit: prevUnit, notes: "" };
     });
     setExercises(init);
 
-    // Initialize rest times and previous notes for each exercise
     const restTimes = dayPlan.exercises.map(
       (pe) => pe.restTime ?? settings.defaultRestTime * 60,
     );
@@ -257,15 +543,11 @@ export default function ActiveWorkoutPage() {
   useEffect(() => {
     const state = location.state as { addExercises?: string[] } | null;
     if (state?.addExercises && state.addExercises.length > 0) {
-      // Get existing exercise IDs
       const existingExerciseIds = new Set(exercises.map((ex) => ex.exerciseId));
-
-      // Filter out exercises that already exist
       const exercisesToAdd = state.addExercises.filter(
         (exerciseId) => !existingExerciseIds.has(exerciseId),
       );
 
-      // Show warning if some exercises were already in the workout
       if (exercisesToAdd.length < state.addExercises.length) {
         const duplicateCount =
           state.addExercises.length - exercisesToAdd.length;
@@ -276,14 +558,12 @@ export default function ActiveWorkoutPage() {
         );
       }
 
-      // Only add new exercises
       if (exercisesToAdd.length > 0) {
         const newExercises: WorkoutExercise[] = exercisesToAdd.map(
           (exerciseId) => {
             const prevExercise = getLastPerformance(exerciseId);
             const prevSets = prevExercise?.sets;
             const prevUnit = prevExercise?.unit || settings.defaultUnit;
-
             const sets: WorkoutSet[] = Array.from(
               { length: settings.defaultSets },
               (_, i) => ({
@@ -296,23 +576,15 @@ export default function ActiveWorkoutPage() {
                 completed: false,
               }),
             );
-            return {
-              exerciseId,
-              sets,
-              unit: prevUnit, // Use unit from last performance, or default if new
-              notes: "", // Initialize empty notes
-            };
+            return { exerciseId, sets, unit: prevUnit, notes: "" };
           },
         );
 
         setExercises((prev) => [...prev, ...newExercises]);
-
-        // Add default rest times and previous notes for new exercises
         setExerciseRestTimes((prev) => [
           ...prev,
           ...new Array(newExercises.length).fill(settings.defaultRestTime * 60),
         ]);
-
         const newPrevNotes = exercisesToAdd.map((exerciseId) => {
           const prevExercise = getLastPerformance(exerciseId);
           return prevExercise?.notes || "";
@@ -320,7 +592,6 @@ export default function ActiveWorkoutPage() {
         setPreviousNotes((prev) => [...prev, ...newPrevNotes]);
       }
 
-      // Clear the state
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [
@@ -337,7 +608,6 @@ export default function ActiveWorkoutPage() {
   // Timer
   useEffect(() => {
     setElapsed(Math.floor((Date.now() - startTime) / 1000));
-
     const interval = setInterval(
       () => setElapsed(Math.floor((Date.now() - startTime) / 1000)),
       1000,
@@ -348,63 +618,47 @@ export default function ActiveWorkoutPage() {
   // Rest timer
   useEffect(() => {
     if (!restTimer || restTimer.isPaused) return;
-
     const interval = setInterval(() => {
       setRestTimer((prev) => {
         if (!prev || prev.isPaused) return prev;
-
         if (restTimerTargetRef.current) {
           const nextTimeLeft = Math.max(
             0,
             Math.ceil((restTimerTargetRef.current - Date.now()) / 1000),
           );
-
           if (nextTimeLeft <= 0) {
             restTimerTargetRef.current = null;
             setTimeout(() => {
               playRestTimer();
               toast.success("¡Descanso terminado!", {
                 duration: 3000,
-                style: {
-                  fontSize: "16px",
-                  fontWeight: "600",
-                },
+                style: { fontSize: "16px", fontWeight: "600" },
               });
             }, 0);
             return null;
           }
-
           return { ...prev, timeLeft: nextTimeLeft };
         }
-
         if (prev.timeLeft <= 1) {
           restTimerTargetRef.current = null;
-          // Schedule sound and toast outside updater
           setTimeout(() => {
             playRestTimer();
             toast.success("¡Descanso terminado!", {
               duration: 3000,
-              style: {
-                fontSize: "16px",
-                fontWeight: "600",
-              },
+              style: { fontSize: "16px", fontWeight: "600" },
             });
           }, 0);
           return null;
         }
-
         return { ...prev, timeLeft: prev.timeLeft - 1 };
       });
     }, 1000);
-
     return () => clearInterval(interval);
   }, [restTimer, playRestTimer]);
 
-  // Persist active workout continuously so it can be restored after app pause/kill.
+  // Persist state
   useEffect(() => {
-    if (!day) return;
-    if (!hasHydratedStateRef.current) return;
-
+    if (!day || !hasHydratedStateRef.current) return;
     const payload: PersistedWorkoutState = {
       startTime,
       exercises,
@@ -418,7 +672,6 @@ export default function ActiveWorkoutPage() {
           }
         : null,
     };
-
     const serialized = JSON.stringify(payload);
     localStorage.setItem(workoutStateKey, serialized);
     sessionStorage.setItem(workoutStateKey, serialized);
@@ -460,15 +713,11 @@ export default function ActiveWorkoutPage() {
           : ex,
       );
 
-      // Handle completion/uncompletion of sets
       if (field === "completed") {
         if (value === false) {
           const wasWeightRecord =
             newExercises[exIdx].sets[setIdx].recordType === "weight";
-          // Clear record type when uncompleting
           newExercises[exIdx].sets[setIdx].recordType = undefined;
-
-          // Recalculate session max for this exercise after uncompleting
           const exercise = newExercises[exIdx];
           const completedSets = exercise.sets.filter((s) => s.completed);
           if (completedSets.length > 0) {
@@ -479,16 +728,12 @@ export default function ActiveWorkoutPage() {
               ...prev,
               [exercise.exerciseId]: newSessionMax,
             }));
-
-            // If we removed a weight record, check if another set should now have it
             if (wasWeightRecord) {
               const exerciseUnit = exercise.unit || settings.defaultUnit;
               const historicMaxWeight = getPersonalRecord(
                 exercise.exerciseId,
                 exerciseUnit,
               );
-
-              // Find the set with the new session max that beats the historic record
               exercise.sets.forEach((s, idx) => {
                 if (
                   s.completed &&
@@ -500,7 +745,6 @@ export default function ActiveWorkoutPage() {
               });
             }
           } else {
-            // No completed sets left, remove from sessionMax
             setSessionMaxWeight((prev) => {
               const updated = { ...prev };
               delete updated[exercise.exerciseId];
@@ -508,15 +752,12 @@ export default function ActiveWorkoutPage() {
             });
           }
         } else if (value === true) {
-          // Clear any previous record type before evaluating
           newExercises[exIdx].sets[setIdx].recordType = undefined;
-
           const exercise = newExercises[exIdx];
           const set = exercise.sets[setIdx];
           const exerciseUnit = exercise.unit || settings.defaultUnit;
           const exerciseName =
             exerciseMap[exercise.exerciseId]?.name || "Ejercicio";
-
           const historicMaxWeight = getPersonalRecord(
             exercise.exerciseId,
             exerciseUnit,
@@ -527,7 +768,6 @@ export default function ActiveWorkoutPage() {
             exerciseUnit,
           );
           const sessionMax = sessionMaxWeight[exercise.exerciseId] ?? 0;
-
           const isWeightRecord = set.weight > historicMaxWeight;
           const isVolumeRecord =
             set.weight <= historicMaxWeight &&
@@ -535,38 +775,24 @@ export default function ActiveWorkoutPage() {
             set.reps > historicMaxRepsAtWeight;
           const isNewSessionMax = set.weight > sessionMax;
 
-          // Weight record: new max weight lifted (only show for the heaviest in session)
           if (isWeightRecord && isNewSessionMax) {
-            // Clear any previous weight records for this exercise
             newExercises[exIdx].sets.forEach((s, idx) => {
-              if (s.recordType === "weight" && idx !== setIdx) {
+              if (s.recordType === "weight" && idx !== setIdx)
                 newExercises[exIdx].sets[idx].recordType = undefined;
-              }
             });
-
-            // Mark this set as a weight record
             newExercises[exIdx].sets[setIdx].recordType = "weight";
-
             toast.success("¡Nuevo récord de peso!", {
               description: `${exerciseName}: ${set.weight} ${exerciseUnit} × ${set.reps} reps`,
               duration: 5000,
               icon: <Trophy className="w-5 h-5" />,
             });
-
-            // Play achievement sound
             playAchievement();
-
-            // Update session max
             setSessionMaxWeight((prev) => ({
               ...prev,
               [exercise.exerciseId]: set.weight,
             }));
-          }
-          // Volume record: more reps at a weight previously lifted
-          else if (isVolumeRecord) {
-            // Mark this set as a volume record
+          } else if (isVolumeRecord) {
             newExercises[exIdx].sets[setIdx].recordType = "volume";
-
             const volumeIncrease =
               (set.reps - historicMaxRepsAtWeight) * set.weight;
             toast.success("¡Nuevo récord de volumen!", {
@@ -574,14 +800,11 @@ export default function ActiveWorkoutPage() {
               duration: 5000,
               icon: <Trophy className="w-5 h-5" />,
             });
-
-            // Play achievement sound
             playAchievement();
           }
         }
       }
 
-      // If weight or reps change on a completed set, clear recordType and recalculate sessionMax
       if (
         (field === "weight" || field === "reps") &&
         newExercises[exIdx].sets[setIdx].completed
@@ -589,8 +812,6 @@ export default function ActiveWorkoutPage() {
         const hadWeightRecord =
           newExercises[exIdx].sets[setIdx].recordType === "weight";
         newExercises[exIdx].sets[setIdx].recordType = undefined;
-
-        // If this set had a weight record, recalculate session max
         if (hadWeightRecord) {
           const exercise = newExercises[exIdx];
           const completedSets = exercise.sets.filter((s) => s.completed);
@@ -609,25 +830,14 @@ export default function ActiveWorkoutPage() {
       return newExercises;
     });
 
-    // If completing a set, start rest timer
-    if (field === "completed" && value === true) {
-      startRestTimer(exIdx);
-    }
+    if (field === "completed" && value === true) startRestTimer(exIdx);
   };
 
   const startRestTimer = (exIdx: number) => {
     const restTime = exerciseRestTimes[exIdx] ?? settings.defaultRestTime * 60;
-
-    // Don't start timer if rest time is 0
     if (restTime === 0) return;
-
     restTimerTargetRef.current = Date.now() + restTime * 1000;
-
-    setRestTimer({
-      exIdx,
-      timeLeft: restTime,
-      isPaused: false,
-    });
+    setRestTimer({ exIdx, timeLeft: restTime, isPaused: false });
   };
 
   const updateRestTime = (exIdx: number, seconds: number) => {
@@ -651,11 +861,8 @@ export default function ActiveWorkoutPage() {
     setExercises((prev) =>
       prev.map((ex, ei) => {
         if (ei !== exIdx) return ex;
-
         const currentUnit = ex.unit || settings.defaultUnit;
         const newUnit: "kg" | "lbs" = currentUnit === "kg" ? "lbs" : "kg";
-
-        // Convert all weights in this exercise
         const convertedSets = ex.sets.map((set) => ({
           ...set,
           weight: convertWeight(set.weight, currentUnit, newUnit),
@@ -670,12 +877,7 @@ export default function ActiveWorkoutPage() {
               }
             : undefined,
         }));
-
-        return {
-          ...ex,
-          sets: convertedSets,
-          unit: newUnit,
-        };
+        return { ...ex, sets: convertedSets, unit: newUnit };
       }),
     );
   };
@@ -683,11 +885,9 @@ export default function ActiveWorkoutPage() {
   const toggleRestTimer = () => {
     if (restTimer) {
       const nextPaused = !restTimer.isPaused;
-      if (nextPaused) {
-        restTimerTargetRef.current = null;
-      } else {
-        restTimerTargetRef.current = Date.now() + restTimer.timeLeft * 1000;
-      }
+      restTimerTargetRef.current = nextPaused
+        ? null
+        : Date.now() + restTimer.timeLeft * 1000;
       setRestTimer({ ...restTimer, isPaused: nextPaused });
     }
   };
@@ -700,13 +900,9 @@ export default function ActiveWorkoutPage() {
   const adjustRestTimer = (seconds: number) => {
     if (restTimer) {
       const nextTimeLeft = Math.max(0, restTimer.timeLeft + seconds);
-      if (!restTimer.isPaused) {
+      if (!restTimer.isPaused)
         restTimerTargetRef.current = Date.now() + nextTimeLeft * 1000;
-      }
-      setRestTimer({
-        ...restTimer,
-        timeLeft: nextTimeLeft,
-      });
+      setRestTimer({ ...restTimer, timeLeft: nextTimeLeft });
     }
   };
 
@@ -750,8 +946,6 @@ export default function ActiveWorkoutPage() {
     setExercises((prev) => prev.filter((_, i) => i !== exIdx));
     setExerciseRestTimes((prev) => prev.filter((_, i) => i !== exIdx));
     setPreviousNotes((prev) => prev.filter((_, i) => i !== exIdx));
-
-    // Cancel rest timer if it's active for this exercise
     if (restTimer?.exIdx === exIdx) {
       restTimerTargetRef.current = null;
       setRestTimer(null);
@@ -764,18 +958,12 @@ export default function ActiveWorkoutPage() {
     );
   };
 
-  // Check if structure has changed (different exercises or different number of sets)
   const hasStructuralChanges = () => {
     if (exercises.length !== originalPlan.length) return true;
-
     for (let i = 0; i < exercises.length; i++) {
-      const current = exercises[i];
-      const original = originalPlan[i];
-
-      if (current.exerciseId !== original.exerciseId) return true;
-      if (current.sets.length !== original.sets) return true;
+      if (exercises[i].exerciseId !== originalPlan[i].exerciseId) return true;
+      if (exercises[i].sets.length !== originalPlan[i].sets) return true;
     }
-
     return false;
   };
 
@@ -792,42 +980,32 @@ export default function ActiveWorkoutPage() {
         restTime: exerciseRestTimes[idx],
       };
     });
-
     updateDayExercises(day as DayName, updatedExercises);
   };
 
   const applyRestTimesOnly = () => {
-    // Only update rest times for existing exercises in the original plan
-    // If there are no structural changes, indices should match directly
     const updatedExercises: PlannedExercise[] = originalPlan.map(
       (original, idx) => ({
         ...original,
         restTime: exerciseRestTimes[idx] ?? original.restTime,
       }),
     );
-
     updateDayExercises(day as DayName, updatedExercises);
   };
 
   const handleFinishClick = () => {
-    // Check if at least one set is completed
     const hasCompletedSets = exercises.some((ex) =>
       ex.sets.some((s) => s.completed),
     );
-
     if (!hasCompletedSets) {
       toast.error(
         "Completa al menos una serie para finalizar el entrenamiento",
       );
       return;
     }
-
-    // Si la opción de confirmar al finalizar está activada, mostrar el diálogo
     if (settings.confirmOnFinish) {
       setShowFinishDialog(true);
     } else {
-      // Si no, finalizar directamente, pero respetar el flujo de cambios estructurales
-      // Replicar la lógica de handleFinish aquí, pero sin mostrar el diálogo simple
       const workout = {
         id: `w-${Date.now()}`,
         day: day as DayName,
@@ -836,7 +1014,6 @@ export default function ActiveWorkoutPage() {
         durationSeconds: elapsed,
         exercises,
       };
-
       if (hasStructuralChanges()) {
         setPendingWorkout(workout);
         setShowChangesDialog(true);
@@ -844,9 +1021,10 @@ export default function ActiveWorkoutPage() {
         applyRestTimesOnly();
         addWorkout(workout);
         clearPersistedWorkoutState();
-        setTimeout(() => {
-          navigate(`/summary/${workout.id}`, { state: workout });
-        }, 0);
+        setTimeout(
+          () => navigate(`/summary/${workout.id}`, { state: workout }),
+          0,
+        );
       }
     }
   };
@@ -861,21 +1039,17 @@ export default function ActiveWorkoutPage() {
       durationSeconds: elapsed,
       exercises,
     };
-
-    // Check if there are structural changes
     if (hasStructuralChanges()) {
       setPendingWorkout(workout);
       setShowChangesDialog(true);
     } else {
-      // Only save rest times if no structural changes
       applyRestTimesOnly();
       addWorkout(workout);
       clearPersistedWorkoutState();
-
-      // Wait a tick to ensure localStorage is updated before navigating
-      setTimeout(() => {
-        navigate(`/summary/${workout.id}`, { state: workout });
-      }, 0);
+      setTimeout(
+        () => navigate(`/summary/${workout.id}`, { state: workout }),
+        0,
+      );
     }
   };
 
@@ -884,43 +1058,39 @@ export default function ActiveWorkoutPage() {
     if (pendingWorkout) {
       addWorkout(pendingWorkout);
       clearPersistedWorkoutState();
-      // Wait a tick to ensure localStorage is updated before navigating
-      setTimeout(() => {
-        navigate(`/summary/${pendingWorkout.id}`, { state: pendingWorkout });
-      }, 0);
+      setTimeout(
+        () =>
+          navigate(`/summary/${pendingWorkout.id}`, { state: pendingWorkout }),
+        0,
+      );
     }
   };
 
   const handleDiscardChanges = () => {
-    // Save only rest times for original exercises
     applyRestTimesOnly();
     if (pendingWorkout) {
       addWorkout(pendingWorkout);
       clearPersistedWorkoutState();
-      // Wait a tick to ensure localStorage is updated before navigating
-      setTimeout(() => {
-        navigate(`/summary/${pendingWorkout.id}`, { state: pendingWorkout });
-      }, 0);
+      setTimeout(
+        () =>
+          navigate(`/summary/${pendingWorkout.id}`, { state: pendingWorkout }),
+        0,
+      );
     }
   };
 
-  const handleExitClick = () => {
-    setShowExitDialog(true);
-  };
+  const handleExitClick = () => setShowExitDialog(true);
 
   const handleConfirmExit = () => {
-    // Don't save anything when discarding
     clearPersistedWorkoutState();
     setShowExitDialog(false);
     navigate("/");
   };
 
   const handleSaveAndExit = () => {
-    // Check if at least one set is completed
     const hasCompletedSets = exercises.some((ex) =>
       ex.sets.some((s) => s.completed),
     );
-
     if (!hasCompletedSets) {
       toast.error(
         "Debes completar al menos una serie para guardar el entrenamiento",
@@ -928,7 +1098,6 @@ export default function ActiveWorkoutPage() {
       setShowExitDialog(false);
       return;
     }
-
     const workout = {
       id: `w-${Date.now()}`,
       day: day as DayName,
@@ -937,22 +1106,12 @@ export default function ActiveWorkoutPage() {
       durationSeconds: elapsed,
       exercises,
     };
-
-    // Apply changes based on whether there are structural changes
-    if (hasStructuralChanges()) {
-      applyChangesToPlan();
-    } else {
-      applyRestTimesOnly();
-    }
-
+    if (hasStructuralChanges()) applyChangesToPlan();
+    else applyRestTimesOnly();
     addWorkout(workout);
     clearPersistedWorkoutState();
     setShowExitDialog(false);
-
-    // Wait a tick to ensure localStorage is updated before navigating
-    setTimeout(() => {
-      navigate(`/summary/${workout.id}`, { state: workout });
-    }, 0);
+    setTimeout(() => navigate(`/summary/${workout.id}`, { state: workout }), 0);
   };
 
   const formatTime = (s: number) => {
@@ -972,6 +1131,11 @@ export default function ActiveWorkoutPage() {
     );
   }
 
+  // activeId is now just the exerciseId (stable, no index suffix)
+  const activeExercise = activeId
+    ? exercises.find((ex) => ex.exerciseId === activeId) ?? null
+    : null;
+
   return (
     <motion.div
       className="max-w-lg mx-auto"
@@ -979,10 +1143,14 @@ export default function ActiveWorkoutPage() {
       initial="initial"
       animate="animate"
       exit="exit"
+      // Disable text selection globally except in allowed fields
+      style={{
+        userSelect: isSortMode ? "none" : undefined,
+        marginTop: 0,
+      }}
     >
       {/* Fixed Header */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b px-4 pt-6 pb-4">
-        {/* Header */}
         <div
           className="flex items-center justify-between mb-4"
           data-tour="workout-header"
@@ -1020,6 +1188,21 @@ export default function ActiveWorkoutPage() {
             >
               <HelpCircle className="w-4 h-4 text-muted-foreground" />
             </Button>
+            {exercises.length > 1 && (
+              <Button
+                variant={isSortMode ? "secondary" : "ghost"}
+                size="icon"
+                onClick={() =>
+                  isSortMode
+                    ? exitSortMode()
+                    : (setIsSortMode(true), setRevealedSet(null))
+                }
+                title="Reordenar ejercicios"
+                data-tour="sort-btn"
+              >
+                <ArrowUpDown className="w-4 h-4" />
+              </Button>
+            )}
             <Button
               size="icon"
               onClick={handleFinishClick}
@@ -1031,7 +1214,6 @@ export default function ActiveWorkoutPage() {
           </div>
         </div>
 
-        {/* Progress */}
         <motion.div
           data-tour="workout-progress"
           initial={{ opacity: 0, y: -10 }}
@@ -1056,339 +1238,446 @@ export default function ActiveWorkoutPage() {
         </motion.div>
       </div>
 
+      {/* Sort mode banner — floats below header, outside of it */}
+      <AnimatePresence>
+        <AnimatePresence mode="wait">
+          {isSortMode ? (
+            <motion.div
+              initial={{ opacity: 0, y: -16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -48, scale: 0.98 }}
+              transition={{
+                opacity: { duration: 0.35, ease: [0.25, 1, 0.5, 1] },
+                y: { duration: 0.35, ease: [0.25, 1, 0.5, 1] },
+                scale: { duration: 0.35, ease: [0.25, 1, 0.5, 1] },
+              }}
+              className="sticky top-[calc(var(--header-height,88px))] z-10 mx-4 mt-3 mb-0"
+            >
+              <div className="flex items-center justify-between gap-3 bg-primary text-primary-foreground rounded-xl px-4 py-3 shadow-lg">
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col items-center flex-shrink-0 w-6 gap-0.5">
+                    <GripVertical className="w-5 h-5 opacity-90" />
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-base font-semibold">
+                      Modo reordenación
+                    </span>
+                    <span className="text-sm opacity-75">
+                      Mantén pulsado y arrastra para cambiar el orden
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  onClick={exitSortMode}
+                  className="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] rounded-2xl"
+                >
+                  <Check className="w-5 h-5" />
+                </Button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ marginTop: 56, opacity: 1 }}
+              animate={{ marginTop: 0, opacity: 0 }}
+              transition={{
+                marginTop: { duration: 0.35, ease: [0.25, 1, 0.5, 1] },
+                opacity: { duration: 0.35 },
+              }}
+            />
+          )}
+        </AnimatePresence>
+      </AnimatePresence>
+
       {/* Scrollable Content */}
       <div className="px-4 pb-8 pt-4">
-        {/* Exercise cards */}
-        <motion.div
-          className="space-y-4"
-          variants={listContainerVariants}
-          initial="hidden"
-          animate="visible"
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis]}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
         >
-          <AnimatePresence mode="popLayout">
-            {exercises.map((ex, exIdx) => {
-              const data = exerciseMap[ex.exerciseId];
-              if (!data) return null;
+          <SortableContext
+            items={sortableIds}
+            strategy={verticalListSortingStrategy}
+          >
+            <motion.div
+              className="space-y-4"
+              variants={listContainerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <AnimatePresence mode="popLayout">
+                {exercises.map((ex, exIdx) => {
+                  const data = exerciseMap[ex.exerciseId];
+                  if (!data) return null;
+                  const sortableId = sortableIds[exIdx];
 
-              return (
-                <motion.div
-                  key={`${ex.exerciseId}-${exIdx}`}
-                  variants={listItemVariants}
-                  exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
-                  layout
-                >
-                  <Card
-                    className="p-4"
-                    onClick={() => setRevealedSet(null)}
-                    id={exIdx === 0 ? "tour-exercise-card-0" : undefined}
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div
-                        className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDetailExercise(data);
-                          setDetailSheetOpen(true);
-                        }}
-                      >
-                        {data?.imageUrl ? (
-                          <img
-                            src={data.imageUrl}
-                            alt={data.name}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <span className="text-sm text-muted-foreground">
-                            IMG
-                          </span>
-                        )}
-                      </div>
-                      <div
-                        className="flex-1 cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDetailExercise(data);
-                          setDetailSheetOpen(true);
-                        }}
-                      >
-                        <p className="text-base sm:text-sm font-semibold hover:text-primary transition-colors">
-                          {data.name}
-                        </p>
-                        <Badge
-                          variant="secondary"
-                          className="text-xs sm:text-[10px]"
-                        >
-                          {data.muscleGroup}
-                        </Badge>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => deleteExercise(exIdx)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-
-                    {/* Rest time editor */}
-                    <div
-                      className="flex items-center gap-2 mb-3"
-                      id={exIdx === 0 ? "tour-rest-time-0" : undefined}
+                  return (
+                    <motion.div
+                      key={ex.exerciseId}
+                      variants={listItemVariants}
+                      exit={{
+                        opacity: 0,
+                        y: -20,
+                        transition: { duration: 0.2 },
+                      }}
+                      layout
                     >
-                      <Timer className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm sm:text-xs text-muted-foreground">
-                        Descanso:
-                      </span>
-                      <Select
-                        value={String(exerciseRestTimes[exIdx] || 0)}
-                        onValueChange={(value) =>
-                          updateRestTime(exIdx, Number(value))
-                        }
+                      <SortableExerciseCard
+                        id={sortableId}
+                        ex={ex}
+                        exIdx={exIdx}
+                        isSortMode={isSortMode}
+                        justDropped={justDroppedId === ex.exerciseId}
+                        exerciseMap={exerciseMap}
+                        onLongPress={handleLongPress}
                       >
-                        <SelectTrigger className="h-auto w-auto border-0 bg-transparent px-0 py-0 text-sm sm:text-xs font-medium hover:text-primary transition-colors focus:ring-0 focus:ring-offset-0 gap-1">
-                          <SelectValue>
-                            {formatRestTime(exerciseRestTimes[exIdx] || 0)}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="0">Sin descanso</SelectItem>
-                          <SelectItem value="30">30s</SelectItem>
-                          <SelectItem value="60">1min</SelectItem>
-                          <SelectItem value="90">1min 30s</SelectItem>
-                          <SelectItem value="120">2min</SelectItem>
-                          <SelectItem value="150">2min 30s</SelectItem>
-                          <SelectItem value="180">3min</SelectItem>
-                          <SelectItem value="210">3min 30s</SelectItem>
-                          <SelectItem value="240">4min</SelectItem>
-                          <SelectItem value="300">5min</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Notes section */}
-                    <div className="mb-3">
-                      <Textarea
-                        placeholder={
-                          previousNotes[exIdx]
-                            ? previousNotes[exIdx]
-                            : "Agregar notas..."
-                        }
-                        value={ex.notes || ""}
-                        onChange={(e) => updateNotes(exIdx, e.target.value)}
-                        className="text-sm sm:text-xs min-h-[60px] resize-none rounded-xl"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-
-                    {/* Sets table */}
-                    <div className="space-y-2">
-                      <div className="grid grid-cols-[2.5rem_4.5rem_1fr_4rem_2.5rem] gap-1 text-sm sm:text-xs font-semibold text-muted-foreground px-1">
-                        <span className="text-center">Serie</span>
-                        <span className="text-center">Previo</span>
-                        <span
-                          className="text-center cursor-pointer hover:text-primary transition-colors"
-                          onClick={() => setUnitChangeDialogExIdx(exIdx)}
-                          id={exIdx === 0 ? "tour-weight-unit-0" : undefined}
+                        {/* Full card content — only rendered when NOT in sort mode */}
+                        <Card
+                          className="p-4"
+                          onClick={() => setRevealedSet(null)}
+                          id={exIdx === 0 ? "tour-exercise-card-0" : undefined}
                         >
-                          Peso ({ex.unit || settings.defaultUnit})
-                        </span>
-                        <span className="text-center">Reps</span>
-                        <span className="text-center">✓</span>
-                      </div>
-                      <AnimatePresence mode="popLayout">
-                        {ex.sets.map((set, setIdx) => {
-                          const setKey = `${exIdx}-${setIdx}`;
-                          const isRevealed = revealedSet === setKey;
-
-                          return (
+                          <div className="flex items-center gap-3 mb-3">
                             <div
-                              key={setKey}
-                              className="relative h-9 sm:h-8 rounded overflow-hidden"
-                              id={
-                                exIdx === 0 && setIdx === 0
-                                  ? "tour-set-row-0"
-                                  : undefined
+                              className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDetailExercise(data);
+                                setDetailSheetOpen(true);
+                              }}
+                            >
+                              {data?.imageUrl ? (
+                                <img
+                                  src={data.imageUrl}
+                                  alt={data.name}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <span className="text-sm text-muted-foreground">
+                                  IMG
+                                </span>
+                              )}
+                            </div>
+                            {/* Long-press target: exercise name */}
+                            <div
+                              className="flex-1 cursor-pointer select-none"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDetailExercise(data);
+                                setDetailSheetOpen(true);
+                              }}
+                            >
+                              <p className="text-base sm:text-sm font-semibold hover:text-primary transition-colors">
+                                {data.name}
+                              </p>
+                              <Badge
+                                variant="secondary"
+                                className="text-xs sm:text-[10px]"
+                              >
+                                {data.muscleGroup}
+                              </Badge>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => deleteExercise(exIdx)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+
+                          {/* Rest time editor */}
+                          <div
+                            className="flex items-center gap-2 mb-3"
+                            id={exIdx === 0 ? "tour-rest-time-0" : undefined}
+                          >
+                            <Timer className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm sm:text-xs text-muted-foreground">
+                              Descanso:
+                            </span>
+                            <Select
+                              value={String(exerciseRestTimes[exIdx] || 0)}
+                              onValueChange={(value) =>
+                                updateRestTime(exIdx, Number(value))
                               }
                             >
-                              {/* Background red for delete */}
-                              {ex.sets.length > 1 && (
-                                <div className="absolute inset-0 bg-destructive flex items-center justify-end pr-2 rounded-xl">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 sm:h-7 px-3 text-destructive-foreground hover:bg-destructive-foreground/20"
-                                    onClick={() => {
-                                      deleteSet(exIdx, setIdx);
-                                      setRevealedSet(null);
-                                    }}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              )}
+                              <SelectTrigger className="h-auto w-auto border-0 bg-transparent px-0 py-0 text-sm sm:text-xs font-medium hover:text-primary transition-colors focus:ring-0 focus:ring-offset-0 gap-1">
+                                <SelectValue>
+                                  {formatRestTime(
+                                    exerciseRestTimes[exIdx] || 0,
+                                  )}
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0">Sin descanso</SelectItem>
+                                <SelectItem value="30">30s</SelectItem>
+                                <SelectItem value="60">1min</SelectItem>
+                                <SelectItem value="90">1min 30s</SelectItem>
+                                <SelectItem value="120">2min</SelectItem>
+                                <SelectItem value="150">2min 30s</SelectItem>
+                                <SelectItem value="180">3min</SelectItem>
+                                <SelectItem value="210">3min 30s</SelectItem>
+                                <SelectItem value="240">4min</SelectItem>
+                                <SelectItem value="300">5min</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
 
-                              {/* Swipeable content */}
-                              <motion.div
-                                drag={ex.sets.length > 1 ? "x" : false}
-                                dragConstraints={{ left: -80, right: 0 }}
-                                dragElastic={{ left: 0.1, right: 0 }}
-                                dragMomentum={false}
-                                dragDirectionLock
-                                animate={{ x: isRevealed ? -80 : 0 }}
-                                transition={{
-                                  type: "spring",
-                                  stiffness: 400,
-                                  damping: 30,
-                                }}
-                                onDragEnd={(_, info) => {
-                                  if (ex.sets.length > 1) {
-                                    if (info.offset.x < -40) {
-                                      setRevealedSet(setKey);
-                                    } else if (info.offset.x > 10) {
-                                      setRevealedSet(null);
-                                    }
-                                  }
-                                }}
-                                onDragStart={() => {
-                                  if (revealedSet && revealedSet !== setKey) {
-                                    setRevealedSet(null);
-                                  }
-                                }}
-                                className="absolute inset-0 grid grid-cols-[2.5rem_4.5rem_1fr_4rem_2.5rem] gap-1 items-center px-1 bg-card touch-draggable"
-                                style={{ touchAction: "pan-y" }}
-                                initial={{ opacity: 1, x: 0 }}
-                                exit={{
-                                  opacity: 0,
-                                  y: -10,
-                                  transition: { duration: 0.15 },
-                                }}
+                          {/* Notes */}
+                          <div className="mb-3">
+                            <Textarea
+                              placeholder={
+                                previousNotes[exIdx]
+                                  ? previousNotes[exIdx]
+                                  : "Agregar notas..."
+                              }
+                              value={ex.notes || ""}
+                              onChange={(e) =>
+                                updateNotes(exIdx, e.target.value)
+                              }
+                              className="text-sm sm:text-xs min-h-[60px] resize-none rounded-xl"
+                              onClick={(e) => e.stopPropagation()}
+                              // Allow text selection in notes
+                              style={{ userSelect: "text" }}
+                            />
+                          </div>
+
+                          {/* Sets table */}
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-[2.5rem_4.5rem_1fr_4rem_2.5rem] gap-1 text-sm sm:text-xs font-semibold text-muted-foreground px-1 select-none">
+                              <span className="text-center">Serie</span>
+                              <span className="text-center">Previo</span>
+                              <span
+                                className="text-center cursor-pointer hover:text-primary transition-colors"
+                                onClick={() => setUnitChangeDialogExIdx(exIdx)}
+                                id={
+                                  exIdx === 0 ? "tour-weight-unit-0" : undefined
+                                }
                               >
-                                <span className="text-sm sm:text-xs text-center pointer-events-none">
-                                  {set.setNumber}
-                                </span>
-                                <span className="text-sm sm:text-xs text-muted-foreground text-center pointer-events-none">
-                                  {set.previous
-                                    ? `${set.previous.weight}×${set.previous.reps}`
-                                    : "-"}
-                                </span>
-                                <div
-                                  onPointerDown={(e) => e.stopPropagation()}
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Input
-                                    type="number"
-                                    value={set.weight || ""}
-                                    onChange={(e) =>
-                                      updateSet(
-                                        exIdx,
-                                        setIdx,
-                                        "weight",
-                                        Number(e.target.value),
-                                      )
-                                    }
-                                    className="h-9 sm:h-8 text-sm sm:text-xs text-center px-1"
-                                  />
-                                </div>
-                                <div
-                                  onPointerDown={(e) => e.stopPropagation()}
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Input
-                                    type="number"
-                                    value={set.reps || ""}
-                                    onChange={(e) =>
-                                      updateSet(
-                                        exIdx,
-                                        setIdx,
-                                        "reps",
-                                        Number(e.target.value),
-                                      )
-                                    }
-                                    className="h-9 sm:h-8 text-sm sm:text-xs text-center px-1"
-                                  />
-                                </div>
-                                <div
-                                  className="flex justify-center"
-                                  onPointerDown={(e) => e.stopPropagation()}
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Checkbox
-                                    checked={set.completed}
-                                    onCheckedChange={(v) =>
-                                      updateSet(exIdx, setIdx, "completed", v)
-                                    }
+                                Peso ({ex.unit || settings.defaultUnit})
+                              </span>
+                              <span className="text-center">Reps</span>
+                              <span className="text-center">✓</span>
+                            </div>
+                            <AnimatePresence mode="popLayout">
+                              {ex.sets.map((set, setIdx) => {
+                                const setKey = `${exIdx}-${setIdx}`;
+                                const isRevealed = revealedSet === setKey;
+                                return (
+                                  <div
+                                    key={setKey}
+                                    className="relative h-9 sm:h-8 rounded overflow-hidden"
                                     id={
                                       exIdx === 0 && setIdx === 0
-                                        ? "tour-set-checkbox-0"
+                                        ? "tour-set-row-0"
                                         : undefined
                                     }
-                                  />
-                                </div>
-                              </motion.div>
-                            </div>
-                          );
-                        })}
-                      </AnimatePresence>
-                    </div>
+                                  >
+                                    {ex.sets.length > 1 && (
+                                      <div className="absolute inset-0 bg-destructive flex items-center justify-end pr-2 rounded-xl">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="h-8 sm:h-7 px-3 text-destructive-foreground hover:bg-destructive-foreground/20"
+                                          onClick={() => {
+                                            deleteSet(exIdx, setIdx);
+                                            setRevealedSet(null);
+                                          }}
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                      </div>
+                                    )}
+                                    <motion.div
+                                      drag={ex.sets.length > 1 ? "x" : false}
+                                      dragConstraints={{ left: -80, right: 0 }}
+                                      dragElastic={{ left: 0.1, right: 0 }}
+                                      dragMomentum={false}
+                                      dragDirectionLock
+                                      animate={{ x: isRevealed ? -80 : 0 }}
+                                      transition={{
+                                        type: "spring",
+                                        stiffness: 400,
+                                        damping: 30,
+                                      }}
+                                      onDragEnd={(_, info) => {
+                                        if (ex.sets.length > 1) {
+                                          if (info.offset.x < -40)
+                                            setRevealedSet(setKey);
+                                          else if (info.offset.x > 10)
+                                            setRevealedSet(null);
+                                        }
+                                      }}
+                                      onDragStart={() => {
+                                        if (
+                                          revealedSet &&
+                                          revealedSet !== setKey
+                                        )
+                                          setRevealedSet(null);
+                                      }}
+                                      className="absolute inset-0 grid grid-cols-[2.5rem_4.5rem_1fr_4rem_2.5rem] gap-1 items-center px-1 bg-card touch-draggable"
+                                      style={{ touchAction: "pan-y" }}
+                                      initial={{ opacity: 1, x: 0 }}
+                                      exit={{
+                                        opacity: 0,
+                                        y: -10,
+                                        transition: { duration: 0.15 },
+                                      }}
+                                    >
+                                      <span className="text-sm sm:text-xs text-center pointer-events-none select-none">
+                                        {set.setNumber}
+                                      </span>
+                                      <span className="text-sm sm:text-xs text-muted-foreground text-center pointer-events-none select-none">
+                                        {set.previous
+                                          ? `${set.previous.weight}×${set.previous.reps}`
+                                          : "-"}
+                                      </span>
+                                      <div
+                                        onPointerDown={(e) =>
+                                          e.stopPropagation()
+                                        }
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <Input
+                                          type="number"
+                                          value={set.weight || ""}
+                                          onChange={(e) =>
+                                            updateSet(
+                                              exIdx,
+                                              setIdx,
+                                              "weight",
+                                              Number(e.target.value),
+                                            )
+                                          }
+                                          className="h-9 sm:h-8 text-sm sm:text-xs text-center px-1"
+                                          style={{ userSelect: "text" }}
+                                        />
+                                      </div>
+                                      <div
+                                        onPointerDown={(e) =>
+                                          e.stopPropagation()
+                                        }
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <Input
+                                          type="number"
+                                          value={set.reps || ""}
+                                          onChange={(e) =>
+                                            updateSet(
+                                              exIdx,
+                                              setIdx,
+                                              "reps",
+                                              Number(e.target.value),
+                                            )
+                                          }
+                                          className="h-9 sm:h-8 text-sm sm:text-xs text-center px-1"
+                                          style={{ userSelect: "text" }}
+                                        />
+                                      </div>
+                                      <div
+                                        className="flex justify-center"
+                                        onPointerDown={(e) =>
+                                          e.stopPropagation()
+                                        }
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <Checkbox
+                                          checked={set.completed}
+                                          onCheckedChange={(v) =>
+                                            updateSet(
+                                              exIdx,
+                                              setIdx,
+                                              "completed",
+                                              v,
+                                            )
+                                          }
+                                          id={
+                                            exIdx === 0 && setIdx === 0
+                                              ? "tour-set-checkbox-0"
+                                              : undefined
+                                          }
+                                        />
+                                      </div>
+                                    </motion.div>
+                                  </div>
+                                );
+                              })}
+                            </AnimatePresence>
+                          </div>
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="mt-2 text-sm sm:text-xs w-full border border-border"
-                      id={exIdx === 0 ? "tour-add-set-0" : undefined}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setRevealedSet(null);
-                        addSet(exIdx);
-                      }}
-                    >
-                      <Plus className="w-3 h-3 mr-1" /> Agregar serie
-                    </Button>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </motion.div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="mt-2 text-sm sm:text-xs w-full border border-border select-none"
+                            id={exIdx === 0 ? "tour-add-set-0" : undefined}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setRevealedSet(null);
+                              addSet(exIdx);
+                            }}
+                          >
+                            <Plus className="w-3 h-3 mr-1" /> Agregar serie
+                          </Button>
+                        </Card>
+                      </SortableExerciseCard>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </motion.div>
+          </SortableContext>
 
-        <Button
-          variant="outline"
-          className="w-full mt-4 text-sm"
-          data-tour="add-exercise-btn"
-          onClick={() => {
-            setRevealedSet(null);
-            // Save current state before navigating to the exercise library.
-            const snapshot: PersistedWorkoutState = {
-              startTime,
-              exercises,
-              restTimes: exerciseRestTimes,
-              restTimer: restTimer
-                ? {
-                    ...restTimer,
-                    targetEndTime: restTimer.isPaused
-                      ? null
-                      : restTimerTargetRef.current,
-                  }
-                : null,
-            };
-            const serialized = JSON.stringify(snapshot);
-            localStorage.setItem(workoutStateKey, serialized);
-            sessionStorage.setItem(workoutStateKey, serialized);
-            navigate(`/exercises?fromWorkout=${day}`, {
-              state: {
+          <DragOverlay dropAnimation={customDropAnimation}>
+            {activeId && activeExercise ? (
+              <DragOverlayCard ex={activeExercise} exerciseMap={exerciseMap} />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+
+        {!isSortMode && (
+          <Button
+            variant="outline"
+            className="w-full mt-4 text-sm select-none"
+            data-tour="add-exercise-btn"
+            onClick={() => {
+              setRevealedSet(null);
+              const snapshot: PersistedWorkoutState = {
                 startTime,
-                currentExercises: exercises.map((ex) => ex.exerciseId),
-              },
-            });
-          }}
-        >
-          <Plus className="w-4 h-4 mr-1" /> Agregar ejercicio
-        </Button>
+                exercises,
+                restTimes: exerciseRestTimes,
+                restTimer: restTimer
+                  ? {
+                      ...restTimer,
+                      targetEndTime: restTimer.isPaused
+                        ? null
+                        : restTimerTargetRef.current,
+                    }
+                  : null,
+              };
+              const serialized = JSON.stringify(snapshot);
+              localStorage.setItem(workoutStateKey, serialized);
+              sessionStorage.setItem(workoutStateKey, serialized);
+              navigate(`/exercises?fromWorkout=${day}`, {
+                state: {
+                  startTime,
+                  currentExercises: exercises.map((ex) => ex.exerciseId),
+                },
+              });
+            }}
+          >
+            <Plus className="w-4 h-4 mr-1" /> Agregar ejercicio
+          </Button>
+        )}
       </div>
 
-      {/* Changes confirmation dialog */}
+      {/* Dialogs */}
       <AlertDialog open={showChangesDialog} onOpenChange={setShowChangesDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1410,7 +1699,6 @@ export default function ActiveWorkoutPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Finish confirmation dialog */}
       <AlertDialog open={showFinishDialog} onOpenChange={setShowFinishDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1429,7 +1717,6 @@ export default function ActiveWorkoutPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Exit confirmation dialog */}
       <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1459,7 +1746,6 @@ export default function ActiveWorkoutPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Unit Change Dialog */}
       <Dialog
         open={unitChangeDialogExIdx !== null}
         onOpenChange={(open) => !open && setUnitChangeDialogExIdx(null)}
@@ -1479,7 +1765,6 @@ export default function ActiveWorkoutPage() {
               )}
             </DialogDescription>
           </DialogHeader>
-
           {unitChangeDialogExIdx !== null && (
             <div className="flex gap-3 py-2">
               <Button
@@ -1490,9 +1775,8 @@ export default function ActiveWorkoutPage() {
                 }
                 className="flex-1 h-20"
                 onClick={() => {
-                  if (exercises[unitChangeDialogExIdx]?.unit !== "kg") {
+                  if (exercises[unitChangeDialogExIdx]?.unit !== "kg")
                     toggleExerciseUnit(unitChangeDialogExIdx);
-                  }
                 }}
               >
                 <div className="flex flex-col items-center gap-1">
@@ -1524,7 +1808,6 @@ export default function ActiveWorkoutPage() {
               </Button>
             </div>
           )}
-
           <DialogFooter>
             <Button
               onClick={() => setUnitChangeDialogExIdx(null)}
@@ -1536,9 +1819,9 @@ export default function ActiveWorkoutPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Fixed Rest Timer at Bottom */}
+      {/* Rest Timer */}
       <AnimatePresence>
-        {restTimer && (
+        {restTimer && !isSortMode && (
           <motion.div
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1548,7 +1831,6 @@ export default function ActiveWorkoutPage() {
             <div className="max-w-2xl mx-auto px-4 pb-8 pointer-events-auto">
               <Card className="p-3 glass">
                 <div className="flex items-center justify-between gap-2">
-                  {/* Timer display */}
                   <div className="flex items-center gap-2">
                     <Timer className="w-6 sm:w-5 h-6 sm:h-5 text-primary flex-shrink-0 dark:text-white" />
                     <div className="text-4xl sm:text-3xl font-bold tabular-nums text-primary dark:text-white">
@@ -1556,8 +1838,6 @@ export default function ActiveWorkoutPage() {
                       {String(restTimer.timeLeft % 60).padStart(2, "0")}
                     </div>
                   </div>
-
-                  {/* Control buttons */}
                   <div className="flex items-center gap-1">
                     <Button
                       variant="outline"
@@ -1615,7 +1895,6 @@ export default function ActiveWorkoutPage() {
         )}
       </AnimatePresence>
 
-      {/* Exercise Detail Sheet */}
       <ExerciseDetailSheet
         exercise={detailExercise}
         open={detailSheetOpen}
