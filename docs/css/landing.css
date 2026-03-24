@@ -391,6 +391,59 @@ main {
   line-height: 1.6;
 }
 
+/* Prototype Section */
+.prototype-section {
+  padding: 6rem 2rem;
+  text-align: center;
+}
+
+.prototype-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.prototype-container h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.prototype-container p {
+  color: var(--muted-foreground);
+  margin-bottom: 2rem;
+}
+
+.prototype-embed {
+  display: flex;
+  justify-content: center;
+}
+
+.prototype-embed iframe {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .prototype-section {
+    padding: 3rem 2rem;
+  }
+
+  .prototype-container h2 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .prototype-section {
+    padding: 3rem 1.75rem;
+  }
+
+  .prototype-container h2 {
+    font-size: 1.75rem;
+  }
+}
+
 /* Footer */
 footer {
   background: var(--card);
@@ -704,6 +757,10 @@ footer {
   animation: fadeInUp 0.8s ease-out 0.3s both;
 }
 
+.prototype-section {
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
 /* Animación para elementos individuales */
 .benefit-item {
   animation: fadeInUp 0.6s ease-out both;
@@ -758,6 +815,7 @@ footer {
   .hero,
   .benefits,
   .features-section,
+  .prototype-section,
   .benefit-item,
   .feature-card {
     animation: none;
